@@ -21,21 +21,21 @@ class LayoutBreak extends HTMLElement {
   }
 
   static getConfigElement() {
-    return document.createElement("layout-break-editor");
+    return document.createElement("layout-break-v2-editor");
   }
   static getStubConfig() {
     return {};
   }
 }
 
-customElements.define("layout-break", LayoutBreak);
+customElements.define("layout-break-v2", LayoutBreak);
 (window as any).customCards = (window as any).customCards || [];
 (window as any).customCards.push({
-  type: "layout-break",
-  name: "Layout Break",
+  type: "layout-break-v2",
+  name: "Layout Break V2",
   preview: false,
   description:
-    "Forces a break in the layout flow. For use with layout-card or special layouts.",
+    "Forces a break in the layout flow. For use with layout-card-v2 or special layouts.",
 });
 
 class LayoutBreakEditor extends HTMLElement {
@@ -46,4 +46,4 @@ class LayoutBreakEditor extends HTMLElement {
   }
 }
 
-customElements.define("layout-break-editor", LayoutBreakEditor);
+customElements.define("layout-break-v2-editor", LayoutBreakEditor);

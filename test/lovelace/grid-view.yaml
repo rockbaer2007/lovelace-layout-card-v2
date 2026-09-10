@@ -1,5 +1,5 @@
 title: Grid
-type: custom:grid-layout
+type: custom:grid-layout-v2
 layout:
   grid-template-columns: auto 30px 25%
   grid-template-rows: auto

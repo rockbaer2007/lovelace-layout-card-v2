@@ -157,7 +157,7 @@ export class BaseColumnLayout extends BaseLayout {
   }
 
   isBreak(config: CardConfig) {
-    return config.type === "custom:layout-break";
+    return config.type === "custom:layout-break-v2";
   }
 
   async _makeLayout() {

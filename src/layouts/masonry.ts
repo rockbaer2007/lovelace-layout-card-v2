@@ -32,4 +32,4 @@ class MasonryLayout extends BaseColumnLayout {
   }
 }
 
-customElements.define("masonry-layout", MasonryLayout);
+customElements.define("masonry-layout-v2", MasonryLayout);

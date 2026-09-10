@@ -1,4 +1,44 @@
-# layout-card
+# Dashboard Layout Card V2
+
+This is a parallel-installable v2 fork of
+[thomasloven/lovelace-layout-card](https://github.com/thomasloven/lovelace-layout-card).
+The original project is MIT licensed; attribution is preserved in this fork.
+
+## V2 Start
+
+The v2 package keeps the original layout ideas, but registers separate custom
+element names so it can be tested next to the original card:
+
+- `custom:masonry-layout-v2`
+- `custom:horizontal-layout-v2`
+- `custom:vertical-layout-v2`
+- `custom:grid-layout-v2`
+- `custom:layout-card-v2`
+- `custom:layout-break-v2`
+- `custom:gap-card-v2`
+- `custom:dashboard-layout-card-v2`
+
+The new `dashboard-layout-card-v2` adds dashboard-style pages with an optional
+always-visible side menu:
+
+```yaml
+type: custom:dashboard-layout-card-v2
+menu:
+  position: left
+  title: Haus
+  clock: digital
+  date: true
+pages:
+  - title: Keller
+    icon: mdi:home-floor-negative-1
+    layout_type: custom:grid-layout-v2
+    layout:
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+      gap: 8px
+    cards: []
+```
+
+The original README content follows for the inherited layout behavior.
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
@@ -34,10 +74,10 @@ You should now have more, narrower, columns of cards in your view.
 
 Layout-card adds four new view layout to lovelace.
 
-- Masonry (`custom:masonry-layout`)
-- Horizontal (`custom:horizontal-layout`)
-- Vertical (`custom:vertical-layout`)
-- Grid (`custom:grid-layout`)
+- Masonry (`custom:masonry-layout-v2`)
+- Horizontal (`custom:horizontal-layout-v2`)
+- Vertical (`custom:vertical-layout-v2`)
+- Grid (`custom:grid-layout-v2`)
 
 The difference between the types of layout is described below.
 
@@ -46,7 +86,7 @@ Those can be selected either via the GUI as in the Quick Start above, or in the 
 ```yaml
 views:
   - title: Home
-    type: custom:masonry-layout
+    type: custom:masonry-layout-v2
     layout:
       width: 300
       max_cols: 10
@@ -58,8 +98,8 @@ views:
 If needed, any layout can also be used inside a lovelace-card by using `layout-card`:
 
 ```yaml
-type: custom:layout-card
-layout_type: custom:masonry-layout
+type: custom:layout-card-v2
+layout_type: custom:masonry-layout-v2
 layout:
   width: 300
   max_cols: 10
@@ -94,7 +134,7 @@ view_layout:
 Layout card adds a special card called `layout-break` which can be used to change how some layouts work.
 
 ```yaml
-type: custom:layout-break
+type: custom:layout-break-v2
 ```
 
 ## Layouts
@@ -207,7 +247,7 @@ Configuration for view:
 
 ```yaml
 title: Grid layout
-type: custom:grid-layout
+type: custom:grid-layout-v2
 layout:
   grid-template-columns: auto 30px 25%
   grid-template-rows: auto
@@ -337,7 +377,7 @@ Another option is this:
 Layout card includes `gap-card` which can be used to insert empty space in any layout:
 
 ```yaml
-type: custom:gap-card
+type: custom:gap-card-v2
 height: <height (optional)>
 size: <size (optional)>
 ```
@@ -364,7 +404,7 @@ Example:
             - domain: sensor
           exclude: []
         card:
-          type: 'custom:layout-card'
+          type: 'custom:layout-card-v2'
           cards: []
           layout_type: masonry
 ```

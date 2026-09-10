@@ -18,18 +18,18 @@ class GapCard extends HTMLElement {
   }
 
   static getConfigElement() {
-    return document.createElement("gap-card-editor");
+    return document.createElement("gap-card-v2-editor");
   }
   static getStubConfig() {
     return {};
   }
 }
 
-customElements.define("gap-card", GapCard);
+customElements.define("gap-card-v2", GapCard);
 (window as any).customCards = (window as any).customCards || [];
 (window as any).customCards.push({
-  type: "gap-card",
-  name: "Gap Card",
+  type: "gap-card-v2",
+  name: "Gap Card V2",
   preview: false,
   description: "Add a customizable gap in the layout.",
 });
@@ -79,4 +79,4 @@ class GapCardEditor extends LitElement {
   }
 }
 
-customElements.define("gap-card-editor", GapCardEditor);
+customElements.define("gap-card-v2-editor", GapCardEditor);

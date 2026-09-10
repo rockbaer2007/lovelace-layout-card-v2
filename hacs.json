@@ -1,5 +1,6 @@
 {
-  "name": "layout-card",
+  "name": "dashboard-layout-card-v2",
+  "filename": "dashboard-layout-card-v2.js",
   "render_readme": true,
-  "homeassistant": "2025.10.0.b0"
+  "homeassistant": "2026.9.0"
 }

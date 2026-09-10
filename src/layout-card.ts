@@ -22,14 +22,13 @@ class LayoutCard extends LitElement {
       );
     }
 
-    let configType = config.layout_type;
-    if (configType) {
-      if (!configType?.endsWith("-layout")) configType += "-layout";
-      if (configType.startsWith("custom:"))
-        configType = configType.substring("custom:".length);
-    } else {
-      configType = "hui-masonry-view";
-    }
+    let configType = config.layout_type ?? "masonry-layout-v2";
+    if (configType.startsWith("custom:"))
+      configType = configType.substring("custom:".length);
+    if (!configType.endsWith("-layout") && !configType.endsWith("-layout-v2"))
+      configType += "-layout-v2";
+    if (configType.endsWith("-layout") && !configType.endsWith("-layout-v2"))
+      configType += "-v2";
     this._layoutType = configType;
   }
 
@@ -131,22 +130,22 @@ class LayoutCard extends LitElement {
   }
 
   static getConfigElement() {
-    return document.createElement("layout-card-editor");
+    return document.createElement("layout-card-v2-editor");
   }
   static getStubConfig() {
     return {
-      layout_type: "masonry",
+      layout_type: "custom:masonry-layout-v2",
       layout: {},
       cards: [],
     };
   }
 }
 
-customElements.define("layout-card", LayoutCard);
+customElements.define("layout-card-v2", LayoutCard);
 (window as any).customCards = (window as any).customCards || [];
 (window as any).customCards.push({
-  type: "layout-card",
-  name: "Layout Card",
+  type: "layout-card-v2",
+  name: "Layout Card V2",
   preview: false,
   description: "Like a stack card, but with way more control.",
 });

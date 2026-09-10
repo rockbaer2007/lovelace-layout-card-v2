@@ -1,34 +1,35 @@
-title: layout-card
+title: dashboard-layout-card-v2
 views:
   - title: Core
     cards: !include card-list.yaml
 
   - title: Masonry
-    type: custom:masonry-layout
+    type: custom:masonry-layout-v2
     cards: !include card-list.yaml
 
   - title: Horizontal
-    type: custom:horizontal-layout
+    type: custom:horizontal-layout-v2
     cards: !include card-list.yaml
 
   - title: Vertical
-    type: custom:vertical-layout
+    type: custom:vertical-layout-v2
     cards: !include card-list.yaml
 
   - !include grid-view.yaml
 
   - title: Options
-    type: custom:masonry-layout
+    type: custom:masonry-layout-v2
     layout:
       width: 200
       max_cols: 10
       min_height: 1
     cards: !include card-list.yaml
   - title: rtl
-    type: custom:masonry-layout
+    type: custom:masonry-layout-v2
     layout:
       rtl: true
     cards: !include card-list.yaml
   - !include layout-card.yaml
   - !include layout-break.yaml
   - !include media-query.yaml
+  - !include dashboard-layout-card-v2.yaml

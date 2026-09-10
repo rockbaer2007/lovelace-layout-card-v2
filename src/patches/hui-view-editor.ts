@@ -32,13 +32,13 @@ customElements.whenDefined("hui-view-editor").then(() => {
 
     const helpLink = document.createElement("p");
     helpLink.innerHTML = `
-      You have layout-card installed which adds some options to this dialog.<br/>
+      You have dashboard-layout-card-v2 installed which adds some options to this dialog.<br/>
       Please see
         <a
           href="https://github.com/thomasloven/lovelace-layout-card"
           target="_blank"
           rel="no referrer"
-        >layout-card on GitHub</a>for usage instructions.
+        >the original layout-card on GitHub</a> for usage instructions.
         <style>
           p {padding: 16px 0 0; margin-bottom: 0;}
           a {color: var(--primary-color);}

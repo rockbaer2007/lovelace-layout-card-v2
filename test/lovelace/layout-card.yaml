@@ -1,16 +1,16 @@
-title: layout-card
+title: layout-card-v2
 panel: true
 cards:
   - type: vertical-stack
     cards:
-      - type: custom:layout-card
+      - type: custom:layout-card-v2
         cards: !include card-list.yaml
-      - type: custom:layout-card
-        layout_type: masonry
+      - type: custom:layout-card-v2
+        layout_type: custom:masonry-layout-v2
         cards: !include card-list.yaml
-      - type: custom:layout-card
-        layout_type: horizontal
+      - type: custom:layout-card-v2
+        layout_type: custom:horizontal-layout-v2
         cards: !include card-list.yaml
-      - type: custom:layout-card
-        layout_type: vertical
+      - type: custom:layout-card-v2
+        layout_type: custom:vertical-layout-v2
         cards: !include card-list.yaml

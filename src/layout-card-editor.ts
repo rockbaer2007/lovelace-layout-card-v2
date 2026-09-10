@@ -142,7 +142,7 @@ class LayoutCardEditor extends LitElement {
   _computeLabel(schema) {
     if (schema.name === "layout_type")
       return this.hass.localize("ui.panel.lovelace.editor.edit_view.type");
-    if (schema.name === "layout") return "Layout options (layout-card)";
+    if (schema.name === "layout") return "Layout options (layout-card v2)";
   }
 
   render() {
@@ -181,7 +181,7 @@ class LayoutCardEditor extends LitElement {
           href="https://github.com/thomasloven/lovelace-layout-card"
           target="_blank"
           rel="no referrer"
-        >layout-card on GitHub</a> for usage instructions.
+        >the original layout-card on GitHub</a> for usage instructions.
       </p>
       <ha-form
         .hass=${this.hass}
@@ -198,7 +198,7 @@ class LayoutCardEditor extends LitElement {
     const numcards = this._config.cards.length;
     if (this._config.entities) {
       return html`
-        This layout-card has the <code>entities</code> parameter set. You cannot
+        This layout-card-v2 has the <code>entities</code> parameter set. You cannot
         manually select cards.
       `;
     }
@@ -328,4 +328,4 @@ class LayoutCardEditor extends LitElement {
   }
 }
 
-customElements.define("layout-card-editor", LayoutCardEditor);
+customElements.define("layout-card-v2-editor", LayoutCardEditor);

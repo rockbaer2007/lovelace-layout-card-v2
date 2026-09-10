@@ -76,3 +76,27 @@ export interface LayoutCardConfig {
   layout?: any;
   layout_options?: any; // legacy
 }
+
+export type DashboardLayoutMenuPosition = "left" | "none" | "right";
+export type DashboardLayoutClockMode = "none" | "digital" | "analog";
+
+export interface DashboardLayoutMenuConfig {
+  position?: DashboardLayoutMenuPosition;
+  title?: string;
+  clock?: DashboardLayoutClockMode;
+  date?: boolean;
+}
+
+export interface DashboardLayoutPageConfig {
+  title: string;
+  icon?: string;
+  layout_type?: string;
+  layout?: any;
+  cards?: Array<CardConfig>;
+}
+
+export interface DashboardLayoutCardConfig {
+  type: "custom:dashboard-layout-card-v2";
+  menu?: DashboardLayoutMenuPosition | DashboardLayoutMenuConfig;
+  pages?: Array<DashboardLayoutPageConfig>;
+}

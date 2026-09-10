@@ -1,0 +1,21 @@
+title: dashboard-layout-card-v2
+panel: true
+cards:
+  - type: custom:dashboard-layout-card-v2
+    menu:
+      position: left
+      title: Haus
+      clock: digital
+      date: true
+    pages:
+      - title: Keller
+        icon: mdi:home-floor-negative-1
+        layout_type: custom:grid-layout-v2
+        layout:
+          grid-template-columns: repeat(3, minmax(0, 1fr))
+          gap: 8px
+        cards: !include card-list.yaml
+      - title: Garten
+        icon: mdi:shovel
+        layout_type: custom:masonry-layout-v2
+        cards: !include card-list.yaml

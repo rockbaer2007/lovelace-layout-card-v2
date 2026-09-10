@@ -9,7 +9,7 @@ const dev = process.env.ROLLUP_WATCH;
 export default {
   input: "src/main.ts",
   output: {
-    file: "layout-card.js",
+    file: "dashboard-layout-card-v2.js",
     format: "es",
   },
   plugins: [

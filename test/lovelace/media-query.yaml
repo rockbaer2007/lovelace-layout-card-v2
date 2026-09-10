@@ -1,5 +1,5 @@
 title: Mediaquery
-type: custom:masonry-layout
+type: custom:masonry-layout-v2
 cards:
   - type: markdown
     content: |

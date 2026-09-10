@@ -26,19 +26,19 @@ export const loadHaForm = async () => {
 
 export const LAYOUT_CARD_SELECTOR_OPTIONS = [
   {
-    value: "custom:masonry-layout",
-    label: "Masonry (layout-card)",
+    value: "custom:masonry-layout-v2",
+    label: "Masonry (layout-card v2)",
   },
   {
-    value: "custom:horizontal-layout",
-    label: "Horizontal (layout-card)",
+    value: "custom:horizontal-layout-v2",
+    label: "Horizontal (layout-card v2)",
   },
   {
-    value: "custom:vertical-layout",
-    label: "Vertical (layout-card)",
+    value: "custom:vertical-layout-v2",
+    label: "Vertical (layout-card v2)",
   },
   {
-    value: "custom:grid-layout",
-    label: "Grid (layout-card)",
+    value: "custom:grid-layout-v2",
+    label: "Grid (layout-card v2)",
   },
 ];

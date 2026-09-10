@@ -1,13 +1,14 @@
 {
-  "name": "layout-card",
-  "version": "2.4.7",
-  "description": "",
+  "name": "dashboard-layout-card-v2",
+  "version": "0.1.0",
+  "description": "Parallel-installable v2 fork of lovelace-layout-card with dashboard pages and optional side menu.",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c --watch"
   },
-  "author": "Thomas Lovén",
+  "author": "Thomas Lovén, UGSo/ATLAS contributors",
   "license": "MIT",
   "devDependencies": {
     "@babel/preset-env": "^7.27.2",
