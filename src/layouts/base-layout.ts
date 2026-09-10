@@ -154,6 +154,7 @@ export class BaseLayout extends LitElement {
           style.active_tab_color ? `--dashboard-layout-v2-active-tab-color: ${style.active_tab_color}` : "",
           style.inactive_tab_color ? `--dashboard-layout-v2-inactive-tab-color: ${style.inactive_tab_color}` : "",
           style.hover_tab_color ? `--dashboard-layout-v2-hover-tab-color: ${style.hover_tab_color}` : "",
+          style.clock_size ? `--dashboard-layout-v2-clock-size: ${style.clock_size}` : "",
           background ? `--dashboard-layout-v2-menu-background: ${background}` : "",
         ].filter(Boolean).join(";")}
       >
@@ -245,8 +246,8 @@ export class BaseLayout extends LitElement {
 
       .dashboard-layout-v2-analog-clock {
         position: relative;
-        width: 44px;
-        height: 44px;
+        width: var(--dashboard-layout-v2-clock-size, 44px);
+        height: var(--dashboard-layout-v2-clock-size, 44px);
         border: 2px solid var(--dashboard-layout-v2-icon-color, var(--primary-color));
         border-radius: 50%;
       }
@@ -254,10 +255,10 @@ export class BaseLayout extends LitElement {
       .dashboard-layout-v2-analog-clock::after {
         content: "";
         position: absolute;
-        width: 6px;
-        height: 6px;
-        top: calc(50% - 3px);
-        left: calc(50% - 3px);
+        width: calc(var(--dashboard-layout-v2-clock-size, 44px) * 0.14);
+        height: calc(var(--dashboard-layout-v2-clock-size, 44px) * 0.14);
+        top: calc(50% - (var(--dashboard-layout-v2-clock-size, 44px) * 0.07));
+        left: calc(50% - (var(--dashboard-layout-v2-clock-size, 44px) * 0.07));
         border-radius: 50%;
         background: var(--primary-text-color);
       }
@@ -272,11 +273,11 @@ export class BaseLayout extends LitElement {
       }
 
       .dashboard-layout-v2-analog-clock .hand.hour {
-        height: 13px;
+        height: calc(var(--dashboard-layout-v2-clock-size, 44px) * 0.3);
       }
 
       .dashboard-layout-v2-analog-clock .hand.minute {
-        height: 18px;
+        height: calc(var(--dashboard-layout-v2-clock-size, 44px) * 0.41);
       }
 
       .dashboard-layout-v2-menu nav {

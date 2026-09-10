@@ -19,6 +19,7 @@ const defaultConfig = {
       active_tab_color: "",
       inactive_tab_color: "",
       hover_tab_color: "",
+      clock_size: "44px",
       background_mode: "none",
       background_color: "",
       background_image: "",
@@ -127,6 +128,28 @@ function normalizedTitle(value: any) {
   return String(value ?? "").trim().toLowerCase();
 }
 
+function clockSizeInputValue(value: string) {
+  const match = String(value ?? "").match(/^(\d+(?:\.\d+)?)px$/);
+  return match ? match[1] : String(value ?? "").replace(/[^\d.]/g, "") || "44";
+}
+
+function normalizedClockSize(value: string) {
+  const size = Number(clockSizeInputValue(value));
+  if (!Number.isFinite(size) || size <= 0) return "44px";
+  return `${Math.max(24, Math.min(120, size))}px`;
+}
+
+function sectionsFromExistingData(page: any, existingView: any) {
+  if (Array.isArray(page.sections)) return page.sections;
+  if (Array.isArray(existingView?.sections)) return existingView.sections;
+  const cards = Array.isArray(page.cards)
+    ? page.cards
+    : Array.isArray(existingView?.cards)
+      ? existingView.cards
+      : [];
+  return cards.length ? [{ type: "grid", cards }] : defaultSections();
+}
+
 class DashboardLayoutV2ViewDialog extends LitElement {
   @property({ attribute: false }) hass: any;
   @property({ attribute: false }) lovelace: any;
@@ -141,6 +164,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _activeTabColor = "";
   @state() private _inactiveTabColor = "";
   @state() private _hoverTabColor = "";
+  @state() private _clockSize = "44";
   @state() private _backgroundMode = "none";
   @state() private _backgroundColor = "";
   @state() private _backgroundImage = "";
@@ -166,6 +190,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._activeTabColor = config.menu.style?.active_tab_color ?? "";
     this._inactiveTabColor = config.menu.style?.inactive_tab_color ?? "";
     this._hoverTabColor = config.menu.style?.hover_tab_color ?? "";
+    this._clockSize = clockSizeInputValue(config.menu.style?.clock_size ?? "44px");
     this._backgroundMode = config.menu.style?.background_mode ?? "none";
     this._backgroundColor = config.menu.style?.background_color ?? "";
     this._backgroundImage = config.menu.style?.background_image ?? "";
@@ -228,6 +253,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "activeTabColor") this._activeTabColor = value;
     if (key === "inactiveTabColor") this._inactiveTabColor = value;
     if (key === "hoverTabColor") this._hoverTabColor = value;
+    if (key === "clockSize") this._clockSize = value;
     if (key === "backgroundMode") this._backgroundMode = value;
     if (key === "backgroundColor") this._backgroundColor = value;
     if (key === "backgroundImage") this._backgroundImage = value;
@@ -285,7 +311,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           ? view.sections
           : Array.isArray(page.sections)
             ? page.sections
-            : defaultSections(),
+            : Array.isArray(view.cards) && view.cards.length
+              ? [{ type: "grid", cards: view.cards }]
+              : defaultSections(),
         max_columns: view.max_columns ?? page.max_columns ?? 4,
       };
     }
@@ -465,6 +493,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           active_tab_color: this._activeTabColor,
           inactive_tab_color: this._inactiveTabColor,
           hover_tab_color: this._hoverTabColor,
+          clock_size: normalizedClockSize(this._clockSize),
           background_mode: this._backgroundMode,
           background_color: this._backgroundColor,
           background_image: this._backgroundImage,
@@ -511,9 +540,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       const type = pageLayoutType(page);
       const sections = Array.isArray(page.sections)
         ? page.sections
-        : Array.isArray(existing?.view.sections)
-          ? existing.view.sections
-          : defaultSections();
+        : sectionsFromExistingData(page, existing?.view);
       const cards = Array.isArray(page.cards)
         ? page.cards
         : Array.isArray(existing?.view.cards)
@@ -737,6 +764,17 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               ${this._renderColorField("Tabfarbe aktiv", "activeTabColor", this._activeTabColor, "var(--primary-color)")}
               ${this._renderColorField("Tabfarbe inaktiv", "inactiveTabColor", this._inactiveTabColor, "transparent")}
               ${this._renderColorField("Tabfarbe Hover", "hoverTabColor", this._hoverTabColor, "var(--secondary-background-color)")}
+              <label>
+                Uhrgröße
+                <input
+                  type="number"
+                  min="24"
+                  max="120"
+                  step="1"
+                  .value=${this._clockSize}
+                  @input=${(ev: Event) => this._setValue("clockSize", (ev.target as HTMLInputElement).value)}
+                />
+              </label>
               <label>
                 Hintergrund
                 <select

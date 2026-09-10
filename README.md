@@ -34,6 +34,7 @@ menu:
     active_tab_color: "#03a9f4"
     inactive_tab_color: "transparent"
     hover_tab_color: "rgba(255,255,255,0.12)"
+    clock_size: "44px"
     background_mode: none
 pages:
   - title: Keller

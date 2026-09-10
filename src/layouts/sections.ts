@@ -14,6 +14,19 @@ const DEFAULT_SECTIONS = [
   },
 ];
 
+function sectionsFromConfig(config: SectionsViewConfig) {
+  if (Array.isArray(config.sections)) return config.sections;
+  if (Array.isArray(config.cards) && config.cards.length) {
+    return [
+      {
+        type: "grid",
+        cards: config.cards,
+      },
+    ];
+  }
+  return DEFAULT_SECTIONS;
+}
+
 class SectionsLayout extends BaseLayout {
   _config: SectionsViewConfig;
   private _sectionElements: HTMLElement[] = [];
@@ -23,7 +36,7 @@ class SectionsLayout extends BaseLayout {
     await super.setConfig({
       ...config,
       type: "custom:sections-layout-v2",
-      sections: Array.isArray(config.sections) ? config.sections : DEFAULT_SECTIONS,
+      sections: sectionsFromConfig(config),
     });
     this._syncNativeSectionsView();
   }
@@ -41,13 +54,13 @@ class SectionsLayout extends BaseLayout {
     return {
       ...this._config,
       type: "sections",
-      sections: Array.isArray(this._config.sections) ? this._config.sections : DEFAULT_SECTIONS,
+      sections: sectionsFromConfig(this._config),
       max_columns: this._config.max_columns ?? 4,
     };
   }
 
   private _buildSectionElements() {
-    const sections = Array.isArray(this._config.sections) ? this._config.sections : DEFAULT_SECTIONS;
+    const sections = sectionsFromConfig(this._config);
     const signature = JSON.stringify(sections);
 
     if (signature !== this._sectionSignature) {
