@@ -70,15 +70,27 @@ class SectionsLayout extends BaseLayout {
     (this as any).__dashboardLayoutV2SectionsEditorsLoaded = true;
 
     try {
+      const warmupView = {
+        title: "tr",
+        path: "tr",
+        sections: [
+          {
+            type: "grid",
+            cards: [],
+          },
+        ],
+      };
+      const warmupConfig = { views: [warmupView] };
       const loader = document.createElement("hui-sections-view") as any;
       loader.hass = this.hass;
-      loader.index = this._resolvedViewIndex() ?? 0;
+      loader.index = 0;
       loader.narrow = this.narrow;
       loader.lovelace = {
         ...this.lovelace,
         editMode: true,
-        config: this.lovelace?.config ?? { views: [] },
-        rawConfig: this.lovelace?.rawConfig ?? this.lovelace?.config ?? { views: [] },
+        config: warmupConfig,
+        rawConfig: warmupConfig,
+        saveConfig: undefined,
       };
       loader.style.cssText = [
         "position:absolute",
