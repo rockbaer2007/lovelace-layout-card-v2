@@ -185,11 +185,71 @@ class SectionsLayout extends BaseLayout {
     }
   }
 
+  private _configureHeader(ev: Event) {
+    ev.stopPropagation();
+    this._patchNativeEditorSaves();
+    this._nativeHeaderEditor()?._configure?.();
+  }
+
+  private _configureFooter(ev: Event) {
+    ev.stopPropagation();
+    this._patchNativeEditorSaves();
+    this._nativeFooterEditor()?._configure?.();
+  }
+
+  private _editHeaderCard(ev: Event) {
+    this._patchNativeEditorSaves();
+    this._nativeHeaderEditor()?._editCard?.(ev);
+  }
+
+  private _deleteHeaderCard(ev: Event) {
+    this._patchNativeEditorSaves();
+    this._nativeHeaderEditor()?._deleteCard?.(ev);
+  }
+
+  private _editFooterCard(ev: Event) {
+    this._patchNativeEditorSaves();
+    this._nativeFooterEditor()?._editCard?.(ev);
+  }
+
+  private _deleteFooterCard(ev: Event) {
+    this._patchNativeEditorSaves();
+    this._nativeFooterEditor()?._deleteCard?.(ev);
+  }
+
+  private _renderFallbackCardEditor(
+    card: LovelaceCard | HuiCard,
+    editCard: (ev: Event) => void,
+    deleteCard: (ev: Event) => void
+  ) {
+    if (!this.lovelace?.editMode) return card;
+
+    return html`
+      <hui-card-edit-mode
+        @ll-edit-card=${editCard}
+        @ll-delete-card=${deleteCard}
+        .lovelace=${this.lovelace}
+        .path=${[0]}
+        no-duplicate
+        no-move
+      >
+        ${card}
+      </hui-card-edit-mode>
+    `;
+  }
+
   private _renderHeaderCardFallback(card?: LovelaceCard | HuiCard) {
     return card
       ? html`
           <div class=${this.lovelace?.editMode ? "chrome-card-fallback header edit-mode" : "chrome-card-fallback header"}>
-            ${card}
+            ${this.lovelace?.editMode
+              ? html`
+                  <button class="chrome-configure" @click=${this._configureHeader} title="Kopfzeilen-Einstellungen">
+                    <ha-icon .icon=${"mdi:pencil"}></ha-icon>
+                  </button>
+                `
+              : ""}
+            ${this._renderFallbackCardEditor(card, this._editHeaderCard, this._deleteHeaderCard)}
           </div>
         `
       : "";
@@ -199,7 +259,14 @@ class SectionsLayout extends BaseLayout {
     return card
       ? html`
           <div class=${this.lovelace?.editMode ? "chrome-card-fallback footer edit-mode" : "chrome-card-fallback footer"}>
-            ${card}
+            ${this.lovelace?.editMode
+              ? html`
+                  <button class="chrome-configure" @click=${this._configureFooter} title="Fußzeilen-Einstellungen">
+                    <ha-icon .icon=${"mdi:pencil"}></ha-icon>
+                  </button>
+                `
+              : ""}
+            ${this._renderFallbackCardEditor(card, this._editFooterCard, this._deleteFooterCard)}
           </div>
         `
       : "";
@@ -442,6 +509,32 @@ class SectionsLayout extends BaseLayout {
         .chrome-card-fallback hui-markdown-card ha-card {
           width: 100%;
           max-width: 100%;
+        }
+
+        .chrome-card-fallback hui-card-edit-mode {
+          width: min(700px, 100%);
+        }
+
+        .chrome-configure {
+          position: absolute;
+          top: -36px;
+          right: -2px;
+          z-index: 1;
+          display: inline-grid;
+          place-items: center;
+          width: 36px;
+          height: 36px;
+          border: 0;
+          border-radius: var(--ha-section-border-radius, var(--ha-border-radius-xl));
+          border-bottom-left-radius: 0;
+          border-bottom-right-radius: 0;
+          background: var(--secondary-background-color);
+          color: var(--primary-text-color);
+          cursor: pointer;
+        }
+
+        .chrome-configure ha-icon {
+          --mdc-icon-size: 20px;
         }
       `,
     ];
