@@ -3,6 +3,27 @@ import { LAYOUT_CARD_SELECTOR_OPTIONS } from "../helpers";
 customElements.whenDefined("hui-view-editor").then(() => {
   const HuiViewEditor = customElements.get("hui-view-editor");
 
+  if (HuiViewEditor.prototype._dashboardLayoutCardV2Patched) return;
+  HuiViewEditor.prototype._dashboardLayoutCardV2Patched = true;
+
+  const appendLayoutCardV2Options = (schemaEntry: any) => {
+    const selector = schemaEntry?.selector;
+    const optionContainers = [
+      selector?.select,
+      selector?.radio,
+    ].filter((container) => Array.isArray(container?.options));
+
+    for (const container of optionContainers) {
+      const existingValues = new Set(container.options.map((option) => option.value));
+      const missingOptions = LAYOUT_CARD_SELECTOR_OPTIONS.filter(
+        (option) => !existingValues.has(option.value)
+      );
+      if (missingOptions.length) {
+        container.options = [...container.options, ...missingOptions];
+      }
+    }
+  };
+
   const firstUpdated = HuiViewEditor.prototype.firstUpdated;
   HuiViewEditor.prototype.firstUpdated = function () {
     firstUpdated?.bind(this)();
@@ -11,16 +32,7 @@ customElements.whenDefined("hui-view-editor").then(() => {
     this._schema = (...arg) => {
       const retval = this._oldSchema(...arg);
       const typeSelector = retval.find((e) => e.name == "type");
-      if (typeSelector.name === "layout") return retval;
-      if (
-        !typeSelector.selector.select.options.find(
-          (option) => option.value === LAYOUT_CARD_SELECTOR_OPTIONS[0].value
-        )
-      ) {
-        typeSelector.selector.select.options.push(
-          ...LAYOUT_CARD_SELECTOR_OPTIONS
-        );
-      }
+      appendLayoutCardV2Options(typeSelector);
 
       if (retval.find((e) => e.name === "layout") === undefined)
         retval.push({
@@ -30,21 +42,18 @@ customElements.whenDefined("hui-view-editor").then(() => {
       return retval;
     };
 
-    const helpLink = document.createElement("p");
-    helpLink.innerHTML = `
-      You have dashboard-layout-card-v2 installed which adds some options to this dialog.<br/>
-      Please see
-        <a
-          href="https://github.com/thomasloven/lovelace-layout-card"
-          target="_blank"
-          rel="no referrer"
-        >the original layout-card on GitHub</a> for usage instructions.
+    if (!this.shadowRoot.querySelector(".dashboard-layout-card-v2-help")) {
+      const helpLink = document.createElement("p");
+      helpLink.className = "dashboard-layout-card-v2-help";
+      helpLink.innerHTML = `
+        Dashboard Layout Card V2 adds extra layout choices without replacing Home Assistant or original layout-card entries.
         <style>
-          p {padding: 16px 0 0; margin-bottom: 0;}
-          a {color: var(--primary-color);}
+          .dashboard-layout-card-v2-help {padding: 16px 0 0; margin-bottom: 0;}
+          .dashboard-layout-card-v2-help {color: var(--secondary-text-color);}
         </style>
-    `;
-    this.shadowRoot.appendChild(helpLink);
+      `;
+      this.shadowRoot.appendChild(helpLink);
+    }
     this.requestUpdate();
   };
 });
