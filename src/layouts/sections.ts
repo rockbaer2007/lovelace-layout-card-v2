@@ -40,6 +40,7 @@ class SectionsLayout extends BaseLayout {
 
   async updated(changedProperties: Map<string, any>) {
     await super.updated(changedProperties);
+    this._loadNativeSectionsEditors();
     this._patchNativeEditorSaves();
   }
 
@@ -50,6 +51,18 @@ class SectionsLayout extends BaseLayout {
     view.sections = [...sectionsFromConfig(view), ...DEFAULT_SECTIONS];
     delete view.cards;
     await this.lovelace.saveConfig(nextConfig);
+  }
+
+  private _loadNativeSectionsEditors() {
+    if (!this.lovelace?.editMode || (this as any).__dashboardLayoutV2SectionsEditorsLoaded) return;
+
+    const loader = document.createElement("hui-sections-view") as any;
+    if (typeof loader.willUpdate !== "function") return;
+
+    (this as any).__dashboardLayoutV2SectionsEditorsLoaded = true;
+    loader.hass = this.hass;
+    loader.lovelace = { ...this.lovelace, editMode: true };
+    loader.willUpdate(new Map([["lovelace", undefined]]));
   }
 
   private _nativeHeaderEditor() {
@@ -127,20 +140,31 @@ class SectionsLayout extends BaseLayout {
             >
               ${editMode
                 ? html`
-                    <div class="section-toolbar" aria-hidden="true">
-                      <ha-icon .icon=${"mdi:drag-horizontal"}></ha-icon>
-                      <ha-icon .icon=${"mdi:dots-vertical"}></ha-icon>
-                    </div>
+                    <hui-section-edit-mode
+                      .hass=${this.hass}
+                      .lovelace=${this.lovelace}
+                      .index=${index}
+                      .viewIndex=${this.index}
+                    >
+                      <hui-section
+                        .hass=${this.hass}
+                        .lovelace=${this.lovelace}
+                        .config=${sectionConfig}
+                        .viewIndex=${this.index}
+                        .index=${index}
+                        ?preview=${editMode}
+                      ></hui-section>
+                    </hui-section-edit-mode>
                   `
-                : ""}
-              <hui-section
-                .hass=${this.hass}
-                .lovelace=${this.lovelace}
-                .config=${sectionConfig}
-                .viewIndex=${this.index}
-                .index=${index}
-                ?preview=${editMode}
-              ></hui-section>
+                : html`
+                    <hui-section
+                      .hass=${this.hass}
+                      .lovelace=${this.lovelace}
+                      .config=${sectionConfig}
+                      .viewIndex=${this.index}
+                      .index=${index}
+                    ></hui-section>
+                  `}
             </div>
           `)}
           ${editMode
@@ -211,29 +235,6 @@ class SectionsLayout extends BaseLayout {
 
         .section.edit-mode {
           min-height: 112px;
-          padding: 14px;
-          border: 2px dashed var(--divider-color, rgba(255, 255, 255, 0.18));
-          border-radius: 16px;
-          box-sizing: border-box;
-          background: transparent;
-        }
-
-        .section-toolbar {
-          position: absolute;
-          top: -42px;
-          right: 0;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          min-height: 42px;
-          padding: 0 10px;
-          border-radius: 12px 12px 0 0;
-          background: var(--secondary-background-color, #242424);
-          color: var(--primary-text-color);
-        }
-
-        .section-toolbar ha-icon {
-          --mdc-icon-size: 20px;
         }
 
         .create-section {
