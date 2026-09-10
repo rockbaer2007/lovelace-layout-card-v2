@@ -102,9 +102,13 @@ export interface DashboardLayoutMenuConfig {
 export interface DashboardLayoutPageConfig {
   title: string;
   icon?: string;
+  type?: string;
+  path?: string;
   layout_type?: string;
   layout?: any;
   cards?: Array<CardConfig>;
+  sections?: Array<Record<string, any>>;
+  max_columns?: number;
 }
 
 export interface DashboardLayoutCardConfig {

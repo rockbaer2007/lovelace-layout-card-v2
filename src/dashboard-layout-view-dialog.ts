@@ -49,6 +49,23 @@ function normalizeConfig(viewConfig: any) {
   };
 }
 
+function pageLayoutType(page: any) {
+  return page.type ?? page.layout_type ?? "custom:masonry-layout-v2";
+}
+
+function isSectionsPage(page: any) {
+  return pageLayoutType(page) === "sections";
+}
+
+function defaultSections() {
+  return [
+    {
+      type: "grid",
+      cards: [],
+    },
+  ];
+}
+
 class DashboardLayoutV2ViewDialog extends LitElement {
   @property({ attribute: false }) hass: any;
   @property({ attribute: false }) lovelace: any;
@@ -120,10 +137,25 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   private _normalizePage(page: any, index: number) {
     const title = String(page.title ?? page.name ?? `Unterseite ${index + 1}`);
     const path = page.path ?? (slugifyPath(title) || `dashboard-v2-${index + 1}`);
-    return {
+    const type = pageLayoutType(page);
+    const normalizedPage = {
       ...page,
       title,
       path: String(path),
+      type,
+      layout_type: type,
+    };
+
+    if (type === "sections") {
+      return {
+        ...normalizedPage,
+        sections: Array.isArray(page.sections) ? page.sections : defaultSections(),
+      };
+    }
+
+    return {
+      ...normalizedPage,
+      cards: Array.isArray(page.cards) ? page.cards : [],
     };
   }
 
@@ -131,6 +163,31 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._pages = this._pages.map((page, pageIndex) =>
       pageIndex === index ? { ...page, [key]: value } : page
     );
+    this._syncJsonFromPages();
+  }
+
+  private _updatePageLayout(index: number, value: string) {
+    this._pages = this._pages.map((page, pageIndex) => {
+      if (pageIndex !== index) return page;
+      if (value === "sections") {
+        const { cards: _cards, ...rest } = page;
+        return {
+          ...rest,
+          type: "sections",
+          layout_type: "sections",
+          sections: Array.isArray(page.sections) ? page.sections : defaultSections(),
+          max_columns: page.max_columns ?? 4,
+        };
+      }
+
+      const { sections: _sections, max_columns: _maxColumns, ...rest } = page;
+      return {
+        ...rest,
+        type: value,
+        layout_type: value,
+        cards: Array.isArray(page.cards) ? page.cards : [],
+      };
+    });
     this._syncJsonFromPages();
   }
 
@@ -258,28 +315,60 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         ...((existing?.view.layout ?? page.layout) ?? {}),
         dashboard_layout_v2: dashboardLayoutV2,
       };
+      const type = pageLayoutType(page);
+      const sections = Array.isArray(page.sections)
+        ? page.sections
+        : Array.isArray(existing?.view.sections)
+          ? existing.view.sections
+          : defaultSections();
+      const cards = Array.isArray(page.cards)
+        ? page.cards
+        : Array.isArray(existing?.view.cards)
+          ? existing.view.cards
+          : [];
 
       if (existing) {
-        nextViews[existing.index] = {
+        const updatedView = {
           ...existing.view,
           title: page.title,
           ...(page.icon ? { icon: page.icon } : {}),
-          type: page.type ?? page.layout_type ?? existing.view.type ?? "custom:masonry-layout-v2",
+          type,
           subview: isCurrentView ? existing.view.subview : true,
           layout: pageLayout,
         };
+        if (type === "sections") {
+          delete updatedView.cards;
+          updatedView.sections = sections;
+          updatedView.max_columns = page.max_columns ?? existing.view.max_columns ?? 4;
+        } else {
+          delete updatedView.sections;
+          delete updatedView.max_columns;
+          updatedView.cards = cards;
+        }
+        nextViews[existing.index] = updatedView;
         continue;
       }
 
-      nextViews.push({
+      const newView = {
         title: page.title,
         path: pagePath,
         ...(page.icon ? { icon: page.icon } : {}),
-        type: page.type ?? page.layout_type ?? "custom:masonry-layout-v2",
+        type,
         subview: true,
         layout: pageLayout,
-        cards: Array.isArray(page.cards) ? page.cards : [],
-      });
+      };
+      if (type === "sections") {
+        nextViews.push({
+          ...newView,
+          max_columns: page.max_columns ?? 4,
+          sections,
+        });
+      } else {
+        nextViews.push({
+          ...newView,
+          cards,
+        });
+      }
     }
 
     const nextConfig = {
@@ -394,14 +483,34 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         <select
                           .value=${selectedPage.layout_type ?? selectedPage.type ?? "custom:masonry-layout-v2"}
                           @change=${(ev: Event) =>
-                            this._updatePage(this._selectedPageIndex, "layout_type", (ev.target as HTMLSelectElement).value)}
+                            this._updatePageLayout(this._selectedPageIndex, (ev.target as HTMLSelectElement).value)}
                         >
+                          <option value="sections">Abschnitte (Standard)</option>
                           <option value="custom:masonry-layout-v2">Masonry V2</option>
                           <option value="custom:horizontal-layout-v2">Horizontal V2</option>
                           <option value="custom:vertical-layout-v2">Vertical V2</option>
                           <option value="custom:grid-layout-v2">Grid V2</option>
                         </select>
                       </label>
+                      ${isSectionsPage(selectedPage)
+                        ? html`
+                            <label>
+                              Max. Spalten
+                              <input
+                                type="number"
+                                min="1"
+                                max="10"
+                                .value=${String(selectedPage.max_columns ?? 4)}
+                                @input=${(ev: Event) =>
+                                  this._updatePage(
+                                    this._selectedPageIndex,
+                                    "max_columns",
+                                    Number((ev.target as HTMLInputElement).value)
+                                  )}
+                              />
+                            </label>
+                          `
+                        : nothing}
                     `
                   : html`<p class="empty">Noch keine Unterseite angelegt.</p>`}
               </div>
