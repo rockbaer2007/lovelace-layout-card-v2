@@ -36,16 +36,26 @@ function slugifyPath(value: string) {
     .replace(/^-+|-+$/g, "");
 }
 
+function dashboardLayoutConfigFrom(viewConfig: any) {
+  return (
+    viewConfig?.layout?.dashboard_layout_v2 ??
+    viewConfig?.dashboard_layout_v2 ??
+    viewConfig?.layout ??
+    {}
+  );
+}
+
 function normalizeConfig(viewConfig: any) {
+  const dashboardLayoutConfig = dashboardLayoutConfigFrom(viewConfig);
   return {
     ...defaultConfig,
-    ...(viewConfig?.layout?.dashboard_layout_v2 ?? {}),
+    ...dashboardLayoutConfig,
     menu: {
       ...defaultConfig.menu,
-      ...(viewConfig?.layout?.dashboard_layout_v2?.menu ?? {}),
+      ...(dashboardLayoutConfig?.menu ?? {}),
       style: {
         ...defaultConfig.menu.style,
-        ...(viewConfig?.layout?.dashboard_layout_v2?.menu?.style ?? {}),
+        ...(dashboardLayoutConfig?.menu?.style ?? {}),
       },
     },
   };

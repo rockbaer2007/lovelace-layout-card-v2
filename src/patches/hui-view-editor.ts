@@ -107,7 +107,9 @@ function patchSelectSelectorClass() {
 function getCurrentView(root: any) {
   const viewIndex = root?._curView;
   if (typeof viewIndex !== "number") return undefined;
-  const viewConfig = root?.lovelace?.config?.views?.[viewIndex];
+  const viewConfig =
+    root?.lovelace?.rawConfig?.views?.[viewIndex] ??
+    root?.lovelace?.config?.views?.[viewIndex];
   return viewConfig ? { viewIndex, viewConfig } : undefined;
 }
 
