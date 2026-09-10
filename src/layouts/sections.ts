@@ -40,6 +40,7 @@ class SectionsLayout extends BaseLayout {
 
   async updated(changedProperties: Map<string, any>) {
     await super.updated(changedProperties);
+    this._patchNativeEditorSaves();
   }
 
   private async _addSection() {
@@ -59,13 +60,54 @@ class SectionsLayout extends BaseLayout {
     return this.shadowRoot?.getElementById("native-footer-editor") as any;
   }
 
+  private _sourceLovelaceConfig() {
+    return this.lovelace?.rawConfig ?? this.lovelace?.config;
+  }
+
+  private async _saveViewPatch(patch: Partial<SectionsViewConfig>) {
+    const sourceConfig = this._sourceLovelaceConfig();
+    const viewIndex = Number(this.index);
+    if (!sourceConfig?.views?.[viewIndex] || !this.lovelace?.saveConfig) return;
+
+    const nextConfig = JSON.parse(JSON.stringify(sourceConfig));
+    nextConfig.views[viewIndex] = {
+      ...nextConfig.views[viewIndex],
+      ...patch,
+    };
+
+    await this.lovelace.saveConfig(nextConfig);
+    this._config = {
+      ...this._config,
+      ...patch,
+    };
+    this.requestUpdate();
+  }
+
+  private _patchNativeEditorSaves() {
+    const header = this._nativeHeaderEditor();
+    if (header && !header.__dashboardLayoutV2SavePatched) {
+      header._saveHeaderConfig = (headerConfig: Record<string, any>) =>
+        this._saveViewPatch({ header: headerConfig });
+      header.__dashboardLayoutV2SavePatched = true;
+    }
+
+    const footer = this._nativeFooterEditor();
+    if (footer && !footer.__dashboardLayoutV2SavePatched) {
+      footer._saveFooterConfig = (footerConfig: Record<string, any>) =>
+        this._saveViewPatch({ footer: footerConfig });
+      footer.__dashboardLayoutV2SavePatched = true;
+    }
+  }
+
   private _configureHeader(ev: Event) {
     ev.stopPropagation();
+    this._patchNativeEditorSaves();
     this._nativeHeaderEditor()?._configure?.();
   }
 
   private _addTitle(ev: Event) {
     ev.stopPropagation();
+    this._patchNativeEditorSaves();
     this._nativeHeaderEditor()?._addCard?.();
   }
 
@@ -76,11 +118,13 @@ class SectionsLayout extends BaseLayout {
 
   private _configureFooter(ev: Event) {
     ev.stopPropagation();
+    this._patchNativeEditorSaves();
     this._nativeFooterEditor()?._configure?.();
   }
 
   private _addFooter(ev: Event) {
     ev.stopPropagation();
+    this._patchNativeEditorSaves();
     this._nativeFooterEditor()?._addCard?.();
   }
 
