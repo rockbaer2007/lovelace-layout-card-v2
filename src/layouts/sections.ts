@@ -1,4 +1,5 @@
 import { css, html } from "lit";
+import { property } from "lit/decorators.js";
 import { BaseLayout } from "./base-layout";
 import { ViewConfig } from "../types";
 
@@ -16,8 +17,8 @@ const DEFAULT_SECTIONS = [
 
 class SectionsLayout extends BaseLayout {
   _config: SectionsViewConfig;
-  private _sectionElements: HTMLElement[] = [];
-  private _sectionSignature = "";
+  @property({ attribute: false }) sections: HTMLElement[] = [];
+  @property({ attribute: false }) badges: HTMLElement[] = [];
 
   async setConfig(config: SectionsViewConfig) {
     await super.setConfig({
@@ -46,37 +47,6 @@ class SectionsLayout extends BaseLayout {
     };
   }
 
-  private _buildSectionElements() {
-    const sections = Array.isArray(this._config.sections) ? this._config.sections : DEFAULT_SECTIONS;
-    const signature = JSON.stringify(sections);
-
-    if (signature !== this._sectionSignature) {
-      this._sectionElements = sections.map((sectionConfig, index) => {
-        const section = document.createElement("hui-section") as any;
-        this._applySectionConfig(section, sectionConfig, index);
-        return section;
-      });
-      this._sectionSignature = signature;
-    }
-
-    this._sectionElements.forEach((section: any, index) => {
-      const sectionConfig = sections[index];
-      this._applySectionConfig(section, sectionConfig, index);
-    });
-
-    return this._sectionElements;
-  }
-
-  private _applySectionConfig(section: any, sectionConfig: Record<string, any>, index: number) {
-    section.hass = this.hass;
-    section.lovelace = this.lovelace;
-    section.viewIndex = this.index;
-    section.index = index;
-    section.preview = Boolean(this.lovelace?.editMode);
-    section.config = sectionConfig;
-    section.requestUpdate?.();
-  }
-
   private _syncNativeSectionsView() {
     const sectionsView = this.shadowRoot?.querySelector("hui-sections-view") as any;
     if (!sectionsView || !this._config) return;
@@ -86,9 +56,9 @@ class SectionsLayout extends BaseLayout {
     sectionsView.index = this.index;
     sectionsView.narrow = this.narrow;
     sectionsView.isStrategy = false;
-    sectionsView.badges = [];
+    sectionsView.badges = this.badges ?? [];
     sectionsView.cards = this.cards ?? [];
-    sectionsView.sections = this._buildSectionElements();
+    sectionsView.sections = this.sections ?? [];
     sectionsView.setConfig?.(this._nativeSectionsConfig());
     sectionsView.requestUpdate?.();
   }
