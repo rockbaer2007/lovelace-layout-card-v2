@@ -169,6 +169,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _menuPosition = "left";
   @state() private _menuTitle = "Haus";
   @state() private _showHome = true;
+  @state() private _homeTitle = "Home";
+  @state() private _homePath = "home";
+  @state() private _homeIcon = "mdi:home";
   @state() private _clock = "digital";
   @state() private _date = true;
   @state() private _iconColor = "";
@@ -202,6 +205,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._menuPosition = config.menu.position ?? "left";
     this._menuTitle = config.menu.title ?? "Haus";
     this._showHome = config.menu.show_home !== false;
+    const homeEntry = this._homeEntryFromView(config.menu.home);
+    this._homeTitle = homeEntry.title;
+    this._homePath = homeEntry.path;
+    this._homeIcon = homeEntry.icon;
     this._clock = config.menu.clock ?? "digital";
     this._date = config.menu.date !== false;
     this._iconColor = config.menu.style?.icon_color ?? "";
@@ -291,6 +298,28 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "adminAlwaysVisible") this._adminAlwaysVisible = value;
     if (key === "visibleUsers") this._visibleUsers = value;
     if (key === "pagesText") this._pagesText = value;
+  }
+
+  private _homeEntryFromView(configHome?: any) {
+    const rawViews = this.lovelace?.rawConfig?.views ?? this.lovelace?.config?.views ?? [];
+    const currentView = rawViews?.[this.viewIndex] ?? this.viewConfig ?? {};
+    const currentPath = String(currentView.path ?? this.viewIndex ?? "");
+    const parentView = Array.isArray(rawViews)
+      ? rawViews.find((view: any, index: number) => {
+          if (index === this.viewIndex || view?.subview) return false;
+          const pages = view?.layout?.dashboard_layout_v2?.pages ?? view?.dashboard_layout_v2?.pages ?? [];
+          return Array.isArray(pages) && pages.some((page: any) => String(page?.path ?? "") === currentPath);
+        })
+      : undefined;
+    const parentMenu = parentView?.layout?.dashboard_layout_v2?.menu ?? parentView?.dashboard_layout_v2?.menu;
+    const parentHome = parentMenu?.home;
+    const source = configHome?.path ? configHome : parentHome?.path ? parentHome : parentView ?? currentView;
+
+    return {
+      title: String(source?.title ?? source?.path ?? "Home"),
+      path: String(source?.path ?? "home"),
+      icon: String(source?.icon ?? "mdi:home"),
+    };
   }
 
   private _renderColorField(label: string, key: string, value: string, placeholder: string) {
@@ -514,11 +543,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     }
 
     const normalizedPages = pagesForSave.map((page, index) => this._normalizePage(page, index));
-    const currentView = views[this.viewIndex];
     const homeEntry = {
-      title: currentView.title ?? currentView.path ?? "Home",
-      path: String(currentView.path ?? this.viewIndex ?? "home"),
-      icon: currentView.icon ?? "mdi:home",
+      title: this._homeTitle,
+      path: this._homePath,
+      icon: this._homeIcon,
     };
 
     const dashboardLayoutV2 = {
@@ -692,6 +720,15 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             />
             Hauptseite als ersten Menüpunkt anzeigen
           </label>
+
+          <fieldset class="home-entry group">
+            <legend>Hauptseite</legend>
+            <span>
+              <ha-icon .icon=${this._homeIcon}></ha-icon>
+              ${this._homeTitle}
+            </span>
+            <small>${this._homePath}</small>
+          </fieldset>
 
           <label>
             Uhr
@@ -1083,6 +1120,22 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         legend {
           padding: 0 6px;
           font-weight: 800;
+        }
+
+        .home-entry {
+          align-content: center;
+          gap: 6px;
+        }
+
+        .home-entry span {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: 800;
+        }
+
+        .home-entry small {
+          color: var(--secondary-text-color);
         }
 
         .page-editor {

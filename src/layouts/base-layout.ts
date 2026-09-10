@@ -122,11 +122,24 @@ export class BaseLayout extends LitElement {
     const menu = this._dashboardLayoutV2Menu();
     if (menu.show_home === false) return sourcePages;
 
+    const views = this.lovelace?.rawConfig?.views ?? this.lovelace?.config?.views ?? [];
     const currentView = this._config ?? this.lovelace?.config?.views?.[this.index];
-    const homePath = String(menu.home?.path ?? currentView?.path ?? this.index ?? "home");
+    const currentPath = String(currentView?.path ?? this.index ?? "");
+    const parentView = Array.isArray(views)
+      ? views.find((view, index) => {
+          if (index === this.index || view?.subview) return false;
+          const pages = view?.layout?.dashboard_layout_v2?.pages ?? view?.dashboard_layout_v2?.pages ?? [];
+          return Array.isArray(pages) && pages.some((page) => String(page?.path ?? "") === currentPath);
+        })
+      : undefined;
+    const parentMenu = parentView?.layout?.dashboard_layout_v2?.menu ?? parentView?.dashboard_layout_v2?.menu;
+    const parentHome = parentMenu?.home;
+    const homePath = String(
+      menu.home?.path ?? parentHome?.path ?? parentView?.path ?? currentView?.path ?? this.index ?? "home"
+    );
     const homePage = {
-      title: menu.home?.title ?? currentView?.title ?? homePath ?? "Home",
-      icon: menu.home?.icon ?? currentView?.icon ?? "mdi:home",
+      title: menu.home?.title ?? parentHome?.title ?? parentView?.title ?? currentView?.title ?? homePath ?? "Home",
+      icon: menu.home?.icon ?? parentHome?.icon ?? parentView?.icon ?? currentView?.icon ?? "mdi:home",
       path: homePath,
     };
 
