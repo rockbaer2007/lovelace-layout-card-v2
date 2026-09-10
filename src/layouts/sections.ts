@@ -368,12 +368,14 @@ class SectionsLayout extends BaseLayout {
             minmax(min(100%, var(--column-min-width)), 1fr)
           );
           gap: var(--column-gap);
+          align-items: start;
           width: 100%;
           min-width: 0;
         }
 
         .section {
           position: relative;
+          align-self: start;
           grid-column: span var(--column-span, 1);
           grid-row: span var(--row-span, 1);
         }
@@ -383,6 +385,8 @@ class SectionsLayout extends BaseLayout {
         }
 
         .create-section {
+          align-self: start;
+          height: 112px;
           min-height: 112px;
           border: 2px dashed var(--primary-color);
           border-radius: 16px;
