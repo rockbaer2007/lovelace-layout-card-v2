@@ -185,8 +185,24 @@ class SectionsLayout extends BaseLayout {
     }
   }
 
-  private _renderChromeCardFallback(card?: LovelaceCard | HuiCard) {
-    return card ? html`<div class="chrome-card-fallback">${card}</div>` : "";
+  private _renderHeaderCardFallback(card?: LovelaceCard | HuiCard) {
+    return card
+      ? html`
+          <div class=${this.lovelace?.editMode ? "chrome-card-fallback header edit-mode" : "chrome-card-fallback header"}>
+            ${card}
+          </div>
+        `
+      : "";
+  }
+
+  private _renderFooterCardFallback(card?: LovelaceCard | HuiCard) {
+    return card
+      ? html`
+          <div class=${this.lovelace?.editMode ? "chrome-card-fallback footer edit-mode" : "chrome-card-fallback footer"}>
+            ${card}
+          </div>
+        `
+      : "";
   }
 
   private async _saveViewPatch(patch: Partial<SectionsViewConfig>) {
@@ -254,7 +270,7 @@ class SectionsLayout extends BaseLayout {
           .viewIndex=${this._resolvedViewIndex()}
           .config=${viewConfig?.header ?? {}}
         ></hui-view-header>
-        ${this._showHeaderCardFallback ? this._renderChromeCardFallback(this._headerCard) : ""}
+        ${this._showHeaderCardFallback ? this._renderHeaderCardFallback(this._headerCard) : ""}
         <div class="sections-view">
           ${sections.map((sectionConfig, index) => html`
             <div
@@ -310,7 +326,7 @@ class SectionsLayout extends BaseLayout {
           .viewIndex=${this._resolvedViewIndex()}
           .config=${viewConfig?.footer ?? {}}
         ></hui-view-footer>
-        ${this._showFooterCardFallback ? this._renderChromeCardFallback(this._footerCard) : ""}
+        ${this._showFooterCardFallback ? this._renderFooterCardFallback(this._footerCard) : ""}
       </div>
       ${this._render_fab()}
     `);
@@ -389,6 +405,39 @@ class SectionsLayout extends BaseLayout {
         .chrome-card-fallback {
           display: block;
           min-width: 0;
+          text-align: center;
+        }
+
+        .chrome-card-fallback.header.edit-mode,
+        .chrome-card-fallback.footer.edit-mode {
+          position: relative;
+          display: grid;
+          place-items: center;
+          min-height: 120px;
+          border: 2px dashed var(--divider-color);
+          border-radius: 12px;
+          box-sizing: border-box;
+        }
+
+        .chrome-card-fallback.header {
+          padding-top: var(--column-gap);
+        }
+
+        .chrome-card-fallback.header.edit-mode {
+          padding: 16px;
+        }
+
+        .chrome-card-fallback.footer.edit-mode {
+          align-self: end;
+          min-height: 76px;
+          margin-bottom: 8px;
+          padding: 12px 16px;
+        }
+
+        .chrome-card-fallback hui-markdown-card,
+        .chrome-card-fallback hui-markdown-card ha-card {
+          width: 100%;
+          max-width: 100%;
         }
       `,
     ];
