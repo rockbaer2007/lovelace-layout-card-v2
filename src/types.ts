@@ -50,6 +50,7 @@ export interface ViewConfig {
     height?: string;
     dashboard_layout_v2?: {
       menu?: DashboardLayoutMenuConfig;
+      chrome?: DashboardLayoutChromeConfig;
       pages?: Array<DashboardLayoutPageConfig & { path?: string }>;
     };
   };
@@ -92,6 +93,12 @@ export interface LayoutCardConfig {
 export type DashboardLayoutMenuPosition = "left" | "none" | "right";
 export type DashboardLayoutClockMode = "none" | "digital" | "analog";
 
+export interface DashboardLayoutChromeConfig {
+  hide_ha_chrome?: boolean;
+  admin_always_visible?: boolean;
+  visible_users?: string | string[];
+}
+
 export interface DashboardLayoutMenuConfig {
   position?: DashboardLayoutMenuPosition;
   title?: string;
@@ -127,5 +134,6 @@ export interface DashboardLayoutPageConfig {
 export interface DashboardLayoutCardConfig {
   type: "custom:dashboard-layout-card-v2";
   menu?: DashboardLayoutMenuPosition | DashboardLayoutMenuConfig;
+  chrome?: DashboardLayoutChromeConfig;
   pages?: Array<DashboardLayoutPageConfig>;
 }

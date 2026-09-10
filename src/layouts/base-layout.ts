@@ -3,11 +3,13 @@ import { property } from "lit/decorators.js";
 import {
   CardConfig,
   CardConfigGroup,
+  DashboardLayoutChromeConfig,
   DashboardLayoutMenuConfig,
   HuiCard,
   LovelaceCard,
   ViewConfig,
 } from "../types";
+import { applyHaChromeVisibility } from "../ha-chrome";
 
 export class BaseLayout extends LitElement {
   @property() cards: Array<LovelaceCard | HuiCard> = [];
@@ -45,6 +47,12 @@ export class BaseLayout extends LitElement {
       this.cards.forEach((c) => (c.editMode = this.lovelace?.editMode));
       this._editMode = this.lovelace?.editMode ?? false;
     }
+    applyHaChromeVisibility(this.hass, this._dashboardLayoutV2Chrome());
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    applyHaChromeVisibility(this.hass, undefined);
   }
 
   _shouldShow(card: LovelaceCard | HuiCard, config: CardConfig, index: number) {
@@ -94,6 +102,10 @@ export class BaseLayout extends LitElement {
       position: "none",
       ...(this._config.layout?.dashboard_layout_v2?.menu ?? {}),
     };
+  }
+
+  _dashboardLayoutV2Chrome(): DashboardLayoutChromeConfig | undefined {
+    return this._config.layout?.dashboard_layout_v2?.chrome;
   }
 
   _dashboardLayoutV2Pages() {

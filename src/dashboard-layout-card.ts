@@ -2,12 +2,14 @@ import { css, html, LitElement } from "lit";
 import { property, state } from "lit/decorators.js";
 import {
   CardConfig,
+  DashboardLayoutChromeConfig,
   DashboardLayoutCardConfig,
   DashboardLayoutMenuConfig,
   DashboardLayoutMenuPosition,
   DashboardLayoutPageConfig,
   LovelaceCard,
 } from "./types";
+import { applyHaChromeVisibility } from "./ha-chrome";
 
 function normalizeLayoutType(layoutType?: string) {
   if (!layoutType) return "masonry-layout-v2";
@@ -30,6 +32,15 @@ function normalizeMenu(menu?: DashboardLayoutCardConfig["menu"]): DashboardLayou
   return menu;
 }
 
+function normalizeChrome(chrome?: DashboardLayoutChromeConfig): DashboardLayoutChromeConfig {
+  return {
+    hide_ha_chrome: false,
+    admin_always_visible: true,
+    visible_users: "",
+    ...(chrome ?? {}),
+  };
+}
+
 class DashboardLayoutCardV2 extends LitElement {
   @property() hass;
   @property() editMode = false;
@@ -48,6 +59,7 @@ class DashboardLayoutCardV2 extends LitElement {
     }
     this._config = {
       ...config,
+      chrome: normalizeChrome(config.chrome),
       pages: config.pages.map((page) => ({
         ...page,
         cards: page.cards ?? [],
@@ -67,6 +79,7 @@ class DashboardLayoutCardV2 extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     if (this._clockTimer) window.clearInterval(this._clockTimer);
+    applyHaChromeVisibility(this.hass, undefined);
   }
 
   async updated(changedProperties: Map<string, any>) {
@@ -77,6 +90,7 @@ class DashboardLayoutCardV2 extends LitElement {
       });
       if (this._layoutElement) (this._layoutElement as any).hass = this.hass;
     }
+    applyHaChromeVisibility(this.hass, this._config?.chrome);
   }
 
   get _pages() {
@@ -234,6 +248,11 @@ class DashboardLayoutCardV2 extends LitElement {
         title: "Haus",
         clock: "digital",
         date: true,
+      },
+      chrome: {
+        hide_ha_chrome: false,
+        admin_always_visible: true,
+        visible_users: "",
       },
       pages: [
         {

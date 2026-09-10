@@ -28,6 +28,11 @@ const defaultConfig = {
       background_image: "",
     },
   },
+  chrome: {
+    hide_ha_chrome: false,
+    admin_always_visible: true,
+    visible_users: "",
+  },
   pages: [],
 };
 
@@ -174,6 +179,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _backgroundMode = "none";
   @state() private _backgroundColor = "";
   @state() private _backgroundImage = "";
+  @state() private _hideHaChrome = false;
+  @state() private _adminAlwaysVisible = true;
+  @state() private _visibleUsers = "";
   @state() private _pages: any[] = [];
   private _pageSourcePaths: Array<string | undefined> = [];
   @state() private _selectedPageIndex = 0;
@@ -203,6 +211,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._backgroundMode = config.menu.style?.background_mode ?? "none";
     this._backgroundColor = config.menu.style?.background_color ?? "";
     this._backgroundImage = config.menu.style?.background_image ?? "";
+    this._hideHaChrome = config.chrome?.hide_ha_chrome === true;
+    this._adminAlwaysVisible = config.chrome?.admin_always_visible !== false;
+    this._visibleUsers = Array.isArray(config.chrome?.visible_users)
+      ? config.chrome.visible_users.join(", ")
+      : config.chrome?.visible_users ?? "";
     const rawViews = params.lovelace?.rawConfig?.views ?? params.lovelace?.config?.views ?? [];
     const viewsByPath = new Map(
       Array.isArray(rawViews)
@@ -269,6 +282,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "backgroundMode") this._backgroundMode = value;
     if (key === "backgroundColor") this._backgroundColor = value;
     if (key === "backgroundImage") this._backgroundImage = value;
+    if (key === "hideHaChrome") this._hideHaChrome = value;
+    if (key === "adminAlwaysVisible") this._adminAlwaysVisible = value;
+    if (key === "visibleUsers") this._visibleUsers = value;
     if (key === "pagesText") this._pagesText = value;
   }
 
@@ -514,6 +530,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           background_image: this._backgroundImage,
         },
       },
+      chrome: {
+        hide_ha_chrome: this._hideHaChrome,
+        admin_always_visible: this._adminAlwaysVisible,
+        visible_users: this._visibleUsers,
+      },
       pages: normalizedPages.map((page) => pageNavigationMetadata(page)),
     };
 
@@ -670,6 +691,37 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             />
             Datum anzeigen
           </label>
+
+          <fieldset class="wide group">
+            <legend>HA-Oberfläche</legend>
+            <label class="check">
+              <input
+                type="checkbox"
+                .checked=${this._hideHaChrome}
+                @change=${(ev: Event) => this._setValue("hideHaChrome", (ev.target as HTMLInputElement).checked)}
+              />
+              HA-Sidebar und HA-Header für nicht erlaubte Benutzer ausblenden
+            </label>
+            <label class="check">
+              <input
+                type="checkbox"
+                .checked=${this._adminAlwaysVisible}
+                @change=${(ev: Event) => this._setValue("adminAlwaysVisible", (ev.target as HTMLInputElement).checked)}
+              />
+              Admin immer sichtbar lassen
+            </label>
+            <label>
+              Sichtbare Benutzer
+              <input
+                placeholder="Name oder User-ID, getrennt mit Komma"
+                .value=${this._visibleUsers}
+                @input=${(ev: Event) => this._setValue("visibleUsers", (ev.target as HTMLInputElement).value)}
+              />
+            </label>
+            <p class="hint">
+              Leere Liste blendet die HA-Oberfläche für alle Nicht-Admins aus, sobald die Option aktiv ist.
+            </p>
+          </fieldset>
 
           <fieldset class="wide group">
             <legend>Tabs / Unterseiten</legend>
@@ -919,7 +971,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
         .wide,
         .check,
-        .error {
+        .error,
+        .hint {
           grid-column: 1 / -1;
         }
 
@@ -1087,6 +1140,13 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         .empty {
           margin: 0;
           color: var(--secondary-text-color);
+        }
+
+        .hint {
+          margin: 0;
+          color: var(--secondary-text-color);
+          font-size: 13px;
+          line-height: 1.4;
         }
       `,
     ];

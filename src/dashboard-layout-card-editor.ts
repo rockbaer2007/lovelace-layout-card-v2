@@ -15,6 +15,12 @@ class DashboardLayoutCardV2Editor extends LitElement {
       },
     },
     {
+      name: "chrome",
+      selector: {
+        object: {},
+      },
+    },
+    {
       name: "pages",
       selector: {
         object: {},
@@ -26,6 +32,11 @@ class DashboardLayoutCardV2Editor extends LitElement {
     this._config = {
       ...config,
       menu: this._normalizeMenu(config.menu),
+      chrome: config.chrome ?? {
+        hide_ha_chrome: false,
+        admin_always_visible: true,
+        visible_users: "",
+      },
       pages: config.pages ?? [],
     };
   }
@@ -52,6 +63,7 @@ class DashboardLayoutCardV2Editor extends LitElement {
 
   _computeLabel(schema) {
     if (schema.name === "menu") return "Menu";
+    if (schema.name === "chrome") return "HA-Oberfläche";
     if (schema.name === "pages") return "Pages";
     return schema.name;
   }
