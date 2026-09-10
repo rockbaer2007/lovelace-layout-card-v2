@@ -117,17 +117,24 @@ class SectionsLayout extends BaseLayout {
     if (!sourceConfig?.views?.[viewIndex] || !this.lovelace?.saveConfig) return;
 
     const nextConfig = JSON.parse(JSON.stringify(sourceConfig));
-    nextConfig.views[viewIndex] = {
-      ...nextConfig.views[viewIndex],
+    const currentView = nextConfig.views[viewIndex];
+    const currentPath = String(currentView?.path ?? "");
+    const targetIndex = currentPath
+      ? nextConfig.views.findIndex((view) => String(view?.path ?? "") === currentPath)
+      : viewIndex;
+    const saveIndex = targetIndex >= 0 ? targetIndex : viewIndex;
+
+    nextConfig.views[saveIndex] = {
+      ...nextConfig.views[saveIndex],
       ...patch,
     };
 
     await this.lovelace.saveConfig(nextConfig);
-    if (this.lovelace.config?.views?.[viewIndex]) {
-      this.lovelace.config.views[viewIndex] = nextConfig.views[viewIndex];
+    if (this.lovelace.config?.views?.[saveIndex]) {
+      this.lovelace.config.views[saveIndex] = nextConfig.views[saveIndex];
     }
-    if (this.lovelace.rawConfig?.views?.[viewIndex]) {
-      this.lovelace.rawConfig.views[viewIndex] = nextConfig.views[viewIndex];
+    if (this.lovelace.rawConfig?.views?.[saveIndex]) {
+      this.lovelace.rawConfig.views[saveIndex] = nextConfig.views[saveIndex];
     }
     this._config = {
       ...this._config,
