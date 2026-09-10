@@ -1,6 +1,7 @@
 import { css, html } from "lit";
+import { state } from "lit/decorators.js";
 import { BaseLayout } from "./base-layout";
-import { ViewConfig } from "../types";
+import { CardConfig, HuiCard, LovelaceCard, ViewConfig } from "../types";
 
 type SectionsViewConfig = ViewConfig & {
   sections?: Array<Record<string, any>>;
@@ -29,6 +30,12 @@ function sectionsFromConfig(config: SectionsViewConfig) {
 
 class SectionsLayout extends BaseLayout {
   _config: SectionsViewConfig;
+  private _headerCard?: LovelaceCard | HuiCard;
+  private _headerCardKey = "";
+  private _footerCard?: LovelaceCard | HuiCard;
+  private _footerCardKey = "";
+  @state() private _showHeaderCardFallback = false;
+  @state() private _showFooterCardFallback = false;
 
   async setConfig(config: SectionsViewConfig) {
     await super.setConfig({
@@ -42,6 +49,8 @@ class SectionsLayout extends BaseLayout {
     await super.updated(changedProperties);
     this._loadNativeSectionsEditors();
     this._patchNativeEditorSaves();
+    await this._syncChromeCards();
+    this._updateChromeFallbackVisibility();
   }
 
   private async _addSection() {
@@ -110,6 +119,76 @@ class SectionsLayout extends BaseLayout {
     };
   }
 
+  private async _createChromeCard(config: CardConfig) {
+    const helpers = await (window as any).loadCardHelpers?.();
+    if (!helpers?.createCardElement) return undefined;
+    const card = helpers.createCardElement(config) as LovelaceCard | HuiCard;
+    card.hass = this.hass;
+    card.editMode = this.lovelace?.editMode;
+    return card;
+  }
+
+  private async _syncChromeCards() {
+    const viewConfig = this._currentViewConfig();
+    const headerCardConfig = viewConfig.header?.card as CardConfig | undefined;
+    const footerCardConfig = viewConfig.footer?.card as CardConfig | undefined;
+    const headerKey = headerCardConfig ? JSON.stringify(headerCardConfig) : "";
+    const footerKey = footerCardConfig ? JSON.stringify(footerCardConfig) : "";
+
+    if (headerKey !== this._headerCardKey) {
+      this._headerCardKey = headerKey;
+      this._headerCard = headerCardConfig
+        ? await this._createChromeCard(headerCardConfig)
+        : undefined;
+      this.requestUpdate();
+    }
+
+    if (footerKey !== this._footerCardKey) {
+      this._footerCardKey = footerKey;
+      this._footerCard = footerCardConfig
+        ? await this._createChromeCard(footerCardConfig)
+        : undefined;
+      this.requestUpdate();
+    }
+
+    if (this._headerCard) {
+      this._headerCard.hass = this.hass;
+      this._headerCard.editMode = this.lovelace?.editMode;
+    }
+    if (this._footerCard) {
+      this._footerCard.hass = this.hass;
+      this._footerCard.editMode = this.lovelace?.editMode;
+    }
+  }
+
+  private _nativeChromeShowsCard(element?: any) {
+    const root = element?.shadowRoot;
+    if (!root) return false;
+    return Boolean(
+      root.querySelector("hui-card, hui-card-options, ha-card, hui-warning")
+        ?? root.querySelector("[card], .card")
+    );
+  }
+
+  private _updateChromeFallbackVisibility() {
+    const viewConfig = this._currentViewConfig();
+    const shouldShowHeaderFallback = Boolean(viewConfig.header?.card)
+      && !this._nativeChromeShowsCard(this._nativeHeaderEditor());
+    const shouldShowFooterFallback = Boolean(viewConfig.footer?.card)
+      && !this._nativeChromeShowsCard(this._nativeFooterEditor());
+
+    if (this._showHeaderCardFallback !== shouldShowHeaderFallback) {
+      this._showHeaderCardFallback = shouldShowHeaderFallback;
+    }
+    if (this._showFooterCardFallback !== shouldShowFooterFallback) {
+      this._showFooterCardFallback = shouldShowFooterFallback;
+    }
+  }
+
+  private _renderChromeCardFallback(card?: LovelaceCard | HuiCard) {
+    return card ? html`<div class="chrome-card-fallback">${card}</div>` : "";
+  }
+
   private async _saveViewPatch(patch: Partial<SectionsViewConfig>) {
     const sourceConfig = this._sourceLovelaceConfig();
     const viewIndex = this._resolvedViewIndex();
@@ -175,6 +254,7 @@ class SectionsLayout extends BaseLayout {
           .viewIndex=${this._resolvedViewIndex()}
           .config=${viewConfig?.header ?? {}}
         ></hui-view-header>
+        ${this._showHeaderCardFallback ? this._renderChromeCardFallback(this._headerCard) : ""}
         <div class="sections-view">
           ${sections.map((sectionConfig, index) => html`
             <div
@@ -230,6 +310,7 @@ class SectionsLayout extends BaseLayout {
           .viewIndex=${this._resolvedViewIndex()}
           .config=${viewConfig?.footer ?? {}}
         ></hui-view-footer>
+        ${this._showFooterCardFallback ? this._renderChromeCardFallback(this._footerCard) : ""}
       </div>
       ${this._render_fab()}
     `);
@@ -303,6 +384,11 @@ class SectionsLayout extends BaseLayout {
           display: block;
           align-self: end;
           margin-bottom: 8px;
+        }
+
+        .chrome-card-fallback {
+          display: block;
+          min-width: 0;
         }
       `,
     ];
