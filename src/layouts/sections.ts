@@ -54,6 +54,7 @@ class SectionsLayout extends BaseLayout {
   render() {
     const sections = sectionsFromConfig(this._config);
     const maxColumns = this._config?.max_columns ?? 4;
+    const editMode = Boolean(this.lovelace?.editMode);
     return this._renderDashboardLayoutV2Shell(html`
       <div class="sections-wrapper" style=${`--sections-max-columns: ${maxColumns}`}>
         <hui-view-header
@@ -66,7 +67,7 @@ class SectionsLayout extends BaseLayout {
         <div class="sections-view">
           ${sections.map((sectionConfig, index) => html`
             <div
-              class="section"
+              class=${editMode ? "section edit-mode" : "section"}
               style=${[
                 sectionConfig.column_span
                   ? `--column-span: ${Math.min(Number(sectionConfig.column_span), maxColumns)}`
@@ -74,17 +75,25 @@ class SectionsLayout extends BaseLayout {
                 sectionConfig.row_span ? `--row-span: ${sectionConfig.row_span}` : "",
               ].filter(Boolean).join(";")}
             >
+              ${editMode
+                ? html`
+                    <div class="section-toolbar" aria-hidden="true">
+                      <ha-icon .icon=${"mdi:drag-horizontal"}></ha-icon>
+                      <ha-icon .icon=${"mdi:dots-vertical"}></ha-icon>
+                    </div>
+                  `
+                : ""}
               <hui-section
                 .hass=${this.hass}
                 .lovelace=${this.lovelace}
                 .config=${sectionConfig}
                 .viewIndex=${this.index}
                 .index=${index}
-                ?preview=${Boolean(this.lovelace?.editMode)}
+                ?preview=${editMode}
               ></hui-section>
             </div>
           `)}
-          ${this.lovelace?.editMode
+          ${editMode
             ? html`
                 <button class="create-section" @click=${this._addSection} title="Abschnitt hinzufügen">
                   <ha-icon .icon=${"mdi:view-grid-plus"}></ha-icon>
@@ -92,6 +101,22 @@ class SectionsLayout extends BaseLayout {
               `
             : ""}
         </div>
+        <hui-view-footer
+          .hass=${this.hass}
+          .lovelace=${this.lovelace}
+          .viewIndex=${this.index}
+          .config=${this._config?.footer}
+        ></hui-view-footer>
+        ${editMode
+          ? html`
+              <div class="footer-placeholder">
+                <button title="Fußzeile hinzufügen">
+                  <ha-icon .icon=${"mdi:plus"}></ha-icon>
+                  <span>Fußzeile hinzufügen</span>
+                </button>
+              </div>
+            `
+          : ""}
       </div>
       ${this._render_fab()}
     `);
@@ -122,6 +147,8 @@ class SectionsLayout extends BaseLayout {
           margin: 0 auto;
           padding: 0 var(--column-gap);
           box-sizing: border-box;
+          min-height: calc(100vh - 96px);
+          grid-template-rows: auto auto 1fr;
         }
 
         .sections-view {
@@ -136,14 +163,66 @@ class SectionsLayout extends BaseLayout {
         }
 
         .section {
+          position: relative;
           grid-column: span var(--column-span, 1);
           grid-row: span var(--row-span, 1);
+        }
+
+        .section.edit-mode {
+          min-height: 112px;
+          padding: 14px;
+          border: 2px dashed var(--divider-color, rgba(255, 255, 255, 0.18));
+          border-radius: 16px;
+          box-sizing: border-box;
+          background: transparent;
+        }
+
+        .section-toolbar {
+          position: absolute;
+          top: -42px;
+          right: 0;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          min-height: 42px;
+          padding: 0 10px;
+          border-radius: 12px 12px 0 0;
+          background: var(--secondary-background-color, #242424);
+          color: var(--primary-text-color);
+        }
+
+        .section-toolbar ha-icon {
+          --mdc-icon-size: 20px;
         }
 
         .create-section {
           min-height: 112px;
           border: 2px dashed var(--primary-color);
           border-radius: 16px;
+          background: transparent;
+          color: var(--primary-text-color);
+          cursor: pointer;
+        }
+
+        .footer-placeholder {
+          align-self: end;
+          width: min(100%, 900px);
+          margin: 32px auto 8px;
+          min-height: 72px;
+          display: grid;
+          place-items: center;
+          border: 2px dashed var(--divider-color, rgba(255, 255, 255, 0.18));
+          border-radius: 16px;
+        }
+
+        .footer-placeholder button {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          min-height: 44px;
+          padding: 0 18px;
+          border: 2px dashed var(--primary-color);
+          border-radius: 22px;
           background: transparent;
           color: var(--primary-text-color);
           cursor: pointer;
