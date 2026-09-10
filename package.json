@@ -1,6 +1,6 @@
 {
   "name": "dashboard-layout-card-v2",
-  "version": "0.1.52",
+  "version": "0.1.51",
   "description": "Parallel-installable v2 fork of lovelace-layout-card with dashboard pages and optional side menu.",
   "private": true,
   "type": "module",

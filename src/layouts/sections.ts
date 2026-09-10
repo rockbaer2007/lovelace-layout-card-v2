@@ -130,7 +130,11 @@ class SectionsLayout extends BaseLayout {
   }
 
   private _hasNativeChromeElements() {
-    return Boolean(customElements.get("hui-view-header") && customElements.get("hui-view-footer"));
+    return Boolean(
+      customElements.get("hui-view-header")
+        && customElements.get("hui-view-footer")
+        && customElements.get("hui-view-badges")
+    );
   }
 
   private _updateNativeChromeReady() {
@@ -337,75 +341,23 @@ class SectionsLayout extends BaseLayout {
   }
 
   private _editHeaderCard(ev: Event) {
-    ev.stopPropagation();
     this._patchNativeEditorSaves();
-    const editor = this._nativeHeaderEditor();
-    if (typeof editor?._editCard === "function") {
-      editor._editCard(ev);
-      return;
-    }
-    this._showChromeCardEditDialog("header");
+    this._nativeHeaderEditor()?._editCard?.(ev);
   }
 
   private _deleteHeaderCard(ev: Event) {
-    ev.stopPropagation();
     this._patchNativeEditorSaves();
-    const editor = this._nativeHeaderEditor();
-    if (typeof editor?._deleteCard === "function") {
-      editor._deleteCard(ev);
-      return;
-    }
-    const viewConfig = this._currentViewConfig();
-    this._saveViewPatch({ header: { ...(viewConfig.header ?? {}), card: undefined } });
+    this._nativeHeaderEditor()?._deleteCard?.(ev);
   }
 
   private _editFooterCard(ev: Event) {
-    ev.stopPropagation();
     this._patchNativeEditorSaves();
-    const editor = this._nativeFooterEditor();
-    if (typeof editor?._editCard === "function") {
-      editor._editCard(ev);
-      return;
-    }
-    this._showChromeCardEditDialog("footer");
+    this._nativeFooterEditor()?._editCard?.(ev);
   }
 
   private _deleteFooterCard(ev: Event) {
-    ev.stopPropagation();
     this._patchNativeEditorSaves();
-    const editor = this._nativeFooterEditor();
-    if (typeof editor?._deleteCard === "function") {
-      editor._deleteCard(ev);
-      return;
-    }
-    const viewConfig = this._currentViewConfig();
-    this._saveViewPatch({ footer: { ...(viewConfig.footer ?? {}), card: undefined } });
-  }
-
-  private _showChromeCardEditDialog(area: "header" | "footer") {
-    const viewConfig = this._currentViewConfig();
-    const chromeConfig = viewConfig[area] ?? {};
-    const cardConfig = chromeConfig.card as CardConfig | undefined;
-    if (!cardConfig) return;
-
-    this.dispatchEvent(new CustomEvent("show-dialog", {
-      bubbles: true,
-      composed: true,
-      detail: {
-        dialogTag: "hui-dialog-edit-card",
-        dialogParams: {
-          lovelaceConfig: this._sourceLovelaceConfig(),
-          cardConfig,
-          saveCardConfig: (config: CardConfig) =>
-            this._saveViewPatch({
-              [area]: {
-                ...chromeConfig,
-                card: config,
-              },
-            }),
-        },
-      },
-    }));
+    this._nativeFooterEditor()?._deleteCard?.(ev);
   }
 
   private _renderFallbackCardEditor(
@@ -465,12 +417,6 @@ class SectionsLayout extends BaseLayout {
 
   private _renderDirectHeaderChrome(card?: LovelaceCard | HuiCard) {
     const editMode = Boolean(this.lovelace?.editMode);
-    const viewConfig = this._currentViewConfig();
-    const badges = Array.isArray(viewConfig.badges)
-      ? viewConfig.badges
-      : Array.isArray((this as any).badges)
-        ? (this as any).badges
-        : [];
     return html`
       <div class=${editMode ? "direct-chrome header edit-mode" : "direct-chrome header"}>
         ${editMode
@@ -492,13 +438,6 @@ class SectionsLayout extends BaseLayout {
                 `
               : ""}
         </div>
-        ${badges.length
-          ? html`
-              <div class="direct-badges">
-                ${badges.map((badge) => this._renderDirectBadge(badge))}
-              </div>
-            `
-          : ""}
         ${editMode
           ? html`
               <button class="direct-add badge-placeholder" type="button">
@@ -508,24 +447,6 @@ class SectionsLayout extends BaseLayout {
             `
           : ""}
       </div>
-    `;
-  }
-
-  private _renderDirectBadge(badge: Record<string, any> | string) {
-    const entityId = typeof badge === "string" ? badge : badge.entity;
-    const state = entityId ? this.hass?.states?.[entityId] : undefined;
-    const label = typeof badge === "string"
-      ? state?.attributes?.friendly_name ?? entityId
-      : badge.name ?? state?.attributes?.friendly_name ?? entityId ?? badge.type ?? "Badge";
-    const icon = typeof badge === "string"
-      ? state?.attributes?.icon
-      : badge.icon ?? state?.attributes?.icon;
-
-    return html`
-      <span class="direct-badge">
-        ${entityId ? html`<ha-state-icon .hass=${this.hass} .stateObj=${state}></ha-state-icon>` : icon ? html`<ha-icon .icon=${icon}></ha-icon>` : ""}
-        <span>${label}</span>
-      </span>
     `;
   }
 
@@ -611,17 +532,18 @@ class SectionsLayout extends BaseLayout {
     const badges = (this as any).badges ?? [];
     return this._renderDashboardLayoutV2Shell(html`
       <div class="sections-wrapper" style=${`--sections-max-columns: ${maxColumns}`}>
-        <hui-view-header
-          id="native-header-editor"
-          class=${this._nativeChromeReady ? "" : "native-chrome-proxy"}
-          .hass=${this.hass}
-          .badges=${badges}
-          .lovelace=${this.lovelace}
-          .viewIndex=${this._resolvedViewIndex()}
-          .config=${viewConfig?.header ?? {}}
-        ></hui-view-header>
         ${this._nativeChromeReady
-          ? this._showHeaderCardFallback ? this._renderHeaderCardFallback(this._headerCard) : ""
+          ? html`
+              <hui-view-header
+                id="native-header-editor"
+                .hass=${this.hass}
+                .badges=${badges}
+                .lovelace=${this.lovelace}
+                .viewIndex=${this._resolvedViewIndex()}
+                .config=${viewConfig?.header ?? {}}
+              ></hui-view-header>
+              ${this._showHeaderCardFallback ? this._renderHeaderCardFallback(this._headerCard) : ""}
+            `
           : this._renderDirectHeaderChrome(this._headerCard)}
         <div class="sections-view">
           ${sections.map((sectionConfig, index) => html`
@@ -671,16 +593,17 @@ class SectionsLayout extends BaseLayout {
               `
             : ""}
         </div>
-        <hui-view-footer
-          id="native-footer-editor"
-          class=${this._nativeChromeReady ? "" : "native-chrome-proxy"}
-          .hass=${this.hass}
-          .lovelace=${this.lovelace}
-          .viewIndex=${this._resolvedViewIndex()}
-          .config=${viewConfig?.footer ?? {}}
-        ></hui-view-footer>
         ${this._nativeChromeReady
-          ? this._showFooterCardFallback ? this._renderFooterCardFallback(this._footerCard) : ""
+          ? html`
+              <hui-view-footer
+                id="native-footer-editor"
+                .hass=${this.hass}
+                .lovelace=${this.lovelace}
+                .viewIndex=${this._resolvedViewIndex()}
+                .config=${viewConfig?.footer ?? {}}
+              ></hui-view-footer>
+              ${this._showFooterCardFallback ? this._renderFooterCardFallback(this._footerCard) : ""}
+            `
           : this._renderDirectFooterChrome(this._footerCard)}
       </div>
       ${this._render_fab()}
@@ -759,19 +682,6 @@ class SectionsLayout extends BaseLayout {
           display: block;
           align-self: end;
           margin-bottom: 8px;
-        }
-
-        .native-chrome-proxy {
-          position: absolute;
-          width: 1px;
-          height: 1px;
-          overflow: hidden;
-          opacity: 0;
-          pointer-events: none;
-          left: -10000px;
-          top: -10000px;
-          padding: 0;
-          margin: 0;
         }
 
         .chrome-card-fallback {
@@ -870,32 +780,6 @@ class SectionsLayout extends BaseLayout {
         }
 
         .direct-add ha-icon {
-          --mdc-icon-size: 18px;
-        }
-
-        .direct-badges {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          gap: 8px;
-          width: min(700px, 100%);
-        }
-
-        .direct-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          min-height: 32px;
-          padding: 4px 10px;
-          border-radius: 16px;
-          background: var(--ha-chip-background-color, var(--secondary-background-color));
-          color: var(--primary-text-color);
-          font-size: 14px;
-          line-height: 20px;
-        }
-
-        .direct-badge ha-icon,
-        .direct-badge ha-state-icon {
           --mdc-icon-size: 18px;
         }
 
