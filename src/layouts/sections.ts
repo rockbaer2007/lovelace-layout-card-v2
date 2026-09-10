@@ -29,8 +29,6 @@ function sectionsFromConfig(config: SectionsViewConfig) {
 
 class SectionsLayout extends BaseLayout {
   _config: SectionsViewConfig;
-  private _sectionElements: HTMLElement[] = [];
-  private _sectionSignature = "";
 
   async setConfig(config: SectionsViewConfig) {
     await super.setConfig({
@@ -38,77 +36,38 @@ class SectionsLayout extends BaseLayout {
       type: "custom:sections-layout-v2",
       sections: sectionsFromConfig(config),
     });
-    this._syncNativeSectionsView();
   }
 
   async updated(changedProperties: Map<string, any>) {
     await super.updated(changedProperties);
-    this._syncNativeSectionsView();
-  }
-
-  firstUpdated() {
-    this._syncNativeSectionsView();
-  }
-
-  private _nativeSectionsConfig() {
-    return {
-      ...this._config,
-      type: "sections",
-      sections: sectionsFromConfig(this._config),
-      max_columns: this._config.max_columns ?? 4,
-    };
-  }
-
-  private _buildSectionElements() {
-    const sections = sectionsFromConfig(this._config);
-    const signature = JSON.stringify(sections);
-
-    if (signature !== this._sectionSignature) {
-      this._sectionElements = sections.map((sectionConfig, index) => {
-        const section = document.createElement("hui-section") as any;
-        this._applySectionConfig(section, sectionConfig, index);
-        return section;
-      });
-      this._sectionSignature = signature;
-    }
-
-    this._sectionElements.forEach((section: any, index) => {
-      const sectionConfig = sections[index];
-      this._applySectionConfig(section, sectionConfig, index);
-    });
-
-    return this._sectionElements;
-  }
-
-  private _applySectionConfig(section: any, sectionConfig: Record<string, any>, index: number) {
-    section.hass = this.hass;
-    section.lovelace = this.lovelace;
-    section.viewIndex = this.index;
-    section.index = index;
-    section.preview = Boolean(this.lovelace?.editMode);
-    section.config = sectionConfig;
-    section.requestUpdate?.();
-  }
-
-  private _syncNativeSectionsView() {
-    const sectionsView = this.shadowRoot?.querySelector("hui-sections-view") as any;
-    if (!sectionsView || !this._config) return;
-
-    sectionsView.hass = this.hass;
-    sectionsView.lovelace = this.lovelace;
-    sectionsView.index = this.index;
-    sectionsView.narrow = this.narrow;
-    sectionsView.isStrategy = false;
-    sectionsView.badges = [];
-    sectionsView.cards = this.cards ?? [];
-    sectionsView.sections = this._buildSectionElements();
-    sectionsView.setConfig?.(this._nativeSectionsConfig());
-    sectionsView.requestUpdate?.();
   }
 
   render() {
+    const sections = sectionsFromConfig(this._config);
+    const maxColumns = this._config?.max_columns ?? 4;
     return this._renderDashboardLayoutV2Shell(html`
-      <hui-sections-view class="sections-view"></hui-sections-view>
+      <div class="sections-view" style=${`--sections-max-columns: ${maxColumns}`}>
+        ${sections.map((sectionConfig, index) => html`
+          <div
+            class="section"
+            style=${[
+              sectionConfig.column_span
+                ? `--column-span: ${Math.min(Number(sectionConfig.column_span), maxColumns)}`
+                : "",
+              sectionConfig.row_span ? `--row-span: ${sectionConfig.row_span}` : "",
+            ].filter(Boolean).join(";")}
+          >
+            <hui-section
+              .hass=${this.hass}
+              .lovelace=${this.lovelace}
+              .config=${sectionConfig}
+              .viewIndex=${this.index}
+              .index=${index}
+              ?preview=${Boolean(this.lovelace?.editMode)}
+            ></hui-section>
+          </div>
+        `)}
+      </div>
       ${this._render_fab()}
     `);
   }
@@ -124,8 +83,29 @@ class SectionsLayout extends BaseLayout {
         }
 
         .sections-view {
-          display: block;
+          --column-gap: var(--ha-view-sections-column-gap, 32px);
+          --column-min-width: var(--ha-view-sections-column-min-width, 320px);
+          --column-max-width: var(--ha-view-sections-column-max-width, 500px);
+          display: grid;
+          grid-template-columns: repeat(
+            auto-fit,
+            minmax(min(100%, var(--column-min-width)), 1fr)
+          );
+          gap: var(--column-gap);
+          width: 100%;
+          max-width: calc(
+            var(--sections-max-columns) * var(--column-max-width) +
+              (var(--sections-max-columns) - 1) * var(--column-gap)
+          );
           min-width: 0;
+          margin: 0 auto;
+          padding: 0 var(--column-gap);
+          box-sizing: border-box;
+        }
+
+        .section {
+          grid-column: span var(--column-span, 1);
+          grid-row: span var(--row-span, 1);
         }
       `,
     ];
