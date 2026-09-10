@@ -160,6 +160,38 @@ function sectionsFromExistingData(page: any, existingView: any) {
   return cards.length ? [{ type: "grid", cards }] : defaultSections();
 }
 
+function stableViewEditorChrome(view: any) {
+  const header = view?.header ?? {};
+  const footer = view?.footer ?? {};
+  const title = String(view?.title ?? view?.path ?? "Home");
+
+  return {
+    header: header.card
+      ? header
+      : {
+          layout: "center",
+          badges_position: "bottom",
+          badges_wrap: "wrap",
+          ...header,
+          card: {
+            type: "markdown",
+            text_only: true,
+            content: `# ${title}`,
+          },
+        },
+    footer: footer.card
+      ? footer
+      : {
+          ...footer,
+          card: {
+            type: "markdown",
+            text_only: true,
+            content: " ",
+          },
+        },
+  };
+}
+
 class DashboardLayoutV2ViewDialog extends LitElement {
   @property({ attribute: false }) hass: any;
   @property({ attribute: false }) lovelace: any;
@@ -596,6 +628,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       if (!isRelatedDashboardLayoutV2View) return view;
       return {
         ...view,
+        ...stableViewEditorChrome(view),
         layout: {
           ...(layoutWithoutDashboardLayoutV2(view.layout) ?? {}),
           dashboard_layout_v2: dashboardLayoutV2,
@@ -634,6 +667,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           subview: isCurrentView ? existing.view.subview : true,
           layout: pageLayout,
         };
+        Object.assign(updatedView, stableViewEditorChrome(updatedView));
         if (type === SECTIONS_LAYOUT_V2) {
           delete updatedView.cards;
           updatedView.sections = sections;
@@ -655,6 +689,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         subview: true,
         layout: pageLayout,
       };
+      Object.assign(newView, stableViewEditorChrome(newView));
       if (type === SECTIONS_LAYOUT_V2) {
         nextViews.push({
           ...newView,
