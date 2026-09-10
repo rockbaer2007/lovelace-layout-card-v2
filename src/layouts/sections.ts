@@ -45,9 +45,10 @@ class SectionsLayout extends BaseLayout {
   }
 
   private async _addSection() {
-    if (!this.lovelace?.config?.views?.[this.index]) return;
+    const viewIndex = this._resolvedViewIndex();
+    if (viewIndex === undefined || !this.lovelace?.config?.views?.[viewIndex]) return;
     const nextConfig = JSON.parse(JSON.stringify(this.lovelace.config));
-    const view = nextConfig.views[this.index];
+    const view = nextConfig.views[viewIndex];
     view.sections = [...sectionsFromConfig(view), ...DEFAULT_SECTIONS];
     delete view.cards;
     await this.lovelace.saveConfig(nextConfig);
@@ -77,10 +78,31 @@ class SectionsLayout extends BaseLayout {
     return this.lovelace?.rawConfig ?? this.lovelace?.config;
   }
 
+  private _resolvedViewIndex() {
+    if (Number.isInteger(Number(this.index))) return Number(this.index);
+
+    const views = this.lovelace?.rawConfig?.views ?? this.lovelace?.config?.views ?? [];
+    if (!Array.isArray(views)) return undefined;
+
+    const configPath = this._config?.path;
+    if (configPath) {
+      const byConfigPath = views.findIndex((view) => String(view?.path ?? "") === String(configPath));
+      if (byConfigPath >= 0) return byConfigPath;
+    }
+
+    const urlPath = decodeURIComponent(location.pathname.split("/").filter(Boolean).pop() ?? "");
+    if (urlPath) {
+      const byUrlPath = views.findIndex((view) => String(view?.path ?? "") === urlPath);
+      if (byUrlPath >= 0) return byUrlPath;
+    }
+
+    return undefined;
+  }
+
   private _currentViewConfig(): SectionsViewConfig {
-    const viewIndex = Number(this.index);
-    const rawView = this.lovelace?.rawConfig?.views?.[viewIndex];
-    const configView = this.lovelace?.config?.views?.[viewIndex];
+    const viewIndex = this._resolvedViewIndex();
+    const rawView = viewIndex === undefined ? undefined : this.lovelace?.rawConfig?.views?.[viewIndex];
+    const configView = viewIndex === undefined ? undefined : this.lovelace?.config?.views?.[viewIndex];
     return {
       ...this._config,
       ...(configView ?? {}),
@@ -90,7 +112,8 @@ class SectionsLayout extends BaseLayout {
 
   private async _saveViewPatch(patch: Partial<SectionsViewConfig>) {
     const sourceConfig = this._sourceLovelaceConfig();
-    const viewIndex = Number(this.index);
+    const viewIndex = this._resolvedViewIndex();
+    if (viewIndex === undefined) return;
     if (!sourceConfig?.views?.[viewIndex] || !this.lovelace?.saveConfig) return;
 
     const nextConfig = JSON.parse(JSON.stringify(sourceConfig));
@@ -142,7 +165,7 @@ class SectionsLayout extends BaseLayout {
           .hass=${this.hass}
           .badges=${badges}
           .lovelace=${this.lovelace}
-          .viewIndex=${this.index}
+          .viewIndex=${this._resolvedViewIndex()}
           .config=${viewConfig?.header ?? {}}
         ></hui-view-header>
         <div class="sections-view">
@@ -162,13 +185,13 @@ class SectionsLayout extends BaseLayout {
                       .hass=${this.hass}
                       .lovelace=${this.lovelace}
                       .index=${index}
-                      .viewIndex=${this.index}
+                      .viewIndex=${this._resolvedViewIndex()}
                     >
                       <hui-section
                         .hass=${this.hass}
                         .lovelace=${this.lovelace}
                         .config=${sectionConfig}
-                        .viewIndex=${this.index}
+                        .viewIndex=${this._resolvedViewIndex()}
                         .index=${index}
                         ?preview=${editMode}
                       ></hui-section>
@@ -179,7 +202,7 @@ class SectionsLayout extends BaseLayout {
                       .hass=${this.hass}
                       .lovelace=${this.lovelace}
                       .config=${sectionConfig}
-                      .viewIndex=${this.index}
+                      .viewIndex=${this._resolvedViewIndex()}
                       .index=${index}
                     ></hui-section>
                   `}
@@ -197,7 +220,7 @@ class SectionsLayout extends BaseLayout {
           id="native-footer-editor"
           .hass=${this.hass}
           .lovelace=${this.lovelace}
-          .viewIndex=${this.index}
+          .viewIndex=${this._resolvedViewIndex()}
           .config=${viewConfig?.footer ?? {}}
         ></hui-view-footer>
       </div>
