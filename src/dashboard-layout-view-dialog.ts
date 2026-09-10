@@ -394,12 +394,21 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const existingViewsByPath = new Map(
       views.map((view, index) => [String(view.path ?? index), { view, index }])
     );
+    const relatedPaths = new Set<string>([currentPath]);
+    normalizedPages.forEach((page, index) => {
+      relatedPaths.add(String(page.path));
+      const sourcePath = this._pageSourcePaths[index];
+      if (sourcePath) relatedPaths.add(sourcePath);
+    });
     const nextViews = views.map((view, index) => {
-      if (index !== this.viewIndex) return view;
+      const viewPath = String(view.path ?? index);
+      const isRelatedDashboardLayoutV2View =
+        relatedPaths.has(viewPath) && String(view.type ?? "").endsWith("-layout-v2");
+      if (!isRelatedDashboardLayoutV2View) return view;
       return {
         ...view,
         layout: {
-          ...(view.layout ?? {}),
+          ...(layoutWithoutDashboardLayoutV2(view.layout) ?? {}),
           dashboard_layout_v2: dashboardLayoutV2,
         },
       };
