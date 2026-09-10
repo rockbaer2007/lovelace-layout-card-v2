@@ -83,6 +83,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _backgroundColor = "";
   @state() private _backgroundImage = "";
   @state() private _pages: any[] = [];
+  private _pageSourcePaths: Array<string | undefined> = [];
   @state() private _selectedPageIndex = 0;
   @state() private _jsonExpanded = false;
   @state() private _pagesText = "[]";
@@ -106,6 +107,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._backgroundColor = config.menu.style?.background_color ?? "";
     this._backgroundImage = config.menu.style?.background_image ?? "";
     this._pages = [...(config.pages ?? [])];
+    this._pageSourcePaths = this._pages.map((page, index) =>
+      String(page.path ?? (slugifyPath(page.title ?? "") || `dashboard-v2-${index + 1}`))
+    );
     this._selectedPageIndex = this._pages.length ? 0 : -1;
     this._syncJsonFromPages();
     this._error = "";
@@ -200,6 +204,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       layout_type: "custom:masonry-layout-v2",
     };
     this._pages = [...this._pages, page];
+    this._pageSourcePaths = [...this._pageSourcePaths, undefined];
     this._selectedPageIndex = this._pages.length - 1;
     this._syncJsonFromPages();
   }
@@ -217,6 +222,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       copy,
       ...this._pages.slice(this._selectedPageIndex + 1),
     ];
+    this._pageSourcePaths = [
+      ...this._pageSourcePaths.slice(0, this._selectedPageIndex + 1),
+      undefined,
+      ...this._pageSourcePaths.slice(this._selectedPageIndex + 1),
+    ];
     this._selectedPageIndex += 1;
     this._syncJsonFromPages();
   }
@@ -224,6 +234,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   private _deletePage() {
     if (this._selectedPageIndex < 0) return;
     this._pages = this._pages.filter((_, index) => index !== this._selectedPageIndex);
+    this._pageSourcePaths = this._pageSourcePaths.filter((_, index) => index !== this._selectedPageIndex);
     this._selectedPageIndex = Math.min(this._selectedPageIndex, this._pages.length - 1);
     this._syncJsonFromPages();
   }
@@ -232,9 +243,13 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const targetIndex = this._selectedPageIndex + direction;
     if (targetIndex < 0 || targetIndex >= this._pages.length) return;
     const pages = [...this._pages];
+    const sourcePaths = [...this._pageSourcePaths];
     const [page] = pages.splice(this._selectedPageIndex, 1);
+    const [sourcePath] = sourcePaths.splice(this._selectedPageIndex, 1);
     pages.splice(targetIndex, 0, page);
+    sourcePaths.splice(targetIndex, 0, sourcePath);
     this._pages = pages;
+    this._pageSourcePaths = sourcePaths;
     this._selectedPageIndex = targetIndex;
     this._syncJsonFromPages();
   }
@@ -244,6 +259,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       const parsed = JSON.parse(this._pagesText || "[]");
       if (!Array.isArray(parsed)) throw new Error("Pages muss eine Liste sein.");
       this._pages = parsed;
+      this._pageSourcePaths = parsed.map((page, index) =>
+        String(page.path ?? (slugifyPath(page.title ?? "") || `dashboard-v2-${index + 1}`))
+      );
       this._selectedPageIndex = this._pages.length ? 0 : -1;
       this._syncJsonFromPages();
       this._error = "";
@@ -307,10 +325,13 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       };
     });
 
-    for (const page of normalizedPages) {
+    for (const [pageIndex, page] of normalizedPages.entries()) {
       const pagePath = String(page.path);
-      const existing = existingViewsByPath.get(pagePath);
-      const isCurrentView = pagePath === currentPath;
+      const sourcePath = this._pageSourcePaths[pageIndex];
+      const existing = sourcePath
+        ? existingViewsByPath.get(sourcePath) ?? existingViewsByPath.get(pagePath)
+        : existingViewsByPath.get(pagePath);
+      const isCurrentView = (sourcePath ?? pagePath) === currentPath;
       const pageLayout = {
         ...((existing?.view.layout ?? page.layout) ?? {}),
         dashboard_layout_v2: dashboardLayoutV2,
@@ -331,6 +352,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         const updatedView = {
           ...existing.view,
           title: page.title,
+          path: pagePath,
           ...(page.icon ? { icon: page.icon } : {}),
           type,
           subview: isCurrentView ? existing.view.subview : true,
