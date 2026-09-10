@@ -79,6 +79,28 @@ function layoutWithoutDashboardLayoutV2(layout: any) {
   return Object.keys(rest).length ? rest : undefined;
 }
 
+function pageWithoutRecursiveDashboardLayout(page: any) {
+  if (!page || typeof page !== "object") return page;
+  const layout = layoutWithoutDashboardLayoutV2(page.layout);
+  const cleanPage = { ...page, ...(layout ? { layout } : {}) };
+  if (!layout) delete cleanPage.layout;
+  return cleanPage;
+}
+
+function pageNavigationMetadata(page: any) {
+  const metadata: any = {
+    title: page.title,
+    path: page.path,
+    ...(page.icon ? { icon: page.icon } : {}),
+    type: page.type,
+    layout_type: page.layout_type ?? page.type,
+  };
+  if (page.type === SECTIONS_LAYOUT_V2) {
+    metadata.max_columns = page.max_columns ?? 4;
+  }
+  return metadata;
+}
+
 class DashboardLayoutV2ViewDialog extends LitElement {
   @property({ attribute: false }) hass: any;
   @property({ attribute: false }) lovelace: any;
@@ -126,7 +148,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         : []
     );
     this._pages = [...(config.pages ?? [])].map((page, index) =>
-      this._mergePageWithView(page, viewsByPath.get(pagePath(page, index)))
+      this._mergePageWithView(pageWithoutRecursiveDashboardLayout(page), viewsByPath.get(pagePath(page, index)))
     );
     this._pageSourcePaths = this._pages.map((page, index) => pagePath(page, index));
     this._selectedPageIndex = this._pages.length ? 0 : -1;
@@ -159,10 +181,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
   private _mergePageWithView(page: any, view: any) {
     if (!view) {
-      const layout = layoutWithoutDashboardLayoutV2(page.layout);
-      const mergedPage = { ...page, ...(layout ? { layout } : {}) };
-      if (!layout) delete mergedPage.layout;
-      return mergedPage;
+      return pageWithoutRecursiveDashboardLayout(page);
     }
 
     const type = pageLayoutType(view);
@@ -200,9 +219,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const title = String(page.title ?? page.name ?? `Unterseite ${index + 1}`);
     const path = page.path ?? (slugifyPath(title) || `dashboard-v2-${index + 1}`);
     const type = pageLayoutType(page);
-    const layout = layoutWithoutDashboardLayoutV2(page.layout);
+    const cleanPage = pageWithoutRecursiveDashboardLayout(page);
+    const layout = cleanPage.layout;
     const normalizedPage = {
-      ...page,
+      ...cleanPage,
       title,
       path: String(path),
       type,
@@ -214,14 +234,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (isSectionsPage(normalizedPage)) {
       return {
         ...normalizedPage,
-        sections: Array.isArray(page.sections) ? page.sections : defaultSections(),
-        max_columns: page.max_columns ?? 4,
+        sections: Array.isArray(cleanPage.sections) ? cleanPage.sections : defaultSections(),
+        max_columns: cleanPage.max_columns ?? 4,
       };
     }
 
     return {
       ...normalizedPage,
-      cards: Array.isArray(page.cards) ? page.cards : [],
+      cards: Array.isArray(cleanPage.cards) ? cleanPage.cards : [],
     };
   }
 
@@ -320,7 +340,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     try {
       const parsed = JSON.parse(this._pagesText || "[]");
       if (!Array.isArray(parsed)) throw new Error("Pages muss eine Liste sein.");
-      this._pages = parsed;
+      this._pages = parsed.map((page) => pageWithoutRecursiveDashboardLayout(page));
       this._pageSourcePaths = parsed.map((page, index) => pagePath(page, index));
       this._selectedPageIndex = this._pages.length ? 0 : -1;
       this._syncJsonFromPages();
@@ -367,7 +387,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           background_image: this._backgroundImage,
         },
       },
-      pages: normalizedPages,
+      pages: normalizedPages.map((page) => pageNavigationMetadata(page)),
     };
 
     const currentPath = String(views[this.viewIndex].path ?? this.viewIndex);
