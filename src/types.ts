@@ -101,6 +101,7 @@ export interface DashboardLayoutMenuConfig {
     icon_color?: string;
     active_tab_color?: string;
     inactive_tab_color?: string;
+    hover_tab_color?: string;
     background_mode?: "none" | "color" | "image";
     background_color?: string;
     background_image?: string;

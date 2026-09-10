@@ -136,6 +136,7 @@ export class BaseLayout extends LitElement {
           style.icon_color ? `--dashboard-layout-v2-icon-color: ${style.icon_color}` : "",
           style.active_tab_color ? `--dashboard-layout-v2-active-tab-color: ${style.active_tab_color}` : "",
           style.inactive_tab_color ? `--dashboard-layout-v2-inactive-tab-color: ${style.inactive_tab_color}` : "",
+          style.hover_tab_color ? `--dashboard-layout-v2-hover-tab-color: ${style.hover_tab_color}` : "",
           background ? `--dashboard-layout-v2-menu-background: ${background}` : "",
         ].filter(Boolean).join(";")}
       >
@@ -248,7 +249,7 @@ export class BaseLayout extends LitElement {
       }
 
       .dashboard-layout-v2-menu button:hover {
-        background: var(--secondary-background-color);
+        background: var(--dashboard-layout-v2-hover-tab-color, var(--secondary-background-color));
       }
 
       .dashboard-layout-v2-menu button.active {

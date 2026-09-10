@@ -18,6 +18,7 @@ const defaultConfig = {
       icon_color: "",
       active_tab_color: "",
       inactive_tab_color: "",
+      hover_tab_color: "",
       background_mode: "none",
       background_color: "",
       background_image: "",
@@ -139,6 +140,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _iconColor = "";
   @state() private _activeTabColor = "";
   @state() private _inactiveTabColor = "";
+  @state() private _hoverTabColor = "";
   @state() private _backgroundMode = "none";
   @state() private _backgroundColor = "";
   @state() private _backgroundImage = "";
@@ -163,6 +165,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._iconColor = config.menu.style?.icon_color ?? "";
     this._activeTabColor = config.menu.style?.active_tab_color ?? "";
     this._inactiveTabColor = config.menu.style?.inactive_tab_color ?? "";
+    this._hoverTabColor = config.menu.style?.hover_tab_color ?? "";
     this._backgroundMode = config.menu.style?.background_mode ?? "none";
     this._backgroundColor = config.menu.style?.background_color ?? "";
     this._backgroundImage = config.menu.style?.background_image ?? "";
@@ -224,6 +227,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "iconColor") this._iconColor = value;
     if (key === "activeTabColor") this._activeTabColor = value;
     if (key === "inactiveTabColor") this._inactiveTabColor = value;
+    if (key === "hoverTabColor") this._hoverTabColor = value;
     if (key === "backgroundMode") this._backgroundMode = value;
     if (key === "backgroundColor") this._backgroundColor = value;
     if (key === "backgroundImage") this._backgroundImage = value;
@@ -460,6 +464,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           icon_color: this._iconColor,
           active_tab_color: this._activeTabColor,
           inactive_tab_color: this._inactiveTabColor,
+          hover_tab_color: this._hoverTabColor,
           background_mode: this._backgroundMode,
           background_color: this._backgroundColor,
           background_image: this._backgroundImage,
@@ -731,6 +736,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               ${this._renderColorField("Iconfarbe", "iconColor", this._iconColor, "var(--primary-color)")}
               ${this._renderColorField("Tabfarbe aktiv", "activeTabColor", this._activeTabColor, "var(--primary-color)")}
               ${this._renderColorField("Tabfarbe inaktiv", "inactiveTabColor", this._inactiveTabColor, "transparent")}
+              ${this._renderColorField("Tabfarbe Hover", "hoverTabColor", this._hoverTabColor, "var(--secondary-background-color)")}
               <label>
                 Hintergrund
                 <select

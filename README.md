@@ -29,6 +29,12 @@ menu:
   title: Haus
   clock: digital
   date: true
+  style:
+    icon_color: "#03a9f4"
+    active_tab_color: "#03a9f4"
+    inactive_tab_color: "transparent"
+    hover_tab_color: "rgba(255,255,255,0.12)"
+    background_mode: none
 pages:
   - title: Keller
     icon: mdi:home-floor-negative-1
