@@ -57,13 +57,33 @@ class SectionsLayout extends BaseLayout {
     const editMode = Boolean(this.lovelace?.editMode);
     return this._renderDashboardLayoutV2Shell(html`
       <div class="sections-wrapper" style=${`--sections-max-columns: ${maxColumns}`}>
-        <hui-view-header
-          .hass=${this.hass}
-          .badges=${[]}
-          .lovelace=${this.lovelace}
-          .viewIndex=${this.index}
-          .config=${this._config?.header}
-        ></hui-view-header>
+        ${editMode
+          ? html`
+              <div class="header-placeholder">
+                <button class="header-edit" title="Kopfzeile bearbeiten">
+                  <ha-icon .icon=${"mdi:pencil"}></ha-icon>
+                </button>
+                <div class="header-actions">
+                  <button title="Titel hinzufügen">
+                    <ha-icon .icon=${"mdi:plus"}></ha-icon>
+                    <span>Titel hinzufügen</span>
+                  </button>
+                  <button title="Badge hinzufügen">
+                    <ha-icon .icon=${"mdi:plus"}></ha-icon>
+                    <span>Badge hinzufügen</span>
+                  </button>
+                </div>
+              </div>
+            `
+          : html`
+              <hui-view-header
+                .hass=${this.hass}
+                .badges=${[]}
+                .lovelace=${this.lovelace}
+                .viewIndex=${this.index}
+                .config=${this._config?.header}
+              ></hui-view-header>
+            `}
         <div class="sections-view">
           ${sections.map((sectionConfig, index) => html`
             <div
@@ -160,6 +180,52 @@ class SectionsLayout extends BaseLayout {
           gap: var(--column-gap);
           width: 100%;
           min-width: 0;
+        }
+
+        .header-placeholder {
+          position: relative;
+          min-height: 128px;
+          display: grid;
+          place-items: center;
+          border: 2px dashed var(--divider-color, rgba(255, 255, 255, 0.18));
+          border-radius: 16px;
+          box-sizing: border-box;
+        }
+
+        .header-edit {
+          position: absolute;
+          top: -42px;
+          right: 0;
+          width: 42px;
+          min-width: 42px;
+          height: 42px;
+          border: 0;
+          border-radius: 12px 12px 0 0;
+          background: var(--secondary-background-color, #242424);
+          color: var(--primary-text-color);
+          cursor: pointer;
+        }
+
+        .header-actions {
+          display: grid;
+          gap: 14px;
+          justify-items: center;
+        }
+
+        .header-actions button {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          min-height: 44px;
+          min-width: 224px;
+          padding: 0 18px;
+          border: 2px dashed var(--primary-color);
+          border-radius: 22px;
+          background: transparent;
+          color: var(--primary-text-color);
+          font: inherit;
+          cursor: pointer;
         }
 
         .section {
