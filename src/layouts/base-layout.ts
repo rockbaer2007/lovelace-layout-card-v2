@@ -101,7 +101,7 @@ export class BaseLayout extends LitElement {
     if (configuredPages?.length) return configuredPages;
 
     return (this.lovelace?.config?.views ?? [])
-      .filter((view) => String(view.type ?? "").endsWith("-layout-v2"))
+      .filter((view) => String(view.type ?? "").endsWith("-layout-v2") && view.subview)
       .map((view, index) => ({
         title: view.title ?? view.path ?? `View ${index + 1}`,
         icon: view.icon,
@@ -133,7 +133,10 @@ export class BaseLayout extends LitElement {
         <nav>
           ${pages.map(
             (page) => html`
-              <button @click=${() => this._navigateDashboardLayoutV2Page(page.path)}>
+              <button
+                class=${location.pathname.endsWith(`/${page.path}`) ? "active" : ""}
+                @click=${() => this._navigateDashboardLayoutV2Page(page.path)}
+              >
                 ${page.icon ? html`<ha-icon .icon=${page.icon}></ha-icon>` : ""}
                 <span>${page.title}</span>
               </button>
@@ -227,6 +230,11 @@ export class BaseLayout extends LitElement {
 
       .dashboard-layout-v2-menu button:hover {
         background: var(--secondary-background-color);
+      }
+
+      .dashboard-layout-v2-menu button.active {
+        color: var(--text-primary-color, #fff);
+        background: var(--primary-color);
       }
 
       .dashboard-layout-v2-menu ha-icon {

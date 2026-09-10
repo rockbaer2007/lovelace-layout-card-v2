@@ -18,6 +18,14 @@ const defaultConfig = {
   pages: [],
 };
 
+function slugifyPath(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 function normalizeConfig(viewConfig: any) {
   return {
     ...defaultConfig,
@@ -88,26 +96,75 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       return;
     }
 
+    const normalizedPages = pages.map((page, index) => {
+      const title = String(page.title ?? page.name ?? `Unterseite ${index + 1}`);
+      return {
+        ...page,
+        title,
+        path: String(page.path ?? slugifyPath(title) ?? `dashboard-v2-${index + 1}`),
+      };
+    });
+
+    const dashboardLayoutV2 = {
+      menu: {
+        position: this._menuPosition,
+        title: this._menuTitle,
+        clock: this._clock,
+        date: this._date,
+      },
+      pages: normalizedPages,
+    };
+
+    const currentPath = String(views[this.viewIndex].path ?? this.viewIndex);
+    const existingViewsByPath = new Map(
+      views.map((view, index) => [String(view.path ?? index), { view, index }])
+    );
+    const nextViews = views.map((view, index) => {
+      if (index !== this.viewIndex) return view;
+      return {
+        ...view,
+        layout: {
+          ...(view.layout ?? {}),
+          dashboard_layout_v2: dashboardLayoutV2,
+        },
+      };
+    });
+
+    for (const page of normalizedPages) {
+      const pagePath = String(page.path);
+      const existing = existingViewsByPath.get(pagePath);
+      const isCurrentView = pagePath === currentPath;
+      const pageLayout = {
+        ...((existing?.view.layout ?? page.layout) ?? {}),
+        dashboard_layout_v2: dashboardLayoutV2,
+      };
+
+      if (existing) {
+        nextViews[existing.index] = {
+          ...existing.view,
+          title: page.title,
+          ...(page.icon ? { icon: page.icon } : {}),
+          type: page.type ?? page.layout_type ?? existing.view.type ?? "custom:masonry-layout-v2",
+          subview: isCurrentView ? existing.view.subview : true,
+          layout: pageLayout,
+        };
+        continue;
+      }
+
+      nextViews.push({
+        title: page.title,
+        path: pagePath,
+        ...(page.icon ? { icon: page.icon } : {}),
+        type: page.type ?? page.layout_type ?? "custom:masonry-layout-v2",
+        subview: true,
+        layout: pageLayout,
+        cards: Array.isArray(page.cards) ? page.cards : [],
+      });
+    }
+
     const nextConfig = {
       ...rawConfig,
-      views: views.map((view, index) => {
-        if (index !== this.viewIndex) return view;
-        return {
-          ...view,
-          layout: {
-            ...(view.layout ?? {}),
-            dashboard_layout_v2: {
-              menu: {
-                position: this._menuPosition,
-                title: this._menuTitle,
-                clock: this._clock,
-                date: this._date,
-              },
-              pages,
-            },
-          },
-        };
-      }),
+      views: nextViews,
     };
 
     await this.lovelace.saveConfig(nextConfig);
