@@ -71,6 +71,7 @@ class SectionsLayout extends BaseLayout {
 
     try {
       const warmupView = {
+        type: "sections",
         title: "tr",
         path: "tr",
         sections: [
@@ -81,7 +82,8 @@ class SectionsLayout extends BaseLayout {
         ],
       };
       const warmupConfig = { views: [warmupView] };
-      const loader = document.createElement("hui-sections-view") as any;
+      await this._waitForElement("hui-view", 1000);
+      const loader = document.createElement("hui-view") as any;
       loader.hass = this.hass;
       loader.index = 0;
       loader.narrow = this.narrow;
@@ -103,7 +105,7 @@ class SectionsLayout extends BaseLayout {
         "top:-10000px",
       ].join(";");
       this.renderRoot.appendChild(loader);
-      loader.willUpdate?.(new Map([["lovelace", undefined]]));
+      await loader.updateComplete;
       await this._waitForNativeSectionsElements();
       this._updateNativeChromeReady();
       this.requestUpdate();
@@ -111,6 +113,13 @@ class SectionsLayout extends BaseLayout {
     } catch (err) {
       console.warn("Dashboard Layout Card V2: native sections warmup failed", err);
     }
+  }
+
+  private async _waitForElement(name: string, timeout = 2000) {
+    await Promise.race([
+      customElements.whenDefined(name),
+      new Promise((resolve) => window.setTimeout(resolve, timeout)),
+    ]);
   }
 
   private async _waitForNativeSectionsElements() {
