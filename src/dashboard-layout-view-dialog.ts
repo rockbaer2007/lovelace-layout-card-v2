@@ -19,6 +19,9 @@ const defaultConfig = {
       active_tab_color: "",
       inactive_tab_color: "",
       hover_tab_color: "",
+      active_tab_text_color: "",
+      inactive_tab_text_color: "",
+      hover_tab_text_color: "",
       clock_size: "44px",
       background_mode: "none",
       background_color: "",
@@ -164,6 +167,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _activeTabColor = "";
   @state() private _inactiveTabColor = "";
   @state() private _hoverTabColor = "";
+  @state() private _activeTabTextColor = "";
+  @state() private _inactiveTabTextColor = "";
+  @state() private _hoverTabTextColor = "";
   @state() private _clockSize = "44";
   @state() private _backgroundMode = "none";
   @state() private _backgroundColor = "";
@@ -190,6 +196,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._activeTabColor = config.menu.style?.active_tab_color ?? "";
     this._inactiveTabColor = config.menu.style?.inactive_tab_color ?? "";
     this._hoverTabColor = config.menu.style?.hover_tab_color ?? "";
+    this._activeTabTextColor = config.menu.style?.active_tab_text_color ?? "";
+    this._inactiveTabTextColor = config.menu.style?.inactive_tab_text_color ?? "";
+    this._hoverTabTextColor = config.menu.style?.hover_tab_text_color ?? "";
     this._clockSize = clockSizeInputValue(config.menu.style?.clock_size ?? "44px");
     this._backgroundMode = config.menu.style?.background_mode ?? "none";
     this._backgroundColor = config.menu.style?.background_color ?? "";
@@ -253,6 +262,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "activeTabColor") this._activeTabColor = value;
     if (key === "inactiveTabColor") this._inactiveTabColor = value;
     if (key === "hoverTabColor") this._hoverTabColor = value;
+    if (key === "activeTabTextColor") this._activeTabTextColor = value;
+    if (key === "inactiveTabTextColor") this._inactiveTabTextColor = value;
+    if (key === "hoverTabTextColor") this._hoverTabTextColor = value;
     if (key === "clockSize") this._clockSize = value;
     if (key === "backgroundMode") this._backgroundMode = value;
     if (key === "backgroundColor") this._backgroundColor = value;
@@ -493,6 +505,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           active_tab_color: this._activeTabColor,
           inactive_tab_color: this._inactiveTabColor,
           hover_tab_color: this._hoverTabColor,
+          active_tab_text_color: this._activeTabTextColor,
+          inactive_tab_text_color: this._inactiveTabTextColor,
+          hover_tab_text_color: this._hoverTabTextColor,
           clock_size: normalizedClockSize(this._clockSize),
           background_mode: this._backgroundMode,
           background_color: this._backgroundColor,
@@ -764,6 +779,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               ${this._renderColorField("Tabfarbe aktiv", "activeTabColor", this._activeTabColor, "var(--primary-color)")}
               ${this._renderColorField("Tabfarbe inaktiv", "inactiveTabColor", this._inactiveTabColor, "transparent")}
               ${this._renderColorField("Tabfarbe Hover", "hoverTabColor", this._hoverTabColor, "var(--secondary-background-color)")}
+              ${this._renderColorField("Textfarbe aktiv", "activeTabTextColor", this._activeTabTextColor, "var(--text-primary-color)")}
+              ${this._renderColorField("Textfarbe inaktiv", "inactiveTabTextColor", this._inactiveTabTextColor, "var(--primary-text-color)")}
+              ${this._renderColorField("Textfarbe Hover", "hoverTabTextColor", this._hoverTabTextColor, "var(--primary-text-color)")}
               <label>
                 Uhrgröße
                 <input

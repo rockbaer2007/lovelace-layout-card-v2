@@ -166,8 +166,29 @@ class DashboardLayoutCardV2 extends LitElement {
 
   _renderMenu(menu: DashboardLayoutMenuConfig) {
     if (this._menuPosition(menu) === "none") return html``;
+    const style = menu.style ?? {};
+    const background =
+      style.background_mode === "color" && style.background_color
+        ? style.background_color
+        : style.background_mode === "image" && style.background_image
+          ? `center / cover no-repeat url("${style.background_image}")`
+          : "";
     return html`
-      <nav class="menu" aria-label="Dashboard pages">
+      <nav
+        class="menu"
+        aria-label="Dashboard pages"
+        style=${[
+          style.icon_color ? `--dashboard-layout-v2-icon-color: ${style.icon_color}` : "",
+          style.active_tab_color ? `--dashboard-layout-v2-active-tab-color: ${style.active_tab_color}` : "",
+          style.inactive_tab_color ? `--dashboard-layout-v2-inactive-tab-color: ${style.inactive_tab_color}` : "",
+          style.hover_tab_color ? `--dashboard-layout-v2-hover-tab-color: ${style.hover_tab_color}` : "",
+          style.active_tab_text_color ? `--dashboard-layout-v2-active-tab-text-color: ${style.active_tab_text_color}` : "",
+          style.inactive_tab_text_color ? `--dashboard-layout-v2-inactive-tab-text-color: ${style.inactive_tab_text_color}` : "",
+          style.hover_tab_text_color ? `--dashboard-layout-v2-hover-tab-text-color: ${style.hover_tab_text_color}` : "",
+          style.clock_size ? `--dashboard-layout-v2-clock-size: ${style.clock_size}` : "",
+          background ? `--dashboard-layout-v2-menu-background: ${background}` : "",
+        ].filter(Boolean).join(";")}
+      >
         <header class="menu-header">
           ${menu.title ? html`<span class="menu-title">${menu.title}</span>` : ""}
           ${this._renderClock(menu)}
@@ -252,7 +273,10 @@ class DashboardLayoutCardV2 extends LitElement {
         gap: 12px;
         padding: 12px;
         border-right: 1px solid var(--divider-color);
-        background: color-mix(in srgb, var(--card-background-color) 92%, var(--primary-color));
+        background: var(
+          --dashboard-layout-v2-menu-background,
+          color-mix(in srgb, var(--card-background-color) 92%, var(--primary-color))
+        );
       }
 
       ha-card.menu-right .menu {
@@ -286,9 +310,9 @@ class DashboardLayoutCardV2 extends LitElement {
 
       .analog-clock {
         position: relative;
-        width: 42px;
-        height: 42px;
-        border: 2px solid var(--primary-color);
+        width: var(--dashboard-layout-v2-clock-size, 42px);
+        height: var(--dashboard-layout-v2-clock-size, 42px);
+        border: 2px solid var(--dashboard-layout-v2-icon-color, var(--primary-color));
         border-radius: 50%;
       }
 
@@ -302,11 +326,11 @@ class DashboardLayoutCardV2 extends LitElement {
       }
 
       .hand.hour {
-        height: 12px;
+        height: calc(var(--dashboard-layout-v2-clock-size, 42px) * 0.29);
       }
 
       .hand.minute {
-        height: 17px;
+        height: calc(var(--dashboard-layout-v2-clock-size, 42px) * 0.4);
       }
 
       .menu-pages {
@@ -323,16 +347,25 @@ class DashboardLayoutCardV2 extends LitElement {
         border: 0;
         border-radius: 8px;
         padding: 8px 10px;
-        color: var(--primary-text-color);
-        background: transparent;
+        color: var(--dashboard-layout-v2-inactive-tab-text-color, var(--primary-text-color));
+        background: var(--dashboard-layout-v2-inactive-tab-color, transparent);
         font: inherit;
         text-align: left;
         cursor: pointer;
       }
 
+      .menu-pages button:hover {
+        color: var(--dashboard-layout-v2-hover-tab-text-color, var(--dashboard-layout-v2-inactive-tab-text-color, var(--primary-text-color)));
+        background: var(--dashboard-layout-v2-hover-tab-color, transparent);
+      }
+
       .menu-pages button.active {
-        color: var(--text-primary-color, #fff);
-        background: var(--primary-color);
+        color: var(--dashboard-layout-v2-active-tab-text-color, var(--text-primary-color, #fff));
+        background: var(--dashboard-layout-v2-active-tab-color, var(--primary-color));
+      }
+
+      .menu-pages ha-icon {
+        color: var(--dashboard-layout-v2-icon-color, var(--primary-color));
       }
 
       .page {

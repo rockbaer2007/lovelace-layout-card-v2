@@ -154,6 +154,9 @@ export class BaseLayout extends LitElement {
           style.active_tab_color ? `--dashboard-layout-v2-active-tab-color: ${style.active_tab_color}` : "",
           style.inactive_tab_color ? `--dashboard-layout-v2-inactive-tab-color: ${style.inactive_tab_color}` : "",
           style.hover_tab_color ? `--dashboard-layout-v2-hover-tab-color: ${style.hover_tab_color}` : "",
+          style.active_tab_text_color ? `--dashboard-layout-v2-active-tab-text-color: ${style.active_tab_text_color}` : "",
+          style.inactive_tab_text_color ? `--dashboard-layout-v2-inactive-tab-text-color: ${style.inactive_tab_text_color}` : "",
+          style.hover_tab_text_color ? `--dashboard-layout-v2-hover-tab-text-color: ${style.hover_tab_text_color}` : "",
           style.clock_size ? `--dashboard-layout-v2-clock-size: ${style.clock_size}` : "",
           background ? `--dashboard-layout-v2-menu-background: ${background}` : "",
         ].filter(Boolean).join(";")}
@@ -235,9 +238,8 @@ export class BaseLayout extends LitElement {
         padding: 4px 6px 8px;
       }
 
-      .dashboard-layout-v2-menu strong,
-      .dashboard-layout-v2-menu span {
-        color: var(--primary-text-color);
+      .dashboard-layout-v2-menu header strong {
+        color: var(--dashboard-layout-v2-inactive-tab-text-color, var(--primary-text-color));
       }
 
       .dashboard-layout-v2-menu small {
@@ -302,10 +304,11 @@ export class BaseLayout extends LitElement {
 
       .dashboard-layout-v2-menu button:hover {
         background: var(--dashboard-layout-v2-hover-tab-color, var(--secondary-background-color));
+        color: var(--dashboard-layout-v2-hover-tab-text-color, var(--dashboard-layout-v2-inactive-tab-text-color, var(--primary-text-color)));
       }
 
       .dashboard-layout-v2-menu button.active {
-        color: var(--text-primary-color, #fff);
+        color: var(--dashboard-layout-v2-active-tab-text-color, var(--text-primary-color, #fff));
         background: var(--dashboard-layout-v2-active-tab-color, var(--primary-color));
       }
 
