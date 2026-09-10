@@ -68,7 +68,6 @@ class SectionsLayout extends BaseLayout {
     (this as any).__dashboardLayoutV2SectionsEditorsLoaded = true;
 
     try {
-      await customElements.whenDefined("hui-sections-view");
       const loader = document.createElement("hui-sections-view") as any;
       loader.hass = this.hass;
       loader.index = this._resolvedViewIndex() ?? 0;
@@ -90,10 +89,29 @@ class SectionsLayout extends BaseLayout {
         "top:-10000px",
       ].join(";");
       this.renderRoot.appendChild(loader);
+      loader.willUpdate?.(new Map([["lovelace", undefined]]));
+      await this._waitForNativeSectionsElements();
+      this.requestUpdate();
       window.setTimeout(() => loader.remove(), 1200);
     } catch (err) {
       console.warn("Dashboard Layout Card V2: native sections warmup failed", err);
     }
+  }
+
+  private async _waitForNativeSectionsElements() {
+    const names = [
+      "hui-sections-view",
+      "hui-view-header",
+      "hui-view-footer",
+      "hui-view-badges",
+      "hui-card-edit-mode",
+      "hui-section",
+      "hui-section-edit-mode",
+    ];
+    await Promise.race([
+      Promise.all(names.map((name) => customElements.whenDefined(name))),
+      new Promise((resolve) => window.setTimeout(resolve, 2000)),
+    ]);
   }
 
   private _nativeHeaderEditor() {
@@ -209,22 +227,57 @@ class SectionsLayout extends BaseLayout {
   private _configureHeader(ev: Event) {
     ev.stopPropagation();
     this._patchNativeEditorSaves();
-    this._clickNativeConfigure(this._nativeHeaderEditor());
+    if (!this._clickNativeConfigure(this._nativeHeaderEditor())) {
+      this._showNativeHeaderDialog();
+    }
   }
 
   private _configureFooter(ev: Event) {
     ev.stopPropagation();
     this._patchNativeEditorSaves();
-    this._clickNativeConfigure(this._nativeFooterEditor());
+    if (!this._clickNativeConfigure(this._nativeFooterEditor())) {
+      this._showNativeFooterDialog();
+    }
   }
 
   private _clickNativeConfigure(editor?: any) {
     const nativeButton = editor?.shadowRoot?.querySelector(".actions ha-icon-button") as HTMLElement | undefined;
     if (nativeButton) {
       nativeButton.click();
-      return;
+      return true;
     }
     editor?._configure?.();
+    return typeof editor?._configure === "function";
+  }
+
+  private _showNativeHeaderDialog() {
+    const viewConfig = this._currentViewConfig();
+    this.dispatchEvent(new CustomEvent("show-dialog", {
+      bubbles: true,
+      composed: true,
+      detail: {
+        dialogTag: "hui-dialog-edit-view-header",
+        dialogParams: {
+          config: viewConfig.header ?? {},
+          saveConfig: (config: Record<string, any>) => this._saveViewPatch({ header: config }),
+        },
+      },
+    }));
+  }
+
+  private _showNativeFooterDialog() {
+    const viewConfig = this._currentViewConfig();
+    this.dispatchEvent(new CustomEvent("show-dialog", {
+      bubbles: true,
+      composed: true,
+      detail: {
+        dialogTag: "hui-dialog-edit-view-footer",
+        dialogParams: {
+          config: viewConfig.footer ?? {},
+          saveConfig: (config: Record<string, any>) => this._saveViewPatch({ footer: config }),
+        },
+      },
+    }));
   }
 
   private _editHeaderCard(ev: Event) {
