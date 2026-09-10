@@ -101,6 +101,10 @@ function pageNavigationMetadata(page: any) {
   return metadata;
 }
 
+function colorPickerValue(value: string) {
+  return /^#[0-9a-f]{6}$/i.test(value) ? value : "#000000";
+}
+
 class DashboardLayoutV2ViewDialog extends LitElement {
   @property({ attribute: false }) hass: any;
   @property({ attribute: false }) lovelace: any;
@@ -173,6 +177,29 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "backgroundColor") this._backgroundColor = value;
     if (key === "backgroundImage") this._backgroundImage = value;
     if (key === "pagesText") this._pagesText = value;
+  }
+
+  private _renderColorField(label: string, key: string, value: string, placeholder: string) {
+    return html`
+      <label>
+        ${label}
+        <div class="color-row">
+          <input
+            class="text"
+            placeholder=${placeholder}
+            .value=${value}
+            @input=${(ev: Event) => this._setValue(key, (ev.target as HTMLInputElement).value)}
+          />
+          <input
+            class="color"
+            type="color"
+            .value=${colorPickerValue(value)}
+            title=${`${label} auswählen`}
+            @input=${(ev: Event) => this._setValue(key, (ev.target as HTMLInputElement).value)}
+          />
+        </div>
+      </label>
+    `;
   }
 
   private _syncJsonFromPages() {
@@ -639,30 +666,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           <fieldset class="wide group">
             <legend>Style</legend>
             <div class="style-grid">
-              <label>
-                Iconfarbe
-                <input
-                  placeholder="var(--primary-color)"
-                  .value=${this._iconColor}
-                  @input=${(ev: Event) => this._setValue("iconColor", (ev.target as HTMLInputElement).value)}
-                />
-              </label>
-              <label>
-                Tabfarbe aktiv
-                <input
-                  placeholder="var(--primary-color)"
-                  .value=${this._activeTabColor}
-                  @input=${(ev: Event) => this._setValue("activeTabColor", (ev.target as HTMLInputElement).value)}
-                />
-              </label>
-              <label>
-                Tabfarbe inaktiv
-                <input
-                  placeholder="transparent"
-                  .value=${this._inactiveTabColor}
-                  @input=${(ev: Event) => this._setValue("inactiveTabColor", (ev.target as HTMLInputElement).value)}
-                />
-              </label>
+              ${this._renderColorField("Iconfarbe", "iconColor", this._iconColor, "var(--primary-color)")}
+              ${this._renderColorField("Tabfarbe aktiv", "activeTabColor", this._activeTabColor, "var(--primary-color)")}
+              ${this._renderColorField("Tabfarbe inaktiv", "inactiveTabColor", this._inactiveTabColor, "transparent")}
               <label>
                 Hintergrund
                 <select
@@ -676,14 +682,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               </label>
               ${this._backgroundMode === "color"
                 ? html`
-                    <label>
-                      Hintergrundfarbe
-                      <input
-                        placeholder="rgba(0,0,0,0.18)"
-                        .value=${this._backgroundColor}
-                        @input=${(ev: Event) => this._setValue("backgroundColor", (ev.target as HTMLInputElement).value)}
-                      />
-                    </label>
+                    ${this._renderColorField(
+                      "Hintergrundfarbe",
+                      "backgroundColor",
+                      this._backgroundColor,
+                      "rgba(0,0,0,0.18)"
+                    )}
                   `
                 : nothing}
               ${this._backgroundMode === "image"
@@ -815,6 +819,25 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         select {
           height: 40px;
           padding: 0 10px;
+        }
+
+        input.color {
+          width: 48px;
+          min-width: 48px;
+          padding: 3px;
+        }
+
+        .color-row {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 48px;
+          gap: 8px;
+          align-items: center;
+        }
+
+        .color-row .text {
+          width: 100%;
+          min-width: 0;
+          box-sizing: border-box;
         }
 
         textarea {
