@@ -7,6 +7,7 @@ import "./layout-card";
 import "./layout-card-editor";
 import "./dashboard-layout-card";
 import "./dashboard-layout-card-editor";
+import "./dashboard-layout-view-dialog";
 import "./patches/hui-card-element-editor";
 import "./patches/hui-view-editor";
 import "./gap-card.ts";

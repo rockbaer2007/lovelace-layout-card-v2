@@ -1,9 +1,17 @@
+import { html } from "lit";
 import { LAYOUT_CARD_SELECTOR_OPTIONS } from "../helpers";
+import { showDashboardLayoutV2ViewDialog } from "../dashboard-layout-view-dialog";
 
 const dashboardLayoutCardV2PatchFlag = "_dashboardLayoutCardV2Patched";
 const dashboardLayoutCardV2SchemaPatchFlag = "_dashboardLayoutCardV2SchemaPatched";
 const dashboardLayoutCardV2SelectorPatchFlag = "_dashboardLayoutCardV2SelectorPatched";
+const dashboardLayoutCardV2RootPatchFlag = "_dashboardLayoutCardV2RootPatched";
 const homeAssistantViewLayouts = new Set(["sections", "masonry", "sidebar", "panel"]);
+const dashboardLayoutCardV2ViewLayouts = new Set(
+  LAYOUT_CARD_SELECTOR_OPTIONS.map((option) => option.value)
+);
+const dashboardLayoutCardV2Icon =
+  "M3 3h8v8H3V3m10 0h8v8h-8V3M3 13h8v8H3v-8m10 0h8v8h-8v-8z";
 
 function appendLayoutCardV2Options(schemaEntry: any) {
   const selector = schemaEntry?.selector;
@@ -96,6 +104,57 @@ function patchSelectSelectorClass() {
   };
 }
 
+function getCurrentView(root: any) {
+  const viewIndex = root?._curView;
+  if (typeof viewIndex !== "number") return undefined;
+  const viewConfig = root?.lovelace?.config?.views?.[viewIndex];
+  return viewConfig ? { viewIndex, viewConfig } : undefined;
+}
+
+function hasDashboardLayoutV2View(root: any) {
+  const currentView = getCurrentView(root);
+  if (!currentView) return false;
+  return dashboardLayoutCardV2ViewLayouts.has(currentView.viewConfig?.type);
+}
+
+function openDashboardLayoutV2Dialog(root: any) {
+  const currentView = getCurrentView(root);
+  if (!currentView || !root?.lovelace) return;
+  showDashboardLayoutV2ViewDialog(root, {
+    hass: root.hass,
+    lovelace: root.lovelace,
+    viewIndex: currentView.viewIndex,
+    viewConfig: currentView.viewConfig,
+  });
+}
+
+function patchHuiRootClass() {
+  const HuiRoot = customElements.get("hui-root") as any;
+  if (!HuiRoot?.prototype || HuiRoot.prototype[dashboardLayoutCardV2RootPatchFlag]) return;
+
+  HuiRoot.prototype[dashboardLayoutCardV2RootPatchFlag] = true;
+  const renderActionItems = HuiRoot.prototype._renderActionItems;
+  HuiRoot.prototype._renderActionItems = function (...args) {
+    const originalResult = renderActionItems?.apply(this, args);
+    if (!this?._editMode || !hasDashboardLayoutV2View(this)) return originalResult;
+
+    return html`
+      ${originalResult}
+      <ha-icon-button
+        slot="actionItems"
+        id="dashboard-layout-v2-button"
+        .path=${dashboardLayoutCardV2Icon}
+        .label=${"Dashboard Layout V2 konfigurieren"}
+        hide-title
+        @click=${() => openDashboardLayoutV2Dialog(this)}
+      ></ha-icon-button>
+      <ha-tooltip placement="bottom" for="dashboard-layout-v2-button">
+        Dashboard Layout V2 konfigurieren
+      </ha-tooltip>
+    `;
+  };
+}
+
 function collectElementsDeep(root: Document | ShadowRoot | Element, selector: string, result: Element[] = []) {
   if (root instanceof Element && root.matches(selector)) {
     result.push(root);
@@ -143,6 +202,10 @@ customElements.whenDefined("hui-view-editor").then(() => {
 customElements.whenDefined("ha-selector-select").then(() => {
   patchSelectSelectorClass();
   patchExistingViewEditors();
+});
+
+customElements.whenDefined("hui-root").then(() => {
+  patchHuiRootClass();
 });
 
 const viewEditorObserver = new MutationObserver(() => patchExistingViewEditors());

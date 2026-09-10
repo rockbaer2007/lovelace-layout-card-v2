@@ -126,8 +126,8 @@ class GridLayout extends BaseLayout {
   }
 
   render() {
-    return html` <div id="root"></div>
-      ${this._render_fab()}`;
+    return this._renderDashboardLayoutV2Shell(html` <div id="root"></div>
+      ${this._render_fab()}`);
   }
   static get styles() {
     return [

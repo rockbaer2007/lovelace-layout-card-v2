@@ -40,6 +40,10 @@ export interface ViewConfig {
     margin?: string;
     padding?: string;
     height?: string;
+    dashboard_layout_v2?: {
+      menu?: DashboardLayoutMenuConfig;
+      pages?: Array<DashboardLayoutPageConfig & { path?: string }>;
+    };
   };
   view_layout?: {};
 }

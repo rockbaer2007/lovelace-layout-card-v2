@@ -3,6 +3,7 @@ import { property } from "lit/decorators.js";
 import {
   CardConfig,
   CardConfigGroup,
+  DashboardLayoutMenuConfig,
   HuiCard,
   LovelaceCard,
   ViewConfig,
@@ -88,6 +89,74 @@ export class BaseLayout extends LitElement {
     `;
   }
 
+  _dashboardLayoutV2Menu(): DashboardLayoutMenuConfig {
+    return {
+      position: "none",
+      ...(this._config.layout?.dashboard_layout_v2?.menu ?? {}),
+    };
+  }
+
+  _dashboardLayoutV2Pages() {
+    const configuredPages = this._config.layout?.dashboard_layout_v2?.pages;
+    if (configuredPages?.length) return configuredPages;
+
+    return (this.lovelace?.config?.views ?? [])
+      .filter((view) => String(view.type ?? "").endsWith("-layout-v2"))
+      .map((view, index) => ({
+        title: view.title ?? view.path ?? `View ${index + 1}`,
+        icon: view.icon,
+        path: view.path ?? String(index),
+      }));
+  }
+
+  _navigateDashboardLayoutV2Page(path?: string) {
+    if (!path) return;
+    const basePath = location.pathname.split("/").slice(0, -1).join("/");
+    history.pushState(null, "", `${basePath}/${path}`);
+    window.dispatchEvent(new Event("location-changed"));
+  }
+
+  _renderDashboardLayoutV2Menu() {
+    const menu = this._dashboardLayoutV2Menu();
+    if (menu.position === "none") return html``;
+
+    const pages = this._dashboardLayoutV2Pages();
+    return html`
+      <aside class="dashboard-layout-v2-menu">
+        <header>
+          ${menu.title ? html`<strong>${menu.title}</strong>` : ""}
+          ${menu.clock !== "none"
+            ? html`<span>${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>`
+            : ""}
+          ${menu.date !== false ? html`<small>${new Date().toLocaleDateString()}</small>` : ""}
+        </header>
+        <nav>
+          ${pages.map(
+            (page) => html`
+              <button @click=${() => this._navigateDashboardLayoutV2Page(page.path)}>
+                ${page.icon ? html`<ha-icon .icon=${page.icon}></ha-icon>` : ""}
+                <span>${page.title}</span>
+              </button>
+            `
+          )}
+        </nav>
+      </aside>
+    `;
+  }
+
+  _renderDashboardLayoutV2Shell(content) {
+    const menu = this._dashboardLayoutV2Menu();
+    if (menu.position === "none") return content;
+
+    return html`
+      <section class=${`dashboard-layout-v2-shell menu-${menu.position}`}>
+        ${menu.position === "left" ? this._renderDashboardLayoutV2Menu() : ""}
+        <div class="dashboard-layout-v2-content">${content}</div>
+        ${menu.position === "right" ? this._renderDashboardLayoutV2Menu() : ""}
+      </section>
+    `;
+  }
+
   static get _fab_styles() {
     return css`
       ha-fab {
@@ -95,6 +164,74 @@ export class BaseLayout extends LitElement {
         right: calc(16px + env(safe-area-inset-right));
         bottom: calc(16px + env(safe-area-inset-bottom));
         z-index: 1;
+      }
+
+      .dashboard-layout-v2-shell {
+        display: grid;
+        grid-template-columns: minmax(160px, 220px) minmax(0, 1fr);
+        gap: 12px;
+        height: 100%;
+      }
+
+      .dashboard-layout-v2-shell.menu-right {
+        grid-template-columns: minmax(0, 1fr) minmax(160px, 220px);
+      }
+
+      .dashboard-layout-v2-content {
+        min-width: 0;
+      }
+
+      .dashboard-layout-v2-menu {
+        display: grid;
+        align-content: start;
+        gap: 12px;
+        padding: 8px;
+        border-radius: 12px;
+        background: var(--card-background-color, rgba(0, 0, 0, 0.18));
+      }
+
+      .dashboard-layout-v2-menu header {
+        display: grid;
+        gap: 2px;
+        padding: 4px 6px 8px;
+      }
+
+      .dashboard-layout-v2-menu strong,
+      .dashboard-layout-v2-menu span {
+        color: var(--primary-text-color);
+      }
+
+      .dashboard-layout-v2-menu small {
+        color: var(--secondary-text-color);
+      }
+
+      .dashboard-layout-v2-menu nav {
+        display: grid;
+        gap: 6px;
+      }
+
+      .dashboard-layout-v2-menu button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 40px;
+        padding: 8px 10px;
+        border: 0;
+        border-radius: 8px;
+        color: var(--primary-text-color);
+        background: transparent;
+        text-align: left;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .dashboard-layout-v2-menu button:hover {
+        background: var(--secondary-background-color);
+      }
+
+      .dashboard-layout-v2-menu ha-icon {
+        --mdc-icon-size: 20px;
+        color: var(--primary-color);
       }
     `;
   }

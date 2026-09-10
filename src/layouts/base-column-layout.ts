@@ -215,10 +215,10 @@ export class BaseColumnLayout extends BaseLayout {
   async _placeColumnCards(cols: Array<Node>, cards: CardConfigGroup[]) {}
 
   render() {
-    return html`
+    return this._renderDashboardLayoutV2Shell(html`
       <div id="columns"></div>
       ${this._render_fab()}
-    `;
+    `);
   }
 
   static get styles() {
