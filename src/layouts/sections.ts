@@ -1,5 +1,5 @@
 import { css, html } from "lit";
-import { state } from "lit/decorators.js";
+import { property, state } from "lit/decorators.js";
 import { BaseLayout } from "./base-layout";
 import { CardConfig, HuiCard, LovelaceCard, ViewConfig } from "../types";
 
@@ -30,6 +30,7 @@ function sectionsFromConfig(config: SectionsViewConfig) {
 
 class SectionsLayout extends BaseLayout {
   _config: SectionsViewConfig;
+  @property({ attribute: false }) badges: any[] = [];
   private _headerCard?: LovelaceCard | HuiCard;
   private _headerCardKey = "";
   private _footerCard?: LovelaceCard | HuiCard;
@@ -106,6 +107,10 @@ class SectionsLayout extends BaseLayout {
       ].join(";");
       this.renderRoot.appendChild(loader);
       await loader.updateComplete;
+      await Promise.race([
+        loader._initialRenderComplete ?? Promise.resolve(),
+        new Promise((resolve) => window.setTimeout(resolve, 2000)),
+      ]);
       await this._waitForNativeSectionsElements();
       this._updateNativeChromeReady();
       this.requestUpdate();
@@ -538,7 +543,7 @@ class SectionsLayout extends BaseLayout {
     const sections = sectionsFromConfig(viewConfig);
     const maxColumns = viewConfig?.max_columns ?? 4;
     const editMode = Boolean(this.lovelace?.editMode);
-    const badges = (this as any).badges ?? [];
+    const badges = this.badges ?? [];
     return this._renderDashboardLayoutV2Shell(html`
       <div class="sections-wrapper" style=${`--sections-max-columns: ${maxColumns}`}>
         ${this._nativeChromeReady
