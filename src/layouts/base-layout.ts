@@ -98,8 +98,10 @@ export class BaseLayout extends LitElement {
   }
 
   _dashboardLayoutV2Menu(): DashboardLayoutMenuConfig {
-    const localMenu = this._config.layout?.dashboard_layout_v2?.menu ?? {};
-    const parentMenu = this._dashboardLayoutV2ParentConfig()?.menu ?? {};
+    const parentConfig = this._dashboardLayoutV2ParentConfig();
+    const usesParentConfig = Boolean(parentConfig && this._config.subview);
+    const localMenu = usesParentConfig ? {} : this._config.layout?.dashboard_layout_v2?.menu ?? {};
+    const parentMenu = parentConfig?.menu ?? {};
 
     return {
       position: "none",
@@ -141,12 +143,17 @@ export class BaseLayout extends LitElement {
   }
 
   _dashboardLayoutV2Chrome(): DashboardLayoutChromeConfig | undefined {
-    return this._config.layout?.dashboard_layout_v2?.chrome ?? this._dashboardLayoutV2ParentConfig()?.chrome;
+    const parentConfig = this._dashboardLayoutV2ParentConfig();
+    if (parentConfig && this._config.subview) return parentConfig.chrome;
+    return this._config.layout?.dashboard_layout_v2?.chrome ?? parentConfig?.chrome;
   }
 
   _dashboardLayoutV2Pages() {
+    const parentConfig = this._dashboardLayoutV2ParentConfig();
     const configuredPages =
-      this._config.layout?.dashboard_layout_v2?.pages ?? this._dashboardLayoutV2ParentConfig()?.pages;
+      parentConfig && this._config.subview
+        ? parentConfig.pages
+        : this._config.layout?.dashboard_layout_v2?.pages ?? parentConfig?.pages;
     const sourcePages = configuredPages?.length
       ? configuredPages
       : (this.lovelace?.config?.views ?? [])

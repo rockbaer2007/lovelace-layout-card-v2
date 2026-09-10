@@ -84,14 +84,32 @@ function dashboardLayoutV2ConfigFromView(viewConfig: any) {
   return viewConfig?.layout?.dashboard_layout_v2 ?? viewConfig?.dashboard_layout_v2;
 }
 
-function referencedDashboardLayoutV2Config(viewConfig: any, views: any[]) {
+function parentDashboardLayoutV2Config(viewConfig: any, views: any[], viewIndex?: number) {
+  if (!Array.isArray(views)) return undefined;
+  const currentPath = String(viewConfig?.path ?? viewIndex ?? "");
   const localConfig = dashboardLayoutV2ConfigFromView(viewConfig);
   const inheritedPath = localConfig?.inherits_from;
-  if (!inheritedPath || !Array.isArray(views)) return localConfig;
+  const referencedParent = inheritedPath
+    ? views.find((view, index) => String(view?.path ?? index) === String(inheritedPath))
+    : undefined;
+  if (referencedParent) return dashboardLayoutV2ConfigFromView(referencedParent);
 
-  const parentView = views.find((view, index) => String(view?.path ?? index) === String(inheritedPath));
-  const parentConfig = dashboardLayoutV2ConfigFromView(parentView);
+  const parentView = views.find((view, index) => {
+    if (index === viewIndex || view?.subview) return false;
+    const pages = dashboardLayoutV2ConfigFromView(view)?.pages ?? [];
+    return Array.isArray(pages) && pages.some((page: any) => String(page?.path ?? "") === currentPath);
+  });
+  return dashboardLayoutV2ConfigFromView(parentView);
+}
+
+function referencedDashboardLayoutV2Config(viewConfig: any, views: any[], viewIndex?: number) {
+  const localConfig = dashboardLayoutV2ConfigFromView(viewConfig);
+  const parentConfig = parentDashboardLayoutV2Config(viewConfig, views, viewIndex);
   if (!parentConfig) return localConfig;
+
+  if (viewConfig?.subview || localConfig?.inherits_from) {
+    return parentConfig;
+  }
 
   return {
     ...parentConfig,
@@ -277,7 +295,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       layout: {
         ...(params.viewConfig?.layout ?? {}),
         dashboard_layout_v2:
-          referencedDashboardLayoutV2Config(params.viewConfig, rawViews) ??
+          referencedDashboardLayoutV2Config(params.viewConfig, rawViews, params.viewIndex) ??
           params.viewConfig?.layout?.dashboard_layout_v2,
       },
     });
