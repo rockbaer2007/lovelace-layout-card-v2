@@ -1,5 +1,4 @@
 import { css, html } from "lit";
-import { state } from "lit/decorators.js";
 import { BaseLayout } from "./base-layout";
 import { ViewConfig } from "../types";
 
@@ -30,7 +29,6 @@ function sectionsFromConfig(config: SectionsViewConfig) {
 
 class SectionsLayout extends BaseLayout {
   _config: SectionsViewConfig;
-  @state() private _nativeEditorsReady = false;
 
   async setConfig(config: SectionsViewConfig) {
     await super.setConfig({
@@ -42,7 +40,7 @@ class SectionsLayout extends BaseLayout {
 
   async updated(changedProperties: Map<string, any>) {
     await super.updated(changedProperties);
-    this._ensureNativeSectionsEditorsLoaded();
+    this._loadNativeSectionsEditors();
     this._patchNativeEditorSaves();
   }
 
@@ -55,35 +53,16 @@ class SectionsLayout extends BaseLayout {
     await this.lovelace.saveConfig(nextConfig);
   }
 
-  private async _ensureNativeSectionsEditorsLoaded() {
-    if (!this.lovelace?.editMode || (this as any).__dashboardLayoutV2SectionsEditorsLoading) return;
-    (this as any).__dashboardLayoutV2SectionsEditorsLoading = true;
+  private _loadNativeSectionsEditors() {
+    if (!this.lovelace?.editMode || (this as any).__dashboardLayoutV2SectionsEditorsLoaded) return;
 
     const loader = document.createElement("hui-sections-view") as any;
-    if (typeof loader.setConfig === "function") {
-      loader.setConfig({
-        ...this._config,
-        type: "sections",
-        sections: sectionsFromConfig(this._config),
-      });
-    }
-    if (typeof loader.willUpdate === "function") {
-      loader.hass = this.hass;
-      loader.lovelace = { ...this.lovelace, editMode: true };
-      loader.sections = [];
-      loader.badges = [];
-      loader.willUpdate(new Map([["lovelace", undefined], ["sections", undefined]]));
-    }
+    if (typeof loader.willUpdate !== "function") return;
 
-    await Promise.all([
-      customElements.whenDefined("hui-view-header"),
-      customElements.whenDefined("hui-view-footer"),
-      customElements.whenDefined("hui-section-edit-mode"),
-    ]);
-
-    this._nativeEditorsReady = true;
-    (this as any).__dashboardLayoutV2SectionsEditorsLoading = false;
-    this.requestUpdate();
+    (this as any).__dashboardLayoutV2SectionsEditorsLoaded = true;
+    loader.hass = this.hass;
+    loader.lovelace = { ...this.lovelace, editMode: true };
+    loader.willUpdate(new Map([["lovelace", undefined]]));
   }
 
   private _nativeHeaderEditor() {
