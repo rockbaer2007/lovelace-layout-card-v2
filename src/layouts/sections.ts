@@ -47,7 +47,7 @@ class SectionsLayout extends BaseLayout {
 
   async updated(changedProperties: Map<string, any>) {
     await super.updated(changedProperties);
-    this._loadNativeSectionsEditors();
+    this._warmupNativeSectionsView();
     this._patchNativeEditorSaves();
     await this._syncChromeCards();
     this._updateChromeFallbackVisibility();
@@ -63,16 +63,37 @@ class SectionsLayout extends BaseLayout {
     await this.lovelace.saveConfig(nextConfig);
   }
 
-  private _loadNativeSectionsEditors() {
+  private async _warmupNativeSectionsView() {
     if (!this.lovelace?.editMode || (this as any).__dashboardLayoutV2SectionsEditorsLoaded) return;
-
-    const loader = document.createElement("hui-sections-view") as any;
-    if (typeof loader.willUpdate !== "function") return;
-
     (this as any).__dashboardLayoutV2SectionsEditorsLoaded = true;
-    loader.hass = this.hass;
-    loader.lovelace = { ...this.lovelace, editMode: true };
-    loader.willUpdate(new Map([["lovelace", undefined]]));
+
+    try {
+      await customElements.whenDefined("hui-sections-view");
+      const loader = document.createElement("hui-sections-view") as any;
+      loader.hass = this.hass;
+      loader.index = this._resolvedViewIndex() ?? 0;
+      loader.narrow = this.narrow;
+      loader.lovelace = {
+        ...this.lovelace,
+        editMode: true,
+        config: this.lovelace?.config ?? { views: [] },
+        rawConfig: this.lovelace?.rawConfig ?? this.lovelace?.config ?? { views: [] },
+      };
+      loader.style.cssText = [
+        "position:absolute",
+        "width:1px",
+        "height:1px",
+        "overflow:hidden",
+        "opacity:0",
+        "pointer-events:none",
+        "left:-10000px",
+        "top:-10000px",
+      ].join(";");
+      this.renderRoot.appendChild(loader);
+      window.setTimeout(() => loader.remove(), 1200);
+    } catch (err) {
+      console.warn("Dashboard Layout Card V2: native sections warmup failed", err);
+    }
   }
 
   private _nativeHeaderEditor() {
