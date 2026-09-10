@@ -110,15 +110,30 @@ export class BaseLayout extends LitElement {
 
   _dashboardLayoutV2Pages() {
     const configuredPages = this._config.layout?.dashboard_layout_v2?.pages;
-    if (configuredPages?.length) return configuredPages;
-
-    return (this.lovelace?.config?.views ?? [])
+    const sourcePages = configuredPages?.length
+      ? configuredPages
+      : (this.lovelace?.config?.views ?? [])
       .filter((view) => String(view.type ?? "").endsWith("-layout-v2") && view.subview)
       .map((view, index) => ({
         title: view.title ?? view.path ?? `View ${index + 1}`,
         icon: view.icon,
         path: view.path ?? String(index),
       }));
+    const menu = this._dashboardLayoutV2Menu();
+    if (menu.show_home === false) return sourcePages;
+
+    const currentView = this._config ?? this.lovelace?.config?.views?.[this.index];
+    const homePath = String(menu.home?.path ?? currentView?.path ?? this.index ?? "home");
+    const homePage = {
+      title: menu.home?.title ?? currentView?.title ?? homePath ?? "Home",
+      icon: menu.home?.icon ?? currentView?.icon ?? "mdi:home",
+      path: homePath,
+    };
+
+    return [
+      homePage,
+      ...sourcePages.filter((page) => String(page.path ?? "") !== homePath),
+    ];
   }
 
   _navigateDashboardLayoutV2Page(path?: string) {

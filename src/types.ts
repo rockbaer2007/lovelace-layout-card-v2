@@ -102,6 +102,12 @@ export interface DashboardLayoutChromeConfig {
 export interface DashboardLayoutMenuConfig {
   position?: DashboardLayoutMenuPosition;
   title?: string;
+  show_home?: boolean;
+  home?: {
+    title?: string;
+    path?: string;
+    icon?: string;
+  };
   clock?: DashboardLayoutClockMode;
   date?: boolean;
   style?: {

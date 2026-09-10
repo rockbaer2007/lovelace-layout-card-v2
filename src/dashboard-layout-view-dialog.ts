@@ -12,6 +12,8 @@ const defaultConfig = {
   menu: {
     position: "left",
     title: "Haus",
+    show_home: true,
+    home: {},
     clock: "digital",
     date: true,
     style: {
@@ -166,6 +168,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
   @state() private _menuPosition = "left";
   @state() private _menuTitle = "Haus";
+  @state() private _showHome = true;
   @state() private _clock = "digital";
   @state() private _date = true;
   @state() private _iconColor = "";
@@ -198,6 +201,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const config = normalizeConfig(params.viewConfig);
     this._menuPosition = config.menu.position ?? "left";
     this._menuTitle = config.menu.title ?? "Haus";
+    this._showHome = config.menu.show_home !== false;
     this._clock = config.menu.clock ?? "digital";
     this._date = config.menu.date !== false;
     this._iconColor = config.menu.style?.icon_color ?? "";
@@ -269,6 +273,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   private _setValue(key: string, value: any) {
     if (key === "menuPosition") this._menuPosition = value;
     if (key === "menuTitle") this._menuTitle = value;
+    if (key === "showHome") this._showHome = value;
     if (key === "clock") this._clock = value;
     if (key === "date") this._date = value;
     if (key === "iconColor") this._iconColor = value;
@@ -509,11 +514,19 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     }
 
     const normalizedPages = pagesForSave.map((page, index) => this._normalizePage(page, index));
+    const currentView = views[this.viewIndex];
+    const homeEntry = {
+      title: currentView.title ?? currentView.path ?? "Home",
+      path: String(currentView.path ?? this.viewIndex ?? "home"),
+      icon: currentView.icon ?? "mdi:home",
+    };
 
     const dashboardLayoutV2 = {
       menu: {
         position: this._menuPosition,
         title: this._menuTitle,
+        show_home: this._showHome,
+        home: homeEntry,
         clock: this._clock,
         date: this._date,
         style: {
@@ -669,6 +682,15 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               .value=${this._menuTitle}
               @input=${(ev: Event) => this._setValue("menuTitle", (ev.target as HTMLInputElement).value)}
             />
+          </label>
+
+          <label class="check">
+            <input
+              type="checkbox"
+              .checked=${this._showHome}
+              @change=${(ev: Event) => this._setValue("showHome", (ev.target as HTMLInputElement).checked)}
+            />
+            Hauptseite als ersten Menüpunkt anzeigen
           </label>
 
           <label>
