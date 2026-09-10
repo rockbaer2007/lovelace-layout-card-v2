@@ -69,6 +69,10 @@ function defaultSections() {
   ];
 }
 
+function pagePath(page: any, index: number) {
+  return String(page.path ?? (slugifyPath(page.title ?? "") || `dashboard-v2-${index + 1}`));
+}
+
 class DashboardLayoutV2ViewDialog extends LitElement {
   @property({ attribute: false }) hass: any;
   @property({ attribute: false }) lovelace: any;
@@ -109,10 +113,16 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._backgroundMode = config.menu.style?.background_mode ?? "none";
     this._backgroundColor = config.menu.style?.background_color ?? "";
     this._backgroundImage = config.menu.style?.background_image ?? "";
-    this._pages = [...(config.pages ?? [])];
-    this._pageSourcePaths = this._pages.map((page, index) =>
-      String(page.path ?? (slugifyPath(page.title ?? "") || `dashboard-v2-${index + 1}`))
+    const rawViews = params.lovelace?.rawConfig?.views ?? params.lovelace?.config?.views ?? [];
+    const viewsByPath = new Map(
+      Array.isArray(rawViews)
+        ? rawViews.map((view, index) => [String(view.path ?? index), view])
+        : []
     );
+    this._pages = [...(config.pages ?? [])].map((page, index) =>
+      this._mergePageWithView(page, viewsByPath.get(pagePath(page, index)))
+    );
+    this._pageSourcePaths = this._pages.map((page, index) => pagePath(page, index));
     this._selectedPageIndex = this._pages.length ? 0 : -1;
     this._syncJsonFromPages();
     this._error = "";
@@ -139,6 +149,40 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
   private _syncJsonFromPages() {
     this._pagesText = JSON.stringify(this._pages, null, 2);
+  }
+
+  private _mergePageWithView(page: any, view: any) {
+    if (!view) return page;
+
+    const type = pageLayoutType(view);
+    const mergedPage = {
+      ...page,
+      title: view.title ?? page.title,
+      path: view.path ?? page.path,
+      icon: view.icon ?? page.icon,
+      type,
+      layout_type: type,
+      layout: view.layout ?? page.layout,
+    };
+
+    if (type === SECTIONS_LAYOUT_V2) {
+      const { cards: _cards, ...rest } = mergedPage;
+      return {
+        ...rest,
+        sections: Array.isArray(view.sections)
+          ? view.sections
+          : Array.isArray(page.sections)
+            ? page.sections
+            : defaultSections(),
+        max_columns: view.max_columns ?? page.max_columns ?? 4,
+      };
+    }
+
+    const { sections: _sections, max_columns: _maxColumns, ...rest } = mergedPage;
+    return {
+      ...rest,
+      cards: Array.isArray(view.cards) ? view.cards : Array.isArray(page.cards) ? page.cards : [],
+    };
   }
 
   private _normalizePage(page: any, index: number) {
@@ -263,9 +307,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       const parsed = JSON.parse(this._pagesText || "[]");
       if (!Array.isArray(parsed)) throw new Error("Pages muss eine Liste sein.");
       this._pages = parsed;
-      this._pageSourcePaths = parsed.map((page, index) =>
-        String(page.path ?? (slugifyPath(page.title ?? "") || `dashboard-v2-${index + 1}`))
-      );
+      this._pageSourcePaths = parsed.map((page, index) => pagePath(page, index));
       this._selectedPageIndex = this._pages.length ? 0 : -1;
       this._syncJsonFromPages();
       this._error = "";
