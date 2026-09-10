@@ -84,6 +84,38 @@ function dashboardLayoutV2ConfigFromView(viewConfig: any) {
   return viewConfig?.layout?.dashboard_layout_v2 ?? viewConfig?.dashboard_layout_v2;
 }
 
+function referencedDashboardLayoutV2Config(viewConfig: any, views: any[]) {
+  const localConfig = dashboardLayoutV2ConfigFromView(viewConfig);
+  const inheritedPath = localConfig?.inherits_from;
+  if (!inheritedPath || !Array.isArray(views)) return localConfig;
+
+  const parentView = views.find((view, index) => String(view?.path ?? index) === String(inheritedPath));
+  const parentConfig = dashboardLayoutV2ConfigFromView(parentView);
+  if (!parentConfig) return localConfig;
+
+  return {
+    ...parentConfig,
+    ...localConfig,
+    menu: {
+      ...(parentConfig.menu ?? {}),
+      ...(localConfig.menu ?? {}),
+      home: {
+        ...(parentConfig.menu?.home ?? {}),
+        ...(localConfig.menu?.home ?? {}),
+      },
+      style: {
+        ...(parentConfig.menu?.style ?? {}),
+        ...(localConfig.menu?.style ?? {}),
+      },
+    },
+    chrome: {
+      ...(parentConfig.chrome ?? {}),
+      ...(localConfig.chrome ?? {}),
+    },
+    pages: localConfig.pages ?? parentConfig.pages,
+  };
+}
+
 function isDashboardLayoutV2View(viewConfig: any) {
   return DASHBOARD_LAYOUT_V2_VIEW_TYPES.has(viewConfig?.type) || String(viewConfig?.type ?? "").endsWith("-layout-v2");
 }
@@ -122,6 +154,12 @@ function pageWithoutRecursiveDashboardLayout(page: any) {
   const cleanPage = { ...page, ...(layout ? { layout } : {}) };
   if (!layout) delete cleanPage.layout;
   return cleanPage;
+}
+
+function dashboardLayoutV2Reference(path: string) {
+  return {
+    inherits_from: path,
+  };
 }
 
 function pageNavigationMetadata(page: any) {
@@ -233,7 +271,16 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this.viewIndex = params.viewIndex;
     this.viewConfig = params.viewConfig;
 
-    const config = normalizeConfig(params.viewConfig);
+    const rawViews = params.lovelace?.rawConfig?.views ?? params.lovelace?.config?.views ?? [];
+    const config = normalizeConfig({
+      ...params.viewConfig,
+      layout: {
+        ...(params.viewConfig?.layout ?? {}),
+        dashboard_layout_v2:
+          referencedDashboardLayoutV2Config(params.viewConfig, rawViews) ??
+          params.viewConfig?.layout?.dashboard_layout_v2,
+      },
+    });
     this._menuPosition = config.menu.position ?? "left";
     this._menuTitle = config.menu.title ?? "Haus";
     this._showHome = config.menu.show_home !== false;
@@ -259,7 +306,6 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._visibleUsers = Array.isArray(config.chrome?.visible_users)
       ? config.chrome.visible_users.join(", ")
       : config.chrome?.visible_users ?? "";
-    const rawViews = params.lovelace?.rawConfig?.views ?? params.lovelace?.config?.views ?? [];
     const viewsByPath = new Map(
       Array.isArray(rawViews)
         ? rawViews.map((view, index) => [String(view.path ?? index), view])
@@ -461,6 +507,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
     const addConfigPaths = (config: any) => {
       let changed = false;
+      changed = addPath(config?.inherits_from) || changed;
       changed = addPath(config?.menu?.home?.path) || changed;
       if (Array.isArray(config?.pages)) {
         config.pages.forEach((page: any) => {
@@ -661,6 +708,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     };
 
     const currentPath = String(views[this.viewIndex].path ?? this.viewIndex);
+    const homePath = String(homeEntry.path);
     const existingViewsByPath = new Map(
       views.map((view, index) => [String(view.path ?? index), { view, index }])
     );
@@ -675,12 +723,16 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       const isRelatedDashboardLayoutV2View =
         relatedPaths.has(viewPath) && isDashboardLayoutV2View(view);
       if (!isRelatedDashboardLayoutV2View) return view;
+      const nextDashboardLayoutV2 =
+        viewPath === homePath || (index === this.viewIndex && !view.subview)
+          ? dashboardLayoutV2
+          : dashboardLayoutV2Reference(homePath);
       return {
         ...view,
         ...stableViewEditorChrome(view),
         layout: {
           ...(layoutWithoutDashboardLayoutV2(view.layout) ?? {}),
-          dashboard_layout_v2: dashboardLayoutV2,
+          dashboard_layout_v2: nextDashboardLayoutV2,
         },
       };
     });
@@ -694,7 +746,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       const isCurrentView = (sourcePath ?? pagePath) === currentPath;
       const pageLayout = {
         ...(layoutWithoutDashboardLayoutV2(existing?.view.layout ?? page.layout) ?? {}),
-        dashboard_layout_v2: dashboardLayoutV2,
+        dashboard_layout_v2: dashboardLayoutV2Reference(homePath),
       };
       const type = pageLayoutType(page);
       const sections = Array.isArray(page.sections)

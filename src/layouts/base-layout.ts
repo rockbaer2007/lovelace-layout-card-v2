@@ -99,17 +99,7 @@ export class BaseLayout extends LitElement {
 
   _dashboardLayoutV2Menu(): DashboardLayoutMenuConfig {
     const localMenu = this._config.layout?.dashboard_layout_v2?.menu ?? {};
-    const views = this.lovelace?.rawConfig?.views ?? this.lovelace?.config?.views ?? [];
-    const currentView = this._config ?? this.lovelace?.config?.views?.[this.index];
-    const currentPath = String(currentView?.path ?? this.index ?? "");
-    const parentView = Array.isArray(views)
-      ? views.find((view, index) => {
-          if (index === this.index || view?.subview) return false;
-          const pages = view?.layout?.dashboard_layout_v2?.pages ?? view?.dashboard_layout_v2?.pages ?? [];
-          return Array.isArray(pages) && pages.some((page) => String(page?.path ?? "") === currentPath);
-        })
-      : undefined;
-    const parentMenu = parentView?.layout?.dashboard_layout_v2?.menu ?? parentView?.dashboard_layout_v2?.menu ?? {};
+    const parentMenu = this._dashboardLayoutV2ParentConfig()?.menu ?? {};
 
     return {
       position: "none",
@@ -126,12 +116,37 @@ export class BaseLayout extends LitElement {
     };
   }
 
+  _dashboardLayoutV2ParentConfig() {
+    const localConfig = this._config.layout?.dashboard_layout_v2 ?? {};
+    const views = this.lovelace?.rawConfig?.views ?? this.lovelace?.config?.views ?? [];
+    const currentView = this._config ?? this.lovelace?.config?.views?.[this.index];
+    const currentPath = String(currentView?.path ?? this.index ?? "");
+    if (!Array.isArray(views)) return undefined;
+    const inheritedPath = localConfig.inherits_from;
+    const referencedParent = inheritedPath
+      ? views.find((view, index) => String(view?.path ?? index) === String(inheritedPath))
+      : undefined;
+    if (referencedParent) {
+      return referencedParent?.layout?.dashboard_layout_v2 ?? referencedParent?.dashboard_layout_v2;
+    }
+
+    const parentView = Array.isArray(views)
+      ? views.find((view, index) => {
+          if (index === this.index || view?.subview) return false;
+          const pages = view?.layout?.dashboard_layout_v2?.pages ?? view?.dashboard_layout_v2?.pages ?? [];
+          return Array.isArray(pages) && pages.some((page) => String(page?.path ?? "") === currentPath);
+        })
+      : undefined;
+    return parentView?.layout?.dashboard_layout_v2 ?? parentView?.dashboard_layout_v2;
+  }
+
   _dashboardLayoutV2Chrome(): DashboardLayoutChromeConfig | undefined {
-    return this._config.layout?.dashboard_layout_v2?.chrome;
+    return this._config.layout?.dashboard_layout_v2?.chrome ?? this._dashboardLayoutV2ParentConfig()?.chrome;
   }
 
   _dashboardLayoutV2Pages() {
-    const configuredPages = this._config.layout?.dashboard_layout_v2?.pages;
+    const configuredPages =
+      this._config.layout?.dashboard_layout_v2?.pages ?? this._dashboardLayoutV2ParentConfig()?.pages;
     const sourcePages = configuredPages?.length
       ? configuredPages
       : (this.lovelace?.config?.views ?? [])
