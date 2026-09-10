@@ -27,6 +27,13 @@ const defaultConfig = {
 };
 
 const SECTIONS_LAYOUT_V2 = "custom:sections-layout-v2";
+const DASHBOARD_LAYOUT_V2_VIEW_TYPES = new Set([
+  "custom:masonry-layout-v2",
+  SECTIONS_LAYOUT_V2,
+  "custom:horizontal-layout-v2",
+  "custom:vertical-layout-v2",
+  "custom:grid-layout-v2",
+]);
 
 function slugifyPath(value: string) {
   return value
@@ -115,6 +122,10 @@ function colorPickerValue(value: string) {
   return /^#[0-9a-f]{6}$/i.test(value) ? value : "#000000";
 }
 
+function normalizedTitle(value: any) {
+  return String(value ?? "").trim().toLowerCase();
+}
+
 class DashboardLayoutV2ViewDialog extends LitElement {
   @property({ attribute: false }) hass: any;
   @property({ attribute: false }) lovelace: any;
@@ -161,9 +172,39 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         ? rawViews.map((view, index) => [String(view.path ?? index), view])
         : []
     );
-    this._pages = [...(config.pages ?? [])].map((page, index) =>
-      this._mergePageWithView(pageWithoutRecursiveDashboardLayout(page), viewsByPath.get(pagePath(page, index)))
+    const viewsByTitle = new Map(
+      Array.isArray(rawViews)
+        ? rawViews
+            .filter((view) => view?.title)
+            .map((view) => [normalizedTitle(view.title), view])
+        : []
     );
+    const pagesSource =
+      Array.isArray(config.pages) && config.pages.length
+        ? config.pages
+        : rawViews
+            .filter(
+              (view: any, index: number) =>
+                index !== this.viewIndex && view?.subview && DASHBOARD_LAYOUT_V2_VIEW_TYPES.has(view?.type)
+            )
+            .map((view: any) =>
+              pageNavigationMetadata({
+                title: view.title,
+                path: view.path,
+                icon: view.icon,
+                type: pageLayoutType(view),
+                layout_type: pageLayoutType(view),
+                max_columns: view.max_columns,
+              })
+            );
+    this._pages = [...pagesSource].map((page, index) => {
+      const cleanPage = pageWithoutRecursiveDashboardLayout(page);
+      const matchingView =
+        viewsByPath.get(pagePath(cleanPage, index)) ??
+        viewsByTitle.get(normalizedTitle(cleanPage.title)) ??
+        rawViews[index + 1];
+      return this._mergePageWithView(cleanPage, matchingView);
+    });
     this._pageSourcePaths = this._pages.map((page, index) => pagePath(page, index));
     this._selectedPageIndex = this._pages.length ? 0 : -1;
     this._syncJsonFromPages();
@@ -531,6 +572,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   render() {
     if (!this.viewConfig) return nothing;
     const selectedPage = this._pages[this._selectedPageIndex];
+    const selectedPageLayout = selectedPage ? pageLayoutType(selectedPage) : "";
 
     return html`
       <div class="scrim" @click=${this._close}></div>
@@ -633,11 +675,21 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                           @change=${(ev: Event) =>
                             this._updatePageLayout(this._selectedPageIndex, (ev.target as HTMLSelectElement).value)}
                         >
-                          <option value=${SECTIONS_LAYOUT_V2}>Abschnitte V2</option>
-                          <option value="custom:masonry-layout-v2">Masonry V2</option>
-                          <option value="custom:horizontal-layout-v2">Horizontal V2</option>
-                          <option value="custom:vertical-layout-v2">Vertical V2</option>
-                          <option value="custom:grid-layout-v2">Grid V2</option>
+                          <option value=${SECTIONS_LAYOUT_V2} ?selected=${selectedPageLayout === SECTIONS_LAYOUT_V2}>
+                            Abschnitte V2
+                          </option>
+                          <option value="custom:masonry-layout-v2" ?selected=${selectedPageLayout === "custom:masonry-layout-v2"}>
+                            Masonry V2
+                          </option>
+                          <option value="custom:horizontal-layout-v2" ?selected=${selectedPageLayout === "custom:horizontal-layout-v2"}>
+                            Horizontal V2
+                          </option>
+                          <option value="custom:vertical-layout-v2" ?selected=${selectedPageLayout === "custom:vertical-layout-v2"}>
+                            Vertical V2
+                          </option>
+                          <option value="custom:grid-layout-v2" ?selected=${selectedPageLayout === "custom:grid-layout-v2"}>
+                            Grid V2
+                          </option>
                         </select>
                       </label>
                       ${isSectionsPage(selectedPage)
