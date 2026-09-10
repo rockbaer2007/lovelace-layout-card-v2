@@ -89,6 +89,14 @@ export interface DashboardLayoutMenuConfig {
   title?: string;
   clock?: DashboardLayoutClockMode;
   date?: boolean;
+  style?: {
+    icon_color?: string;
+    active_tab_color?: string;
+    inactive_tab_color?: string;
+    background_mode?: "none" | "color" | "image";
+    background_color?: string;
+    background_image?: string;
+  };
 }
 
 export interface DashboardLayoutPageConfig {

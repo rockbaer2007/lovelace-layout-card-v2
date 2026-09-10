@@ -14,6 +14,14 @@ const defaultConfig = {
     title: "Haus",
     clock: "digital",
     date: true,
+    style: {
+      icon_color: "",
+      active_tab_color: "",
+      inactive_tab_color: "",
+      background_mode: "none",
+      background_color: "",
+      background_image: "",
+    },
   },
   pages: [],
 };
@@ -33,6 +41,10 @@ function normalizeConfig(viewConfig: any) {
     menu: {
       ...defaultConfig.menu,
       ...(viewConfig?.layout?.dashboard_layout_v2?.menu ?? {}),
+      style: {
+        ...defaultConfig.menu.style,
+        ...(viewConfig?.layout?.dashboard_layout_v2?.menu?.style ?? {}),
+      },
     },
   };
 }
@@ -47,6 +59,15 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _menuTitle = "Haus";
   @state() private _clock = "digital";
   @state() private _date = true;
+  @state() private _iconColor = "";
+  @state() private _activeTabColor = "";
+  @state() private _inactiveTabColor = "";
+  @state() private _backgroundMode = "none";
+  @state() private _backgroundColor = "";
+  @state() private _backgroundImage = "";
+  @state() private _pages: any[] = [];
+  @state() private _selectedPageIndex = 0;
+  @state() private _jsonExpanded = false;
   @state() private _pagesText = "[]";
   @state() private _error = "";
 
@@ -61,7 +82,15 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._menuTitle = config.menu.title ?? "Haus";
     this._clock = config.menu.clock ?? "digital";
     this._date = config.menu.date !== false;
-    this._pagesText = JSON.stringify(config.pages ?? [], null, 2);
+    this._iconColor = config.menu.style?.icon_color ?? "";
+    this._activeTabColor = config.menu.style?.active_tab_color ?? "";
+    this._inactiveTabColor = config.menu.style?.inactive_tab_color ?? "";
+    this._backgroundMode = config.menu.style?.background_mode ?? "none";
+    this._backgroundColor = config.menu.style?.background_color ?? "";
+    this._backgroundImage = config.menu.style?.background_image ?? "";
+    this._pages = [...(config.pages ?? [])];
+    this._selectedPageIndex = this._pages.length ? 0 : -1;
+    this._syncJsonFromPages();
     this._error = "";
   }
 
@@ -75,15 +104,105 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "menuTitle") this._menuTitle = value;
     if (key === "clock") this._clock = value;
     if (key === "date") this._date = value;
+    if (key === "iconColor") this._iconColor = value;
+    if (key === "activeTabColor") this._activeTabColor = value;
+    if (key === "inactiveTabColor") this._inactiveTabColor = value;
+    if (key === "backgroundMode") this._backgroundMode = value;
+    if (key === "backgroundColor") this._backgroundColor = value;
+    if (key === "backgroundImage") this._backgroundImage = value;
     if (key === "pagesText") this._pagesText = value;
   }
 
-  private async _save() {
-    let pages: any[];
+  private _syncJsonFromPages() {
+    this._pagesText = JSON.stringify(this._pages, null, 2);
+  }
+
+  private _normalizePage(page: any, index: number) {
+    const title = String(page.title ?? page.name ?? `Unterseite ${index + 1}`);
+    const path = page.path ?? (slugifyPath(title) || `dashboard-v2-${index + 1}`);
+    return {
+      ...page,
+      title,
+      path: String(path),
+    };
+  }
+
+  private _updatePage(index: number, key: string, value: any) {
+    this._pages = this._pages.map((page, pageIndex) =>
+      pageIndex === index ? { ...page, [key]: value } : page
+    );
+    this._syncJsonFromPages();
+  }
+
+  private _addPage() {
+    const nextIndex = this._pages.length + 1;
+    const page = {
+      title: `Unterseite ${nextIndex}`,
+      path: `unterseite-${nextIndex}`,
+      icon: "mdi:view-dashboard",
+      layout_type: "custom:masonry-layout-v2",
+    };
+    this._pages = [...this._pages, page];
+    this._selectedPageIndex = this._pages.length - 1;
+    this._syncJsonFromPages();
+  }
+
+  private _duplicatePage() {
+    const page = this._pages[this._selectedPageIndex];
+    if (!page) return;
+    const copy = {
+      ...page,
+      title: `${page.title ?? "Unterseite"} Kopie`,
+      path: `${page.path ?? "unterseite"}-kopie`,
+    };
+    this._pages = [
+      ...this._pages.slice(0, this._selectedPageIndex + 1),
+      copy,
+      ...this._pages.slice(this._selectedPageIndex + 1),
+    ];
+    this._selectedPageIndex += 1;
+    this._syncJsonFromPages();
+  }
+
+  private _deletePage() {
+    if (this._selectedPageIndex < 0) return;
+    this._pages = this._pages.filter((_, index) => index !== this._selectedPageIndex);
+    this._selectedPageIndex = Math.min(this._selectedPageIndex, this._pages.length - 1);
+    this._syncJsonFromPages();
+  }
+
+  private _movePage(direction: -1 | 1) {
+    const targetIndex = this._selectedPageIndex + direction;
+    if (targetIndex < 0 || targetIndex >= this._pages.length) return;
+    const pages = [...this._pages];
+    const [page] = pages.splice(this._selectedPageIndex, 1);
+    pages.splice(targetIndex, 0, page);
+    this._pages = pages;
+    this._selectedPageIndex = targetIndex;
+    this._syncJsonFromPages();
+  }
+
+  private _applyJson() {
     try {
       const parsed = JSON.parse(this._pagesText || "[]");
       if (!Array.isArray(parsed)) throw new Error("Pages muss eine Liste sein.");
-      pages = parsed;
+      this._pages = parsed;
+      this._selectedPageIndex = this._pages.length ? 0 : -1;
+      this._syncJsonFromPages();
+      this._error = "";
+    } catch (err: any) {
+      this._error = err?.message || "Pages konnten nicht gelesen werden.";
+    }
+  }
+
+  private async _save() {
+    let pagesForSave = this._pages;
+    try {
+      const parsed = JSON.parse(this._pagesText || "[]");
+      if (this._jsonExpanded) {
+        if (!Array.isArray(parsed)) throw new Error("Pages muss eine Liste sein.");
+        pagesForSave = parsed;
+      }
     } catch (err: any) {
       this._error = err?.message || "Pages konnten nicht gelesen werden.";
       return;
@@ -96,14 +215,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       return;
     }
 
-    const normalizedPages = pages.map((page, index) => {
-      const title = String(page.title ?? page.name ?? `Unterseite ${index + 1}`);
-      return {
-        ...page,
-        title,
-        path: String(page.path ?? slugifyPath(title) ?? `dashboard-v2-${index + 1}`),
-      };
-    });
+    const normalizedPages = pagesForSave.map((page, index) => this._normalizePage(page, index));
 
     const dashboardLayoutV2 = {
       menu: {
@@ -111,6 +223,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         title: this._menuTitle,
         clock: this._clock,
         date: this._date,
+        style: {
+          icon_color: this._iconColor,
+          active_tab_color: this._activeTabColor,
+          inactive_tab_color: this._inactiveTabColor,
+          background_mode: this._backgroundMode,
+          background_color: this._backgroundColor,
+          background_image: this._backgroundImage,
+        },
       },
       pages: normalizedPages,
     };
@@ -173,6 +293,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
   render() {
     if (!this.viewConfig) return nothing;
+    const selectedPage = this._pages[this._selectedPageIndex];
 
     return html`
       <div class="scrim" @click=${this._close}></div>
@@ -224,13 +345,150 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             Datum anzeigen
           </label>
 
-          <label class="wide">
-            Tabs / Unterseiten als JSON
+          <fieldset class="wide group">
+            <legend>Tabs / Unterseiten</legend>
+            <div class="page-editor">
+              <div class="page-list">
+                ${this._pages.map(
+                  (page, index) => html`
+                    <button
+                      class=${index === this._selectedPageIndex ? "selected" : ""}
+                      @click=${() => (this._selectedPageIndex = index)}
+                    >
+                      <span>${page.title ?? page.path ?? `Unterseite ${index + 1}`}</span>
+                      <small>${page.path ?? ""}</small>
+                    </button>
+                  `
+                )}
+              </div>
+
+              <div class="page-form">
+                ${selectedPage
+                  ? html`
+                      <label>
+                        Titel
+                        <input
+                          .value=${selectedPage.title ?? ""}
+                          @input=${(ev: Event) =>
+                            this._updatePage(this._selectedPageIndex, "title", (ev.target as HTMLInputElement).value)}
+                        />
+                      </label>
+                      <label>
+                        Pfad
+                        <input
+                          .value=${selectedPage.path ?? ""}
+                          @input=${(ev: Event) =>
+                            this._updatePage(this._selectedPageIndex, "path", (ev.target as HTMLInputElement).value)}
+                        />
+                      </label>
+                      <label>
+                        Icon
+                        <input
+                          .value=${selectedPage.icon ?? ""}
+                          @input=${(ev: Event) =>
+                            this._updatePage(this._selectedPageIndex, "icon", (ev.target as HTMLInputElement).value)}
+                        />
+                      </label>
+                      <label>
+                        Layout
+                        <select
+                          .value=${selectedPage.layout_type ?? selectedPage.type ?? "custom:masonry-layout-v2"}
+                          @change=${(ev: Event) =>
+                            this._updatePage(this._selectedPageIndex, "layout_type", (ev.target as HTMLSelectElement).value)}
+                        >
+                          <option value="custom:masonry-layout-v2">Masonry V2</option>
+                          <option value="custom:horizontal-layout-v2">Horizontal V2</option>
+                          <option value="custom:vertical-layout-v2">Vertical V2</option>
+                          <option value="custom:grid-layout-v2">Grid V2</option>
+                        </select>
+                      </label>
+                    `
+                  : html`<p class="empty">Noch keine Unterseite angelegt.</p>`}
+              </div>
+            </div>
+
+            <div class="actions">
+              <button @click=${this._addPage}>Hinzufügen</button>
+              <button @click=${this._duplicatePage} ?disabled=${!selectedPage}>Duplizieren</button>
+              <button @click=${() => this._movePage(-1)} ?disabled=${this._selectedPageIndex <= 0}>Hoch</button>
+              <button @click=${() => this._movePage(1)} ?disabled=${this._selectedPageIndex >= this._pages.length - 1}>Runter</button>
+              <button class="danger" @click=${this._deletePage} ?disabled=${!selectedPage}>Löschen</button>
+            </div>
+          </fieldset>
+
+          <fieldset class="wide group">
+            <legend>Style</legend>
+            <div class="style-grid">
+              <label>
+                Iconfarbe
+                <input
+                  placeholder="var(--primary-color)"
+                  .value=${this._iconColor}
+                  @input=${(ev: Event) => this._setValue("iconColor", (ev.target as HTMLInputElement).value)}
+                />
+              </label>
+              <label>
+                Tabfarbe aktiv
+                <input
+                  placeholder="var(--primary-color)"
+                  .value=${this._activeTabColor}
+                  @input=${(ev: Event) => this._setValue("activeTabColor", (ev.target as HTMLInputElement).value)}
+                />
+              </label>
+              <label>
+                Tabfarbe inaktiv
+                <input
+                  placeholder="transparent"
+                  .value=${this._inactiveTabColor}
+                  @input=${(ev: Event) => this._setValue("inactiveTabColor", (ev.target as HTMLInputElement).value)}
+                />
+              </label>
+              <label>
+                Hintergrund
+                <select
+                  .value=${this._backgroundMode}
+                  @change=${(ev: Event) => this._setValue("backgroundMode", (ev.target as HTMLSelectElement).value)}
+                >
+                  <option value="none">Keine</option>
+                  <option value="color">Farbe</option>
+                  <option value="image">Bild</option>
+                </select>
+              </label>
+              ${this._backgroundMode === "color"
+                ? html`
+                    <label>
+                      Hintergrundfarbe
+                      <input
+                        placeholder="rgba(0,0,0,0.18)"
+                        .value=${this._backgroundColor}
+                        @input=${(ev: Event) => this._setValue("backgroundColor", (ev.target as HTMLInputElement).value)}
+                      />
+                    </label>
+                  `
+                : nothing}
+              ${this._backgroundMode === "image"
+                ? html`
+                    <label>
+                      Hintergrundbild
+                      <input
+                        placeholder="/local/background.jpg"
+                        .value=${this._backgroundImage}
+                        @input=${(ev: Event) => this._setValue("backgroundImage", (ev.target as HTMLInputElement).value)}
+                      />
+                    </label>
+                  `
+                : nothing}
+            </div>
+          </fieldset>
+
+          <details class="wide json-box" ?open=${this._jsonExpanded} @toggle=${(ev: Event) => (this._jsonExpanded = (ev.target as HTMLDetailsElement).open)}>
+            <summary>Spezialoptionen / JSON bearbeiten</summary>
             <textarea
               .value=${this._pagesText}
               @input=${(ev: Event) => this._setValue("pagesText", (ev.target as HTMLTextAreaElement).value)}
             ></textarea>
-          </label>
+            <button @click=${this._applyJson}>JSON übernehmen</button>
+          </details>
 
           ${this._error ? html`<p class="error">${this._error}</p>` : nothing}
         </div>
@@ -369,6 +627,99 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           margin: 0;
           color: var(--error-color, #db4437);
           font-weight: 700;
+        }
+
+        .group {
+          display: grid;
+          gap: 12px;
+          margin: 0;
+          padding: 12px;
+          border: 1px solid var(--divider-color, #333);
+          border-radius: 8px;
+        }
+
+        legend {
+          padding: 0 6px;
+          font-weight: 800;
+        }
+
+        .page-editor {
+          display: grid;
+          grid-template-columns: minmax(180px, 240px) 1fr;
+          gap: 12px;
+          min-height: 220px;
+        }
+
+        .page-list {
+          display: grid;
+          align-content: start;
+          gap: 6px;
+          max-height: 300px;
+          overflow: auto;
+        }
+
+        .page-list button {
+          width: 100%;
+          height: auto;
+          min-height: 48px;
+          display: grid;
+          justify-items: start;
+          text-align: left;
+        }
+
+        .page-list button.selected {
+          border-color: var(--primary-color, #03a9f4);
+          background: color-mix(in srgb, var(--primary-color, #03a9f4) 24%, transparent);
+        }
+
+        .page-list small {
+          color: var(--secondary-text-color);
+        }
+
+        .page-form,
+        .style-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+          align-content: start;
+        }
+
+        .actions {
+          display: grid;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 8px;
+        }
+
+        .actions button,
+        .json-box button {
+          width: 100%;
+          min-width: 0;
+        }
+
+        button.danger {
+          color: #fff;
+          background: var(--error-color, #db4437);
+          border-color: var(--error-color, #db4437);
+        }
+
+        button:disabled {
+          opacity: 0.45;
+          cursor: not-allowed;
+        }
+
+        .json-box {
+          display: grid;
+          gap: 10px;
+        }
+
+        summary {
+          cursor: pointer;
+          font-weight: 800;
+        }
+
+        .empty {
+          margin: 0;
+          color: var(--secondary-text-color);
         }
       `,
     ];
