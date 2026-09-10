@@ -98,9 +98,31 @@ export class BaseLayout extends LitElement {
   }
 
   _dashboardLayoutV2Menu(): DashboardLayoutMenuConfig {
+    const localMenu = this._config.layout?.dashboard_layout_v2?.menu ?? {};
+    const views = this.lovelace?.rawConfig?.views ?? this.lovelace?.config?.views ?? [];
+    const currentView = this._config ?? this.lovelace?.config?.views?.[this.index];
+    const currentPath = String(currentView?.path ?? this.index ?? "");
+    const parentView = Array.isArray(views)
+      ? views.find((view, index) => {
+          if (index === this.index || view?.subview) return false;
+          const pages = view?.layout?.dashboard_layout_v2?.pages ?? view?.dashboard_layout_v2?.pages ?? [];
+          return Array.isArray(pages) && pages.some((page) => String(page?.path ?? "") === currentPath);
+        })
+      : undefined;
+    const parentMenu = parentView?.layout?.dashboard_layout_v2?.menu ?? parentView?.dashboard_layout_v2?.menu ?? {};
+
     return {
       position: "none",
-      ...(this._config.layout?.dashboard_layout_v2?.menu ?? {}),
+      ...parentMenu,
+      ...localMenu,
+      home: {
+        ...(parentMenu.home ?? {}),
+        ...(localMenu.home ?? {}),
+      },
+      style: {
+        ...(parentMenu.style ?? {}),
+        ...(localMenu.style ?? {}),
+      },
     };
   }
 
@@ -274,6 +296,8 @@ export class BaseLayout extends LitElement {
 
       .dashboard-layout-v2-menu header {
         display: grid;
+        justify-items: center;
+        text-align: center;
         gap: 2px;
         padding: 4px 6px 8px;
       }

@@ -305,6 +305,8 @@ class DashboardLayoutCardV2 extends LitElement {
 
       .menu-header {
         display: grid;
+        justify-items: center;
+        text-align: center;
         gap: 4px;
         min-height: 72px;
       }

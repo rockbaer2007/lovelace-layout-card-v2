@@ -80,6 +80,14 @@ function normalizeConfig(viewConfig: any) {
   };
 }
 
+function dashboardLayoutV2ConfigFromView(viewConfig: any) {
+  return viewConfig?.layout?.dashboard_layout_v2 ?? viewConfig?.dashboard_layout_v2;
+}
+
+function isDashboardLayoutV2View(viewConfig: any) {
+  return DASHBOARD_LAYOUT_V2_VIEW_TYPES.has(viewConfig?.type) || String(viewConfig?.type ?? "").endsWith("-layout-v2");
+}
+
 function pageLayoutType(page: any) {
   const type = page.type ?? page.layout_type ?? "custom:masonry-layout-v2";
   return type === "sections" ? SECTIONS_LAYOUT_V2 : type;
@@ -146,7 +154,7 @@ function clockSizeInputValue(value: string) {
 function normalizedClockSize(value: string) {
   const size = Number(clockSizeInputValue(value));
   if (!Number.isFinite(size) || size <= 0) return "44px";
-  return `${Math.max(24, Math.min(120, size))}px`;
+  return `${Math.max(24, Math.min(128, size))}px`;
 }
 
 function sectionsFromExistingData(page: any, existingView: any) {
@@ -270,7 +278,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         : rawViews
             .filter(
               (view: any, index: number) =>
-                index !== this.viewIndex && view?.subview && DASHBOARD_LAYOUT_V2_VIEW_TYPES.has(view?.type)
+                index !== this.viewIndex && view?.subview && isDashboardLayoutV2View(view)
             )
             .map((view: any) =>
               pageNavigationMetadata({
@@ -441,6 +449,55 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     };
   }
 
+  private _collectRelatedDashboardLayoutV2Paths(views: any[], currentPath: string, dashboardLayoutV2: any) {
+    const relatedPaths = new Set<string>([currentPath]);
+
+    const addPath = (path: any) => {
+      if (path === undefined || path === null || path === "") return false;
+      const size = relatedPaths.size;
+      relatedPaths.add(String(path));
+      return relatedPaths.size !== size;
+    };
+
+    const addConfigPaths = (config: any) => {
+      let changed = false;
+      changed = addPath(config?.menu?.home?.path) || changed;
+      if (Array.isArray(config?.pages)) {
+        config.pages.forEach((page: any) => {
+          changed = addPath(page?.path) || changed;
+        });
+      }
+      return changed;
+    };
+
+    addConfigPaths(dashboardLayoutV2);
+
+    let changed = true;
+    while (changed) {
+      changed = false;
+      views.forEach((view, index) => {
+        const viewPath = String(view?.path ?? index);
+        const config = dashboardLayoutV2ConfigFromView(view);
+        if (!config) return;
+
+        const pagePaths = Array.isArray(config.pages)
+          ? config.pages.map((page: any) => String(page?.path ?? ""))
+          : [];
+        const homePath = config.menu?.home?.path ? String(config.menu.home.path) : "";
+        const isConnected =
+          relatedPaths.has(viewPath) ||
+          (homePath && relatedPaths.has(homePath)) ||
+          pagePaths.some((path: string) => relatedPaths.has(path));
+
+        if (!isConnected) return;
+        changed = addPath(viewPath) || changed;
+        changed = addConfigPaths(config) || changed;
+      });
+    }
+
+    return relatedPaths;
+  }
+
   private _updatePage(index: number, key: string, value: any) {
     this._pages = this._pages.map((page, pageIndex) =>
       pageIndex === index ? { ...page, [key]: value } : page
@@ -607,7 +664,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const existingViewsByPath = new Map(
       views.map((view, index) => [String(view.path ?? index), { view, index }])
     );
-    const relatedPaths = new Set<string>([currentPath]);
+    const relatedPaths = this._collectRelatedDashboardLayoutV2Paths(views, currentPath, dashboardLayoutV2);
     normalizedPages.forEach((page, index) => {
       relatedPaths.add(String(page.path));
       const sourcePath = this._pageSourcePaths[index];
@@ -616,7 +673,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const nextViews = views.map((view, index) => {
       const viewPath = String(view.path ?? index);
       const isRelatedDashboardLayoutV2View =
-        relatedPaths.has(viewPath) && String(view.type ?? "").endsWith("-layout-v2");
+        relatedPaths.has(viewPath) && isDashboardLayoutV2View(view);
       if (!isRelatedDashboardLayoutV2View) return view;
       return {
         ...view,
@@ -925,7 +982,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                 <input
                   type="number"
                   min="24"
-                  max="120"
+                  max="128"
                   step="1"
                   .value=${this._clockSize}
                   @input=${(ev: Event) => this._setValue("clockSize", (ev.target as HTMLInputElement).value)}
