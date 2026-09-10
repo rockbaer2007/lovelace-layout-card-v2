@@ -51,10 +51,9 @@ class SectionsLayout extends BaseLayout {
     const signature = JSON.stringify(sections);
 
     if (signature !== this._sectionSignature) {
-      this._sectionElements = sections.map((sectionConfig) => {
+      this._sectionElements = sections.map((sectionConfig, index) => {
         const section = document.createElement("hui-section") as any;
-        if (section.setConfig) section.setConfig(sectionConfig);
-        else section.config = sectionConfig;
+        this._applySectionConfig(section, sectionConfig, index);
         return section;
       });
       this._sectionSignature = signature;
@@ -62,16 +61,20 @@ class SectionsLayout extends BaseLayout {
 
     this._sectionElements.forEach((section: any, index) => {
       const sectionConfig = sections[index];
-      section.hass = this.hass;
-      section.lovelace = this.lovelace;
-      section.viewIndex = this.index;
-      section.index = index;
-      if (section.setConfig) section.setConfig(sectionConfig);
-      else section.config = sectionConfig;
-      section.requestUpdate?.();
+      this._applySectionConfig(section, sectionConfig, index);
     });
 
     return this._sectionElements;
+  }
+
+  private _applySectionConfig(section: any, sectionConfig: Record<string, any>, index: number) {
+    section.hass = this.hass;
+    section.lovelace = this.lovelace;
+    section.viewIndex = this.index;
+    section.index = index;
+    section.preview = Boolean(this.lovelace?.editMode);
+    section.config = sectionConfig;
+    section.requestUpdate?.();
   }
 
   private _syncNativeSectionsView() {
