@@ -163,22 +163,14 @@ function sectionsFromExistingData(page: any, existingView: any) {
 function stableViewEditorChrome(view: any) {
   const header = view?.header ?? {};
   const footer = view?.footer ?? {};
-  const title = String(view?.title ?? view?.path ?? "Home");
 
   return {
-    header: header.card
-      ? header
-      : {
-          layout: "center",
-          badges_position: "bottom",
-          badges_wrap: "wrap",
-          ...header,
-          card: {
-            type: "markdown",
-            text_only: true,
-            content: `# ${title}`,
-          },
-        },
+    header: {
+      layout: "center",
+      badges_position: "bottom",
+      badges_wrap: "wrap",
+      ...header,
+    },
     footer: footer.card
       ? footer
       : {
