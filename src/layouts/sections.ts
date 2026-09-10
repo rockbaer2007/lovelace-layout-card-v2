@@ -34,6 +34,7 @@ class SectionsLayout extends BaseLayout {
   private _headerCardKey = "";
   private _footerCard?: LovelaceCard | HuiCard;
   private _footerCardKey = "";
+  @state() private _nativeChromeReady = false;
   @state() private _showHeaderCardFallback = false;
   @state() private _showFooterCardFallback = false;
 
@@ -48,6 +49,7 @@ class SectionsLayout extends BaseLayout {
   async updated(changedProperties: Map<string, any>) {
     await super.updated(changedProperties);
     this._warmupNativeSectionsView();
+    this._updateNativeChromeReady();
     this._patchNativeEditorSaves();
     await this._syncChromeCards();
     this._updateChromeFallbackVisibility();
@@ -91,6 +93,7 @@ class SectionsLayout extends BaseLayout {
       this.renderRoot.appendChild(loader);
       loader.willUpdate?.(new Map([["lovelace", undefined]]));
       await this._waitForNativeSectionsElements();
+      this._updateNativeChromeReady();
       this.requestUpdate();
       window.setTimeout(() => loader.remove(), 1200);
     } catch (err) {
@@ -112,6 +115,21 @@ class SectionsLayout extends BaseLayout {
       Promise.all(names.map((name) => customElements.whenDefined(name))),
       new Promise((resolve) => window.setTimeout(resolve, 2000)),
     ]);
+  }
+
+  private _hasNativeChromeElements() {
+    return Boolean(
+      customElements.get("hui-view-header")
+        && customElements.get("hui-view-footer")
+        && customElements.get("hui-view-badges")
+    );
+  }
+
+  private _updateNativeChromeReady() {
+    const ready = this._hasNativeChromeElements();
+    if (this._nativeChromeReady !== ready) {
+      this._nativeChromeReady = ready;
+    }
   }
 
   private _nativeHeaderEditor() {
@@ -280,6 +298,36 @@ class SectionsLayout extends BaseLayout {
     }));
   }
 
+  private async _addHeaderCard(ev: Event) {
+    ev.stopPropagation();
+    const viewConfig = this._currentViewConfig();
+    await this._saveViewPatch({
+      header: {
+        ...(viewConfig.header ?? {}),
+        card: {
+          type: "markdown",
+          text_only: true,
+          content: `# ${viewConfig.title ?? "Titel"}`,
+        },
+      },
+    });
+  }
+
+  private async _addFooterCard(ev: Event) {
+    ev.stopPropagation();
+    const viewConfig = this._currentViewConfig();
+    await this._saveViewPatch({
+      footer: {
+        ...(viewConfig.footer ?? {}),
+        card: {
+          type: "markdown",
+          text_only: true,
+          content: "Fußzeile",
+        },
+      },
+    });
+  }
+
   private _editHeaderCard(ev: Event) {
     this._patchNativeEditorSaves();
     this._nativeHeaderEditor()?._editCard?.(ev);
@@ -355,6 +403,66 @@ class SectionsLayout extends BaseLayout {
       : "";
   }
 
+  private _renderDirectHeaderChrome(card?: LovelaceCard | HuiCard) {
+    const editMode = Boolean(this.lovelace?.editMode);
+    return html`
+      <div class=${editMode ? "direct-chrome header edit-mode" : "direct-chrome header"}>
+        ${editMode
+          ? html`
+              <button class="chrome-configure" @click=${this._configureHeader} title="Kopfzeilen-Einstellungen">
+                <ha-icon .icon=${"mdi:pencil"}></ha-icon>
+              </button>
+            `
+          : ""}
+        <div class="direct-heading">
+          ${card
+            ? this._renderFallbackCardEditor(card, this._editHeaderCard, this._deleteHeaderCard)
+            : editMode
+              ? html`
+                  <button class="direct-add" @click=${this._addHeaderCard}>
+                    <ha-icon .icon=${"mdi:plus"}></ha-icon>
+                    Titel hinzufügen
+                  </button>
+                `
+              : ""}
+        </div>
+        ${editMode
+          ? html`
+              <button class="direct-add badge-placeholder" type="button">
+                <ha-icon .icon=${"mdi:plus"}></ha-icon>
+                Badge hinzufügen
+              </button>
+            `
+          : ""}
+      </div>
+    `;
+  }
+
+  private _renderDirectFooterChrome(card?: LovelaceCard | HuiCard) {
+    const editMode = Boolean(this.lovelace?.editMode);
+    if (!editMode && !card) return "";
+
+    return html`
+      <div class=${editMode ? "direct-chrome footer edit-mode" : "direct-chrome footer"}>
+        ${editMode
+          ? html`
+              <button class="chrome-configure" @click=${this._configureFooter} title="Fußzeilen-Einstellungen">
+                <ha-icon .icon=${"mdi:pencil"}></ha-icon>
+              </button>
+            `
+          : ""}
+        ${card
+          ? this._renderFallbackCardEditor(card, this._editFooterCard, this._deleteFooterCard)
+          : html`
+              <button class="direct-add" @click=${this._addFooterCard}>
+                <ha-icon .icon=${"mdi:plus"}></ha-icon>
+                Fußzeile hinzufügen
+              </button>
+            `}
+      </div>
+    `;
+  }
+
   private async _saveViewPatch(patch: Partial<SectionsViewConfig>) {
     const sourceConfig = this._sourceLovelaceConfig();
     const viewIndex = this._resolvedViewIndex();
@@ -412,15 +520,19 @@ class SectionsLayout extends BaseLayout {
     const badges = (this as any).badges ?? [];
     return this._renderDashboardLayoutV2Shell(html`
       <div class="sections-wrapper" style=${`--sections-max-columns: ${maxColumns}`}>
-        <hui-view-header
-          id="native-header-editor"
-          .hass=${this.hass}
-          .badges=${badges}
-          .lovelace=${this.lovelace}
-          .viewIndex=${this._resolvedViewIndex()}
-          .config=${viewConfig?.header ?? {}}
-        ></hui-view-header>
-        ${this._showHeaderCardFallback ? this._renderHeaderCardFallback(this._headerCard) : ""}
+        ${this._nativeChromeReady
+          ? html`
+              <hui-view-header
+                id="native-header-editor"
+                .hass=${this.hass}
+                .badges=${badges}
+                .lovelace=${this.lovelace}
+                .viewIndex=${this._resolvedViewIndex()}
+                .config=${viewConfig?.header ?? {}}
+              ></hui-view-header>
+              ${this._showHeaderCardFallback ? this._renderHeaderCardFallback(this._headerCard) : ""}
+            `
+          : this._renderDirectHeaderChrome(this._headerCard)}
         <div class="sections-view">
           ${sections.map((sectionConfig, index) => html`
             <div
@@ -469,14 +581,18 @@ class SectionsLayout extends BaseLayout {
               `
             : ""}
         </div>
-        <hui-view-footer
-          id="native-footer-editor"
-          .hass=${this.hass}
-          .lovelace=${this.lovelace}
-          .viewIndex=${this._resolvedViewIndex()}
-          .config=${viewConfig?.footer ?? {}}
-        ></hui-view-footer>
-        ${this._showFooterCardFallback ? this._renderFooterCardFallback(this._footerCard) : ""}
+        ${this._nativeChromeReady
+          ? html`
+              <hui-view-footer
+                id="native-footer-editor"
+                .hass=${this.hass}
+                .lovelace=${this.lovelace}
+                .viewIndex=${this._resolvedViewIndex()}
+                .config=${viewConfig?.footer ?? {}}
+              ></hui-view-footer>
+              ${this._showFooterCardFallback ? this._renderFooterCardFallback(this._footerCard) : ""}
+            `
+          : this._renderDirectFooterChrome(this._footerCard)}
       </div>
       ${this._render_fab()}
     `);
@@ -596,6 +712,67 @@ class SectionsLayout extends BaseLayout {
 
         .chrome-card-fallback hui-card-edit-mode {
           width: min(700px, 100%);
+        }
+
+        .direct-chrome {
+          position: relative;
+          display: grid;
+          justify-items: center;
+          gap: 12px;
+          min-width: 0;
+          box-sizing: border-box;
+        }
+
+        .direct-chrome.header {
+          padding-top: var(--column-gap);
+        }
+
+        .direct-chrome.edit-mode {
+          min-height: 120px;
+          padding: 16px;
+          border: 2px dashed var(--divider-color);
+          border-radius: 12px;
+        }
+
+        .direct-chrome.footer.edit-mode {
+          align-self: end;
+          min-height: 76px;
+          margin-bottom: 8px;
+          padding: 12px 16px;
+        }
+
+        .direct-heading {
+          width: min(700px, 100%);
+          text-align: center;
+        }
+
+        .direct-heading hui-card-edit-mode {
+          display: block;
+          width: 100%;
+        }
+
+        .direct-add {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          min-height: 36px;
+          padding: 6px 20px;
+          border: 2px dashed var(--primary-color);
+          border-radius: var(--ha-section-border-radius, var(--ha-border-radius-xl));
+          background: transparent;
+          color: var(--primary-text-color);
+          font: inherit;
+          cursor: pointer;
+        }
+
+        .direct-add ha-icon {
+          --mdc-icon-size: 18px;
+        }
+
+        .badge-placeholder {
+          margin-top: -2px;
         }
 
         .chrome-configure {
