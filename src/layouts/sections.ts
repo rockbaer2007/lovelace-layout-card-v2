@@ -188,13 +188,22 @@ class SectionsLayout extends BaseLayout {
   private _configureHeader(ev: Event) {
     ev.stopPropagation();
     this._patchNativeEditorSaves();
-    this._nativeHeaderEditor()?._configure?.();
+    this._clickNativeConfigure(this._nativeHeaderEditor());
   }
 
   private _configureFooter(ev: Event) {
     ev.stopPropagation();
     this._patchNativeEditorSaves();
-    this._nativeFooterEditor()?._configure?.();
+    this._clickNativeConfigure(this._nativeFooterEditor());
+  }
+
+  private _clickNativeConfigure(editor?: any) {
+    const nativeButton = editor?.shadowRoot?.querySelector(".actions ha-icon-button") as HTMLElement | undefined;
+    if (nativeButton) {
+      nativeButton.click();
+      return;
+    }
+    editor?._configure?.();
   }
 
   private _editHeaderCard(ev: Event) {
