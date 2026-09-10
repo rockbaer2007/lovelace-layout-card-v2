@@ -73,6 +73,12 @@ function pagePath(page: any, index: number) {
   return String(page.path ?? (slugifyPath(page.title ?? "") || `dashboard-v2-${index + 1}`));
 }
 
+function layoutWithoutDashboardLayoutV2(layout: any) {
+  if (!layout || typeof layout !== "object") return undefined;
+  const { dashboard_layout_v2: _dashboardLayoutV2, ...rest } = layout;
+  return Object.keys(rest).length ? rest : undefined;
+}
+
 class DashboardLayoutV2ViewDialog extends LitElement {
   @property({ attribute: false }) hass: any;
   @property({ attribute: false }) lovelace: any;
@@ -152,7 +158,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   }
 
   private _mergePageWithView(page: any, view: any) {
-    if (!view) return page;
+    if (!view) {
+      const layout = layoutWithoutDashboardLayoutV2(page.layout);
+      const mergedPage = { ...page, ...(layout ? { layout } : {}) };
+      if (!layout) delete mergedPage.layout;
+      return mergedPage;
+    }
 
     const type = pageLayoutType(view);
     const mergedPage = {
@@ -162,7 +173,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       icon: view.icon ?? page.icon,
       type,
       layout_type: type,
-      layout: view.layout ?? page.layout,
+      layout: layoutWithoutDashboardLayoutV2(view.layout ?? page.layout),
     };
 
     if (type === SECTIONS_LAYOUT_V2) {
@@ -189,13 +200,16 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const title = String(page.title ?? page.name ?? `Unterseite ${index + 1}`);
     const path = page.path ?? (slugifyPath(title) || `dashboard-v2-${index + 1}`);
     const type = pageLayoutType(page);
+    const layout = layoutWithoutDashboardLayoutV2(page.layout);
     const normalizedPage = {
       ...page,
       title,
       path: String(path),
       type,
       layout_type: type,
+      ...(layout ? { layout } : {}),
     };
+    if (!layout) delete normalizedPage.layout;
 
     if (isSectionsPage(normalizedPage)) {
       return {
@@ -379,7 +393,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         : existingViewsByPath.get(pagePath);
       const isCurrentView = (sourcePath ?? pagePath) === currentPath;
       const pageLayout = {
-        ...((existing?.view.layout ?? page.layout) ?? {}),
+        ...(layoutWithoutDashboardLayoutV2(existing?.view.layout ?? page.layout) ?? {}),
         dashboard_layout_v2: dashboardLayoutV2,
       };
       const type = pageLayoutType(page);
