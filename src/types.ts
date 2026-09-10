@@ -34,8 +34,16 @@ export interface CardConfigGroup {
 
 export interface ViewConfig {
   title?: string;
+  path?: string;
   type?: string;
+  subview?: boolean;
   cards?: Array<CardConfig>;
+  sections?: Array<Record<string, any>>;
+  max_columns?: number;
+  badges?: Array<Record<string, any>>;
+  header?: Record<string, any>;
+  footer?: Record<string, any>;
+  sidebar?: Record<string, any>;
   layout?: {
     margin?: string;
     padding?: string;

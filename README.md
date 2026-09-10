@@ -10,6 +10,7 @@ The v2 package keeps the original layout ideas, but registers separate custom
 element names so it can be tested next to the original card:
 
 - `custom:masonry-layout-v2`
+- `custom:sections-layout-v2`
 - `custom:horizontal-layout-v2`
 - `custom:vertical-layout-v2`
 - `custom:grid-layout-v2`
@@ -72,8 +73,9 @@ You should now have more, narrower, columns of cards in your view.
 
 ### View Layouts
 
-Layout-card adds four new view layout to lovelace.
+Layout-card adds five new view layout to lovelace.
 
+- Sections (`custom:sections-layout-v2`)
 - Masonry (`custom:masonry-layout-v2`)
 - Horizontal (`custom:horizontal-layout-v2`)
 - Vertical (`custom:vertical-layout-v2`)

@@ -26,6 +26,8 @@ const defaultConfig = {
   pages: [],
 };
 
+const SECTIONS_LAYOUT_V2 = "custom:sections-layout-v2";
+
 function slugifyPath(value: string) {
   return value
     .toLowerCase()
@@ -50,11 +52,12 @@ function normalizeConfig(viewConfig: any) {
 }
 
 function pageLayoutType(page: any) {
-  return page.type ?? page.layout_type ?? "custom:masonry-layout-v2";
+  const type = page.type ?? page.layout_type ?? "custom:masonry-layout-v2";
+  return type === "sections" ? SECTIONS_LAYOUT_V2 : type;
 }
 
 function isSectionsPage(page: any) {
-  return pageLayoutType(page) === "sections";
+  return pageLayoutType(page) === SECTIONS_LAYOUT_V2;
 }
 
 function defaultSections() {
@@ -150,10 +153,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       layout_type: type,
     };
 
-    if (type === "sections") {
+    if (isSectionsPage(normalizedPage)) {
       return {
         ...normalizedPage,
         sections: Array.isArray(page.sections) ? page.sections : defaultSections(),
+        max_columns: page.max_columns ?? 4,
       };
     }
 
@@ -173,12 +177,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   private _updatePageLayout(index: number, value: string) {
     this._pages = this._pages.map((page, pageIndex) => {
       if (pageIndex !== index) return page;
-      if (value === "sections") {
+      if (value === "sections" || value === SECTIONS_LAYOUT_V2) {
         const { cards: _cards, ...rest } = page;
         return {
           ...rest,
-          type: "sections",
-          layout_type: "sections",
+          type: SECTIONS_LAYOUT_V2,
+          layout_type: SECTIONS_LAYOUT_V2,
           sections: Array.isArray(page.sections) ? page.sections : defaultSections(),
           max_columns: page.max_columns ?? 4,
         };
@@ -358,7 +362,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           subview: isCurrentView ? existing.view.subview : true,
           layout: pageLayout,
         };
-        if (type === "sections") {
+        if (type === SECTIONS_LAYOUT_V2) {
           delete updatedView.cards;
           updatedView.sections = sections;
           updatedView.max_columns = page.max_columns ?? existing.view.max_columns ?? 4;
@@ -379,7 +383,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         subview: true,
         layout: pageLayout,
       };
-      if (type === "sections") {
+      if (type === SECTIONS_LAYOUT_V2) {
         nextViews.push({
           ...newView,
           max_columns: page.max_columns ?? 4,
@@ -503,11 +507,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       <label>
                         Layout
                         <select
-                          .value=${selectedPage.layout_type ?? selectedPage.type ?? "custom:masonry-layout-v2"}
+                          .value=${pageLayoutType(selectedPage)}
                           @change=${(ev: Event) =>
                             this._updatePageLayout(this._selectedPageIndex, (ev.target as HTMLSelectElement).value)}
                         >
-                          <option value="sections">Abschnitte (Standard)</option>
+                          <option value=${SECTIONS_LAYOUT_V2}>Abschnitte V2</option>
                           <option value="custom:masonry-layout-v2">Masonry V2</option>
                           <option value="custom:horizontal-layout-v2">Horizontal V2</option>
                           <option value="custom:vertical-layout-v2">Vertical V2</option>

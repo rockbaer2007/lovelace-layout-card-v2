@@ -1,4 +1,5 @@
 import "./layouts/masonry";
+import "./layouts/sections";
 import "./layouts/horizontal";
 import "./layouts/vertical";
 import "./layout-break";
