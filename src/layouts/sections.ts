@@ -67,7 +67,7 @@ class SectionsLayout extends BaseLayout {
   }
 
   private async _warmupNativeSectionsView() {
-    if (!this.lovelace?.editMode || (this as any).__dashboardLayoutV2SectionsEditorsLoaded) return;
+    if (!this.lovelace || (this as any).__dashboardLayoutV2SectionsEditorsLoaded) return;
     (this as any).__dashboardLayoutV2SectionsEditorsLoaded = true;
 
     try {
@@ -90,7 +90,7 @@ class SectionsLayout extends BaseLayout {
       loader.narrow = this.narrow;
       loader.lovelace = {
         ...this.lovelace,
-        editMode: true,
+        editMode: this.lovelace.editMode,
         config: warmupConfig,
         rawConfig: warmupConfig,
         saveConfig: undefined,
