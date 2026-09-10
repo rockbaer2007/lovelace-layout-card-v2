@@ -77,6 +77,17 @@ class SectionsLayout extends BaseLayout {
     return this.lovelace?.rawConfig ?? this.lovelace?.config;
   }
 
+  private _currentViewConfig(): SectionsViewConfig {
+    const viewIndex = Number(this.index);
+    const rawView = this.lovelace?.rawConfig?.views?.[viewIndex];
+    const configView = this.lovelace?.config?.views?.[viewIndex];
+    return {
+      ...this._config,
+      ...(configView ?? {}),
+      ...(rawView ?? {}),
+    };
+  }
+
   private async _saveViewPatch(patch: Partial<SectionsViewConfig>) {
     const sourceConfig = this._sourceLovelaceConfig();
     const viewIndex = Number(this.index);
@@ -89,6 +100,12 @@ class SectionsLayout extends BaseLayout {
     };
 
     await this.lovelace.saveConfig(nextConfig);
+    if (this.lovelace.config?.views?.[viewIndex]) {
+      this.lovelace.config.views[viewIndex] = nextConfig.views[viewIndex];
+    }
+    if (this.lovelace.rawConfig?.views?.[viewIndex]) {
+      this.lovelace.rawConfig.views[viewIndex] = nextConfig.views[viewIndex];
+    }
     this._config = {
       ...this._config,
       ...patch,
@@ -113,8 +130,9 @@ class SectionsLayout extends BaseLayout {
   }
 
   render() {
-    const sections = sectionsFromConfig(this._config);
-    const maxColumns = this._config?.max_columns ?? 4;
+    const viewConfig = this._currentViewConfig();
+    const sections = sectionsFromConfig(viewConfig);
+    const maxColumns = viewConfig?.max_columns ?? 4;
     const editMode = Boolean(this.lovelace?.editMode);
     const badges = (this as any).badges ?? [];
     return this._renderDashboardLayoutV2Shell(html`
@@ -125,7 +143,7 @@ class SectionsLayout extends BaseLayout {
           .badges=${badges}
           .lovelace=${this.lovelace}
           .viewIndex=${this.index}
-          .config=${this._config?.header ?? {}}
+          .config=${viewConfig?.header ?? {}}
         ></hui-view-header>
         <div class="sections-view">
           ${sections.map((sectionConfig, index) => html`
@@ -180,7 +198,7 @@ class SectionsLayout extends BaseLayout {
           .hass=${this.hass}
           .lovelace=${this.lovelace}
           .viewIndex=${this.index}
-          .config=${this._config?.footer ?? {}}
+          .config=${viewConfig?.footer ?? {}}
         ></hui-view-footer>
       </div>
       ${this._render_fab()}
