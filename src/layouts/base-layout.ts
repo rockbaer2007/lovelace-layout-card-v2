@@ -116,6 +116,23 @@ export class BaseLayout extends LitElement {
     window.dispatchEvent(new Event("location-changed"));
   }
 
+  _renderDashboardLayoutV2Clock(menu: DashboardLayoutMenuConfig) {
+    if (menu.clock === "none") return html``;
+    if (menu.clock === "analog") {
+      const now = new Date();
+      const seconds = now.getSeconds();
+      const minutes = now.getMinutes() + seconds / 60;
+      const hours = (now.getHours() % 12) + minutes / 60;
+      return html`
+        <div class="dashboard-layout-v2-analog-clock" aria-label="Analoge Uhr">
+          <span class="hand hour" style=${`transform: rotate(${hours * 30}deg)`}></span>
+          <span class="hand minute" style=${`transform: rotate(${minutes * 6}deg)`}></span>
+        </div>
+      `;
+    }
+    return html`<span>${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>`;
+  }
+
   _renderDashboardLayoutV2Menu() {
     const menu = this._dashboardLayoutV2Menu();
     if (menu.position === "none") return html``;
@@ -142,9 +159,7 @@ export class BaseLayout extends LitElement {
       >
         <header>
           ${menu.title ? html`<strong>${menu.title}</strong>` : ""}
-          ${menu.clock !== "none"
-            ? html`<span>${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>`
-            : ""}
+          ${this._renderDashboardLayoutV2Clock(menu)}
           ${menu.date !== false ? html`<small>${new Date().toLocaleDateString()}</small>` : ""}
         </header>
         <nav>
@@ -226,6 +241,42 @@ export class BaseLayout extends LitElement {
 
       .dashboard-layout-v2-menu small {
         color: var(--secondary-text-color);
+      }
+
+      .dashboard-layout-v2-analog-clock {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        border: 2px solid var(--dashboard-layout-v2-icon-color, var(--primary-color));
+        border-radius: 50%;
+      }
+
+      .dashboard-layout-v2-analog-clock::after {
+        content: "";
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        top: calc(50% - 3px);
+        left: calc(50% - 3px);
+        border-radius: 50%;
+        background: var(--primary-text-color);
+      }
+
+      .dashboard-layout-v2-analog-clock .hand {
+        position: absolute;
+        bottom: 50%;
+        left: calc(50% - 1px);
+        width: 2px;
+        transform-origin: bottom center;
+        background: var(--primary-text-color);
+      }
+
+      .dashboard-layout-v2-analog-clock .hand.hour {
+        height: 13px;
+      }
+
+      .dashboard-layout-v2-analog-clock .hand.minute {
+        height: 18px;
       }
 
       .dashboard-layout-v2-menu nav {
