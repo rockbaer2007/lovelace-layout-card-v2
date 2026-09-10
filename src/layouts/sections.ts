@@ -51,6 +51,39 @@ class SectionsLayout extends BaseLayout {
     await this.lovelace.saveConfig(nextConfig);
   }
 
+  private _nativeHeaderEditor() {
+    return this.shadowRoot?.getElementById("native-header-editor") as any;
+  }
+
+  private _nativeFooterEditor() {
+    return this.shadowRoot?.getElementById("native-footer-editor") as any;
+  }
+
+  private _configureHeader(ev: Event) {
+    ev.stopPropagation();
+    this._nativeHeaderEditor()?._configure?.();
+  }
+
+  private _addTitle(ev: Event) {
+    ev.stopPropagation();
+    this._nativeHeaderEditor()?._addCard?.();
+  }
+
+  private _addBadge(ev: Event) {
+    ev.stopPropagation();
+    this.dispatchEvent(new CustomEvent("ll-create-badge", { bubbles: true, composed: true }));
+  }
+
+  private _configureFooter(ev: Event) {
+    ev.stopPropagation();
+    this._nativeFooterEditor()?._configure?.();
+  }
+
+  private _addFooter(ev: Event) {
+    ev.stopPropagation();
+    this._nativeFooterEditor()?._addCard?.();
+  }
+
   render() {
     const sections = sectionsFromConfig(this._config);
     const maxColumns = this._config?.max_columns ?? 4;
@@ -59,16 +92,25 @@ class SectionsLayout extends BaseLayout {
       <div class="sections-wrapper" style=${`--sections-max-columns: ${maxColumns}`}>
         ${editMode
           ? html`
+              <hui-view-header
+                id="native-header-editor"
+                class="native-editor-proxy"
+                .hass=${this.hass}
+                .badges=${[]}
+                .lovelace=${this.lovelace}
+                .viewIndex=${this.index}
+                .config=${this._config?.header ?? {}}
+              ></hui-view-header>
               <div class="header-placeholder">
-                <button class="header-edit" title="Kopfzeile bearbeiten">
+                <button class="header-edit" @click=${this._configureHeader} title="Kopfzeile bearbeiten">
                   <ha-icon .icon=${"mdi:pencil"}></ha-icon>
                 </button>
                 <div class="header-actions">
-                  <button title="Titel hinzufügen">
+                  <button @click=${this._addTitle} title="Titel hinzufügen">
                     <ha-icon .icon=${"mdi:plus"}></ha-icon>
                     <span>Titel hinzufügen</span>
                   </button>
-                  <button title="Badge hinzufügen">
+                  <button @click=${this._addBadge} title="Badge hinzufügen">
                     <ha-icon .icon=${"mdi:plus"}></ha-icon>
                     <span>Badge hinzufügen</span>
                   </button>
@@ -122,15 +164,20 @@ class SectionsLayout extends BaseLayout {
             : ""}
         </div>
         <hui-view-footer
+          id=${editMode ? "native-footer-editor" : ""}
+          class=${editMode ? "native-editor-proxy" : ""}
           .hass=${this.hass}
           .lovelace=${this.lovelace}
           .viewIndex=${this.index}
-          .config=${this._config?.footer}
+          .config=${this._config?.footer ?? {}}
         ></hui-view-footer>
         ${editMode
           ? html`
               <div class="footer-placeholder">
-                <button title="Fußzeile hinzufügen">
+                <button class="footer-edit" @click=${this._configureFooter} title="Fußzeile bearbeiten">
+                  <ha-icon .icon=${"mdi:pencil"}></ha-icon>
+                </button>
+                <button @click=${this._addFooter} title="Fußzeile hinzufügen">
                   <ha-icon .icon=${"mdi:plus"}></ha-icon>
                   <span>Fußzeile hinzufügen</span>
                 </button>
@@ -190,6 +237,15 @@ class SectionsLayout extends BaseLayout {
           border: 2px dashed var(--divider-color, rgba(255, 255, 255, 0.18));
           border-radius: 16px;
           box-sizing: border-box;
+        }
+
+        .native-editor-proxy {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          overflow: hidden;
+          opacity: 0;
+          pointer-events: none;
         }
 
         .header-edit {
@@ -271,6 +327,7 @@ class SectionsLayout extends BaseLayout {
         }
 
         .footer-placeholder {
+          position: relative;
           align-self: end;
           width: min(100%, 900px);
           margin: 32px auto 8px;
@@ -281,7 +338,21 @@ class SectionsLayout extends BaseLayout {
           border-radius: 16px;
         }
 
-        .footer-placeholder button {
+        .footer-edit {
+          position: absolute;
+          top: -42px;
+          right: 0;
+          width: 42px;
+          min-width: 42px;
+          height: 42px;
+          border: 0;
+          border-radius: 12px 12px 0 0;
+          background: var(--secondary-background-color, #242424);
+          color: var(--primary-text-color);
+          cursor: pointer;
+        }
+
+        .footer-placeholder button:not(.footer-edit) {
           display: inline-flex;
           align-items: center;
           gap: 8px;
