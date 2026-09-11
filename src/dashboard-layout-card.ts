@@ -681,6 +681,7 @@ class DashboardLayoutCardV2 extends LitElement {
       .page {
         min-width: 0;
         margin-right: 5px;
+        margin-bottom: 5px;
         padding: 8px;
         border: 1px solid var(--dashboard-layout-v2-card-border-color, transparent);
         border-radius: var(--ha-card-border-radius, 12px);
