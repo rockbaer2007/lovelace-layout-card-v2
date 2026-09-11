@@ -524,9 +524,15 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
   private _updateStatusItem(index: number, key: "entity" | "label" | "unit", value: string) {
     const items = this._normalizeStatusItems(this._statusItems);
-    items[index] = {
+    const nextItem = {
       ...items[index],
       [key]: value,
+    };
+    if (key === "entity" && !items[index]?.label?.trim()) {
+      nextItem.label = this.hass?.states?.[value]?.attributes?.friendly_name ?? value;
+    }
+    items[index] = {
+      ...nextItem,
     };
     this._statusItems = items;
   }
