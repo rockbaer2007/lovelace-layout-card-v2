@@ -7,11 +7,15 @@ const dashboardLayoutCardV2SchemaPatchFlag = "_dashboardLayoutCardV2SchemaPatche
 const dashboardLayoutCardV2SelectorPatchFlag = "_dashboardLayoutCardV2SelectorPatched";
 const dashboardLayoutCardV2RootPatchFlag = "_dashboardLayoutCardV2RootPatched";
 const homeAssistantViewLayouts = new Set(["sections", "masonry", "sidebar", "panel"]);
+const sectionsLayoutV2Type = "custom:sections-layout-v2";
+const sectionsViewLayouts = new Set(["sections", sectionsLayoutV2Type]);
 const dashboardLayoutCardV2ViewLayouts = new Set(
   LAYOUT_CARD_SELECTOR_OPTIONS.map((option) => option.value)
 );
 const dashboardLayoutCardV2Icon =
   "M3 4h12v4H3V4m0 6h12v4H3v-4m0 6h8v4H3v-4M17.8 12.2l2 2L13.6 20.4H11.6V18.4L17.8 12.2m2.7-2.7c.3-.3.8-.3 1.1 0l.9.9c.3.3.3.8 0 1.1l-1.2 1.2-2-2 1.2-1.2z";
+const validPathRegex = /^[a-zA-Z0-9_-]+$/;
+const integerRegex = /^[0-9]+$/;
 
 function appendLayoutCardV2Options(schemaEntry: any) {
   const selector = schemaEntry?.selector;
@@ -31,6 +35,80 @@ function appendLayoutCardV2Options(schemaEntry: any) {
   }
 }
 
+function duplicateSectionsSpecificsForV2(schema: any[]) {
+  if (!Array.isArray(schema)) return;
+  const sectionSpecifics = schema.find((entry) => entry?.name === "section_specifics");
+  if (!sectionSpecifics) return;
+  const hasV2SectionSpecifics = schema.some(
+    (entry) => entry?.name === "section_specifics" && entry?.visible?.value === sectionsLayoutV2Type
+  );
+  if (hasV2SectionSpecifics) return;
+
+  schema.push({
+    ...sectionSpecifics,
+    visible: {
+      ...(sectionSpecifics.visible ?? {}),
+      value: sectionsLayoutV2Type,
+    },
+  });
+}
+
+function slugifyPath(value: string) {
+  return String(value || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function patchValueChanged(target: any) {
+  if (!target || target._dashboardLayoutCardV2ValueChangedPatched || typeof target._valueChanged !== "function") return;
+
+  target._valueChanged = function (ev: CustomEvent) {
+    const config = ev.detail.value;
+    if (!sectionsViewLayouts.has(config.type)) {
+      delete config.max_columns;
+      delete config.dense_section_placement;
+      delete config.top_margin;
+    }
+
+    const slugifyTitle = (title: string | undefined) => {
+      const slug = slugifyPath(title || "");
+      if (integerRegex.test(slug)) {
+        return `view-${slug}`;
+      }
+      return slug;
+    };
+
+    if (
+      this.isNew &&
+      !this._suggestedPath &&
+      this._config.path === config.path &&
+      (!this._config.path || config.path === slugifyTitle(this._config.title))
+    ) {
+      config.path = slugifyTitle(config.title);
+    }
+
+    let valid = true;
+    this._error = undefined;
+    if (config.path && !validPathRegex.test(config.path)) {
+      valid = false;
+      this._error = { path: "error_invalid_path" };
+    } else if (config.path && integerRegex.test(config.path)) {
+      valid = false;
+      this._error = { path: "error_number" };
+    }
+
+    this.dispatchEvent(new CustomEvent("view-config-changed", {
+      bubbles: true,
+      composed: true,
+      detail: { valid, config },
+    }));
+  };
+
+  target._dashboardLayoutCardV2ValueChangedPatched = true;
+}
+
 function patchSchemaProvider(target: any) {
   if (!target || target[dashboardLayoutCardV2SchemaPatchFlag] || typeof target._schema !== "function") return;
 
@@ -39,6 +117,7 @@ function patchSchemaProvider(target: any) {
     const retval = originalSchema.apply(this, args);
     const typeSelector = retval?.find?.((entry) => entry.name === "type");
     appendLayoutCardV2Options(typeSelector);
+    duplicateSectionsSpecificsForV2(retval);
 
     if (retval?.find?.((entry) => entry.name === "layout") === undefined) {
       retval.push({
@@ -67,6 +146,7 @@ function appendHelpText(editor: any) {
 
 function patchViewEditorInstance(editor: any) {
   patchSchemaProvider(editor);
+  patchValueChanged(editor);
   appendHelpText(editor);
   editor?.requestUpdate?.();
 }
@@ -185,6 +265,7 @@ customElements.whenDefined("hui-view-editor").then(() => {
   const HuiViewEditor = customElements.get("hui-view-editor") as any;
 
   patchSchemaProvider(HuiViewEditor.prototype);
+  patchValueChanged(HuiViewEditor.prototype);
 
   if (HuiViewEditor.prototype[dashboardLayoutCardV2PatchFlag]) {
     patchExistingViewEditors();
