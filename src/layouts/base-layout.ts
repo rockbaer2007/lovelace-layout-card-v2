@@ -242,8 +242,16 @@ export class BaseLayout extends LitElement {
       const hours = (now.getHours() % 12) + minutes / 60;
       return html`
         <div class="dashboard-layout-v2-analog-clock" aria-label="Analoge Uhr">
+          ${menu.analog_hour_marks
+            ? Array.from({ length: 12 }, (_, index) => html`
+                <span class="mark" style=${`transform: rotate(${index * 30}deg)`}></span>
+              `)
+            : ""}
           <span class="hand hour" style=${`transform: rotate(${hours * 30}deg)`}></span>
           <span class="hand minute" style=${`transform: rotate(${minutes * 6}deg)`}></span>
+          ${menu.analog_seconds
+            ? html`<span class="hand second" style=${`transform: rotate(${seconds * 6}deg)`}></span>`
+            : ""}
         </div>
       `;
     }
@@ -299,6 +307,8 @@ export class BaseLayout extends LitElement {
           style.inactive_tab_text_color ? `--dashboard-layout-v2-inactive-tab-text-color: ${style.inactive_tab_text_color}` : "",
           style.hover_tab_text_color ? `--dashboard-layout-v2-hover-tab-text-color: ${style.hover_tab_text_color}` : "",
           style.tab_border_color ? `--dashboard-layout-v2-tab-border-color: ${style.tab_border_color}` : "",
+          style.tab_shadow_frame_color ? `--dashboard-layout-v2-tab-shadow-frame-color: ${style.tab_shadow_frame_color}` : "",
+          style.shadow_frame_offset ? `--dashboard-layout-v2-shadow-frame-offset: ${style.shadow_frame_offset}` : "",
           style.clock_size ? `--dashboard-layout-v2-clock-size: ${style.clock_size}` : "",
           style.date_size ? `--dashboard-layout-v2-date-size: ${style.date_size}` : "",
           background ? `--dashboard-layout-v2-menu-background: ${background}` : "",
@@ -323,7 +333,10 @@ export class BaseLayout extends LitElement {
       style.card_border_color ? `--ha-card-border-color: ${style.card_border_color}` : "",
       style.card_border_color ? "--ha-card-border-width: 1px" : "",
       style.shadow_frame_color ? `--dashboard-layout-v2-shadow-frame-color: ${style.shadow_frame_color}` : "",
-      style.shadow_frame_color ? `--ha-card-box-shadow: 3px 3px 0 0 ${style.shadow_frame_color}` : "",
+      style.shadow_frame_offset ? `--dashboard-layout-v2-shadow-frame-offset: ${style.shadow_frame_offset}` : "",
+      style.shadow_frame_color
+        ? `--ha-card-box-shadow: var(--dashboard-layout-v2-shadow-frame-offset, 4px) var(--dashboard-layout-v2-shadow-frame-offset, 4px) 0 0 ${style.shadow_frame_color}`
+        : "",
     ].filter(Boolean).join(";");
   }
 
@@ -364,7 +377,7 @@ export class BaseLayout extends LitElement {
         min-width: 0;
         border: 1px solid var(--dashboard-layout-v2-card-border-color, transparent);
         border-radius: var(--ha-card-border-radius, 12px);
-        box-shadow: 3px 3px 0 0 var(--dashboard-layout-v2-shadow-frame-color, transparent);
+        box-shadow: var(--dashboard-layout-v2-shadow-frame-offset, 4px) var(--dashboard-layout-v2-shadow-frame-offset, 4px) 0 0 var(--dashboard-layout-v2-shadow-frame-color, transparent);
         box-sizing: border-box;
       }
 
@@ -412,6 +425,16 @@ export class BaseLayout extends LitElement {
         border-radius: 50%;
       }
 
+      .dashboard-layout-v2-analog-clock .mark {
+        position: absolute;
+        top: 4px;
+        left: calc(50% - 1px);
+        width: 2px;
+        height: 6px;
+        transform-origin: 1px calc((var(--dashboard-layout-v2-clock-size, 44px) / 2) - 4px);
+        background: var(--primary-text-color);
+      }
+
       .dashboard-layout-v2-analog-clock::after {
         content: "";
         position: absolute;
@@ -440,6 +463,13 @@ export class BaseLayout extends LitElement {
         height: calc(var(--dashboard-layout-v2-clock-size, 44px) * 0.41);
       }
 
+      .dashboard-layout-v2-analog-clock .hand.second {
+        left: calc(50% - 0.5px);
+        width: 1px;
+        height: calc(var(--dashboard-layout-v2-clock-size, 44px) * 0.43);
+        background: var(--dashboard-layout-v2-icon-color, var(--primary-color));
+      }
+
       .dashboard-layout-v2-menu nav {
         display: grid;
         gap: 6px;
@@ -464,6 +494,7 @@ export class BaseLayout extends LitElement {
         border: 1px solid var(--dashboard-layout-v2-tab-border-color, transparent);
         border-radius: 8px;
         box-sizing: border-box;
+        box-shadow: var(--dashboard-layout-v2-shadow-frame-offset, 4px) var(--dashboard-layout-v2-shadow-frame-offset, 4px) 0 0 var(--dashboard-layout-v2-tab-shadow-frame-color, transparent);
         color: var(--primary-text-color);
         background: var(--dashboard-layout-v2-inactive-tab-color, transparent);
         text-align: left;

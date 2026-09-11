@@ -15,6 +15,8 @@ const defaultConfig = {
     show_home: true,
     home: {},
     clock: "digital",
+    analog_hour_marks: false,
+    analog_seconds: false,
     date: true,
     weekday: "none",
     style: {
@@ -28,8 +30,10 @@ const defaultConfig = {
       inactive_tab_text_color: "",
       hover_tab_text_color: "",
       tab_border_color: "",
+      tab_shadow_frame_color: "",
       card_border_color: "",
       shadow_frame_color: "",
+      shadow_frame_offset: "4px",
       clock_size: "44px",
       date_size: "12px",
       weekday_wrap_size: "21px",
@@ -249,6 +253,12 @@ function normalizedDateSize(value: string) {
   return `${Math.max(8, Math.min(48, size))}px`;
 }
 
+function normalizedShadowFrameOffset(value: string) {
+  const size = Number(clockSizeInputValue(value));
+  if (!Number.isFinite(size) || size <= 0) return "4px";
+  return `${Math.max(3, Math.min(10, size))}px`;
+}
+
 function sectionsFromExistingData(page: any, existingView: any) {
   if (Array.isArray(page.sections)) return page.sections;
   if (Array.isArray(existingView?.sections)) return existingView.sections;
@@ -297,6 +307,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _homePath = "home";
   @state() private _homeIcon = "mdi:home";
   @state() private _clock = "digital";
+  @state() private _analogHourMarks = false;
+  @state() private _analogSeconds = false;
   @state() private _date = true;
   @state() private _weekday = "none";
   @state() private _iconColor = "";
@@ -309,8 +321,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _inactiveTabTextColor = "";
   @state() private _hoverTabTextColor = "";
   @state() private _tabBorderColor = "";
+  @state() private _tabShadowFrameColor = "";
   @state() private _cardBorderColor = "";
   @state() private _shadowFrameColor = "";
+  @state() private _shadowFrameOffset = "4";
   @state() private _clockSize = "44";
   @state() private _dateSize = "12";
   @state() private _weekdayWrapSize = "21";
@@ -351,6 +365,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._homePath = homeEntry.path;
     this._homeIcon = homeEntry.icon;
     this._clock = config.menu.clock ?? "digital";
+    this._analogHourMarks = config.menu.analog_hour_marks === true;
+    this._analogSeconds = config.menu.analog_seconds === true;
     this._date = config.menu.date !== false;
     this._weekday = config.menu.weekday ?? "none";
     this._iconColor = config.menu.style?.icon_color ?? "";
@@ -363,8 +379,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._inactiveTabTextColor = config.menu.style?.inactive_tab_text_color ?? "";
     this._hoverTabTextColor = config.menu.style?.hover_tab_text_color ?? "";
     this._tabBorderColor = config.menu.style?.tab_border_color ?? "";
+    this._tabShadowFrameColor = config.menu.style?.tab_shadow_frame_color ?? "";
     this._cardBorderColor = config.menu.style?.card_border_color ?? "";
     this._shadowFrameColor = config.menu.style?.shadow_frame_color ?? "";
+    this._shadowFrameOffset = clockSizeInputValue(config.menu.style?.shadow_frame_offset ?? "4px");
     this._clockSize = clockSizeInputValue(config.menu.style?.clock_size ?? "44px");
     this._dateSize = clockSizeInputValue(config.menu.style?.date_size ?? "12px");
     this._weekdayWrapSize = clockSizeInputValue(config.menu.style?.weekday_wrap_size ?? "21px");
@@ -434,6 +452,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "menuTitle") this._menuTitle = value;
     if (key === "showHome") this._showHome = value;
     if (key === "clock") this._clock = value;
+    if (key === "analogHourMarks") this._analogHourMarks = value;
+    if (key === "analogSeconds") this._analogSeconds = value;
     if (key === "date") this._date = value;
     if (key === "weekday") this._weekday = value;
     if (key === "iconColor") this._iconColor = value;
@@ -446,8 +466,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "inactiveTabTextColor") this._inactiveTabTextColor = value;
     if (key === "hoverTabTextColor") this._hoverTabTextColor = value;
     if (key === "tabBorderColor") this._tabBorderColor = value;
+    if (key === "tabShadowFrameColor") this._tabShadowFrameColor = value;
     if (key === "cardBorderColor") this._cardBorderColor = value;
     if (key === "shadowFrameColor") this._shadowFrameColor = value;
+    if (key === "shadowFrameOffset") this._shadowFrameOffset = value;
     if (key === "clockSize") this._clockSize = value;
     if (key === "dateSize") this._dateSize = value;
     if (key === "weekdayWrapSize") this._weekdayWrapSize = value;
@@ -811,6 +833,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         show_home: this._showHome,
         home: homeEntry,
         clock: this._clock,
+        analog_hour_marks: this._analogHourMarks,
+        analog_seconds: this._analogSeconds,
         date: this._date,
         weekday: this._weekday,
         style: {
@@ -824,8 +848,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           inactive_tab_text_color: this._inactiveTabTextColor,
           hover_tab_text_color: this._hoverTabTextColor,
           tab_border_color: this._tabBorderColor,
+          tab_shadow_frame_color: this._tabShadowFrameColor,
           card_border_color: this._cardBorderColor,
           shadow_frame_color: this._shadowFrameColor,
+          shadow_frame_offset: normalizedShadowFrameOffset(this._shadowFrameOffset),
           clock_size: normalizedClockSize(this._clockSize),
           date_size: normalizedDateSize(this._dateSize),
           weekday_wrap_size: normalizedDateSize(this._weekdayWrapSize),
@@ -1015,6 +1041,29 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               <option value="analog">Analog</option>
             </select>
           </label>
+
+          ${this._clock === "analog"
+            ? html`
+                <label class="check">
+                  <input
+                    type="checkbox"
+                    .checked=${this._analogHourMarks}
+                    @change=${(ev: Event) =>
+                      this._setValue("analogHourMarks", (ev.target as HTMLInputElement).checked)}
+                  />
+                  Stundenteilung anzeigen
+                </label>
+                <label class="check">
+                  <input
+                    type="checkbox"
+                    .checked=${this._analogSeconds}
+                    @change=${(ev: Event) =>
+                      this._setValue("analogSeconds", (ev.target as HTMLInputElement).checked)}
+                  />
+                  Sekundenzeiger anzeigen
+                </label>
+              `
+            : nothing}
 
           <label class="check">
             <input
@@ -1291,9 +1340,23 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               ${this._renderColorField("Hover Farbe", "hoverTabColor", this._hoverTabColor, "var(--secondary-background-color)")}
               ${this._renderColorField("Hover Text", "hoverTabTextColor", this._hoverTabTextColor, "var(--primary-text-color)")}
               ${this._renderColorField("Tabumrandung", "tabBorderColor", this._tabBorderColor, "transparent")}
+              ${this._renderColorField("3D-Effekt Tab", "tabShadowFrameColor", this._tabShadowFrameColor, "transparent")}
               ${this._renderColorField("Cardumrandung", "cardBorderColor", this._cardBorderColor, "transparent")}
-              ${this._renderColorField("3D-Effekt Farbe", "shadowFrameColor", this._shadowFrameColor, "transparent")}
-              <span class="style-empty" aria-hidden="true"></span>
+              ${this._renderColorField("3D-Effekt Card", "shadowFrameColor", this._shadowFrameColor, "transparent")}
+              <label class="wide-style">
+                3D-Versatz
+                <div class="range-row">
+                  <input
+                    type="range"
+                    min="3"
+                    max="10"
+                    step="1"
+                    .value=${this._shadowFrameOffset}
+                    @input=${(ev: Event) => this._setValue("shadowFrameOffset", (ev.target as HTMLInputElement).value)}
+                  />
+                  <span>${this._shadowFrameOffset}px</span>
+                </div>
+              </label>
               ${this._renderColorField("Icon Farbe", "iconColor", this._iconColor, "var(--primary-color)")}
               ${this._renderColorField("Icon-Feld Farbe", "iconBackgroundColor", this._iconBackgroundColor, "transparent")}
               <label>
@@ -1638,6 +1701,23 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
         .shape-preview.rounded-square {
           border-radius: 7px;
+        }
+
+        .range-row {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 48px;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .range-row span {
+          text-align: right;
+          color: var(--secondary-text-color);
+          font-weight: 700;
+        }
+
+        .wide-style {
+          grid-column: 1 / -1;
         }
 
         .actions {

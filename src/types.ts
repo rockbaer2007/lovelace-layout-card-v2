@@ -111,6 +111,8 @@ export interface DashboardLayoutMenuConfig {
     icon?: string;
   };
   clock?: DashboardLayoutClockMode;
+  analog_hour_marks?: boolean;
+  analog_seconds?: boolean;
   date?: boolean;
   weekday?: DashboardLayoutWeekdayMode;
   style?: {
@@ -125,8 +127,10 @@ export interface DashboardLayoutMenuConfig {
     inactive_tab_text_color?: string;
     hover_tab_text_color?: string;
     tab_border_color?: string;
+    tab_shadow_frame_color?: string;
     card_border_color?: string;
     shadow_frame_color?: string;
+    shadow_frame_offset?: string;
     clock_size?: string;
     date_size?: string;
     weekday_wrap_size?: string;
