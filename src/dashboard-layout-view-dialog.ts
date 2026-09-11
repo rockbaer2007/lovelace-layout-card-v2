@@ -1357,7 +1357,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             </div>
           </details>
 
-          <details class="wide collapsible-group">
+          <details class="wide collapsible-group" open>
             <summary>Hauptseite</summary>
             <div class="section-grid">
               <label class="check">
@@ -1369,7 +1369,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                 Hauptseite als ersten Menüpunkt anzeigen
               </label>
 
-              <fieldset class="home-entry group">
+              <fieldset class="home-entry group wide">
                 <legend>Hauptseitefeld</legend>
                 <label>
                   Titel
@@ -1394,7 +1394,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                 </label>
               </fieldset>
 
-              <fieldset class="home-entry group">
+              <fieldset class="home-entry group wide">
                 <legend>Abschnittsansicht</legend>
                 <label>
                   Maximalzahl von Abschnitten in der Breite
