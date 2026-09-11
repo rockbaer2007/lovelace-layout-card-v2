@@ -224,7 +224,8 @@ export class BaseLayout extends LitElement {
     const now = new Date();
     const date = now.toLocaleDateString();
     if (menu.weekday === "short") {
-      return html`<small>${now.toLocaleDateString([], { weekday: "short" })} ${date}</small>`;
+      const weekday = now.toLocaleDateString([], { weekday: "short" }).replace(/\.$/, "");
+      return html`<small>${weekday}. ${date}</small>`;
     }
     if (menu.weekday === "long") {
       const weekday = now.toLocaleDateString([], { weekday: "long" });

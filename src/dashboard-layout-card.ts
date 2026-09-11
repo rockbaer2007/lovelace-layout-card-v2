@@ -184,7 +184,8 @@ class DashboardLayoutCardV2 extends LitElement {
     const dateSize = Number(String(style.date_size ?? "12px").replace(/[^\d.]/g, "")) || 12;
     const date = this._now.toLocaleDateString();
     if (menu.weekday === "short") {
-      return html`<span class="menu-date">${this._now.toLocaleDateString([], { weekday: "short" })} ${date}</span>`;
+      const weekday = this._now.toLocaleDateString([], { weekday: "short" }).replace(/\.$/, "");
+      return html`<span class="menu-date">${weekday}. ${date}</span>`;
     }
     if (menu.weekday === "long") {
       const weekday = this._now.toLocaleDateString([], { weekday: "long" });
