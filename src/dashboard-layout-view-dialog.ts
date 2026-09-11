@@ -408,13 +408,17 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             );
     this._pages = [...pagesSource].map((page, index) => {
       const cleanPage = pageWithoutRecursiveDashboardLayout(page);
+      if (isMenuOnlyPage(cleanPage)) return cleanPage;
+
       const matchingView =
         viewsByPath.get(pagePath(cleanPage, index)) ??
         viewsByTitle.get(normalizedTitle(cleanPage.title)) ??
         rawViews[index + 1];
       return this._mergePageWithView(cleanPage, matchingView);
     });
-    this._pageSourcePaths = this._pages.map((page, index) => pagePath(page, index));
+    this._pageSourcePaths = this._pages.map((page, index) =>
+      isMenuOnlyPage(page) ? undefined : pagePath(page, index)
+    );
     this._selectedPageIndex = this._pages.length ? 0 : -1;
     this._syncJsonFromPages();
     this._error = "";
