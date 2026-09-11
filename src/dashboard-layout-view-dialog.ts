@@ -1479,12 +1479,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       <span>Einheit</span>
                       ${this._normalizeStatusItems(this._statusItems).map(
                         (item, index) => html`
-                          <input
-                            placeholder=${`sensor.status_${index + 1}`}
+                          <ha-entity-picker
+                            .hass=${this.hass}
                             .value=${item.entity ?? ""}
-                            @input=${(ev: Event) =>
-                              this._updateStatusItem(index, "entity", (ev.target as HTMLInputElement).value)}
-                          />
+                            placeholder=${`sensor.status_${index + 1}`}
+                            allow-custom-entity
+                            @value-changed=${(ev: CustomEvent) =>
+                              this._updateStatusItem(index, "entity", ev.detail?.value ?? "")}
+                          ></ha-entity-picker>
                           <input
                             placeholder="Optional"
                             .value=${item.label ?? ""}
@@ -1952,6 +1954,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           color: var(--secondary-text-color);
           font-size: 12px;
           font-weight: 800;
+        }
+
+        .status-items ha-entity-picker {
+          min-width: 0;
+          width: 100%;
         }
 
         .shape-options {
