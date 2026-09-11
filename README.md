@@ -12,8 +12,8 @@ layout-card without overwriting it.
 
 - Adds V2 view layouts for Masonry, Sections, Horizontal, Vertical and Grid.
 - Adds an optional left or right dashboard tab menu for view navigation.
-- Supports non-clickable menu spacers and divider lines.
-- Divider lines support their own color and optional 3D frame color.
+- Supports non-clickable menu spacers and rounded divider bars.
+- Divider bars support their own color and optional 3D frame color.
 - Supports Home Assistant-style Sections views through `custom:sections-layout-v2`.
 - Keeps the menu visible while switching between linked dashboard subviews.
 - Stores shared dashboard menu settings once on the home view.
@@ -180,6 +180,27 @@ dashboard settings are available from the view editor and allow editing:
 
 The JSON section in the editor is optional and meant for advanced page edits.
 Normal tab changes should be done through the form fields.
+
+## Background Images
+
+Menu background images should be stored in Home Assistant's `www` folder and
+referenced through `/local/...`.
+
+Example:
+
+```text
+/config/www/image/back2.jpg
+```
+
+Use this path in the editor:
+
+```text
+/local/image/back2.jpg
+```
+
+Only use images you own or images with a compatible open-source/free license.
+Do not redistribute screenshots, wallpapers or photos unless their license
+allows it.
 
 ## Menu Settings
 
