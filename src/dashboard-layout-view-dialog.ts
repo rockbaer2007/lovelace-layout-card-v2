@@ -25,6 +25,7 @@ const defaultConfig = {
       inactive_tab_text_color: "",
       hover_tab_text_color: "",
       clock_size: "44px",
+      date_size: "12px",
       background_mode: "none",
       background_color: "",
       background_image: "",
@@ -213,6 +214,12 @@ function normalizedClockSize(value: string) {
   return `${Math.max(24, Math.min(128, size))}px`;
 }
 
+function normalizedDateSize(value: string) {
+  const size = Number(clockSizeInputValue(value));
+  if (!Number.isFinite(size) || size <= 0) return "12px";
+  return `${Math.max(8, Math.min(48, size))}px`;
+}
+
 function sectionsFromExistingData(page: any, existingView: any) {
   if (Array.isArray(page.sections)) return page.sections;
   if (Array.isArray(existingView?.sections)) return existingView.sections;
@@ -268,8 +275,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _hoverTabColor = "";
   @state() private _activeTabTextColor = "";
   @state() private _inactiveTabTextColor = "";
-  @state() private _hoverTabTextColor = "";
+@state() private _hoverTabTextColor = "";
   @state() private _clockSize = "44";
+  @state() private _dateSize = "12";
   @state() private _backgroundMode = "none";
   @state() private _backgroundColor = "";
   @state() private _backgroundImage = "";
@@ -316,6 +324,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._inactiveTabTextColor = config.menu.style?.inactive_tab_text_color ?? "";
     this._hoverTabTextColor = config.menu.style?.hover_tab_text_color ?? "";
     this._clockSize = clockSizeInputValue(config.menu.style?.clock_size ?? "44px");
+    this._dateSize = clockSizeInputValue(config.menu.style?.date_size ?? "12px");
     this._backgroundMode = config.menu.style?.background_mode ?? "none";
     this._backgroundColor = config.menu.style?.background_color ?? "";
     this._backgroundImage = config.menu.style?.background_image ?? "";
@@ -387,6 +396,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "inactiveTabTextColor") this._inactiveTabTextColor = value;
     if (key === "hoverTabTextColor") this._hoverTabTextColor = value;
     if (key === "clockSize") this._clockSize = value;
+    if (key === "dateSize") this._dateSize = value;
     if (key === "backgroundMode") this._backgroundMode = value;
     if (key === "backgroundColor") this._backgroundColor = value;
     if (key === "backgroundImage") this._backgroundImage = value;
@@ -712,6 +722,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           inactive_tab_text_color: this._inactiveTabTextColor,
           hover_tab_text_color: this._hoverTabTextColor,
           clock_size: normalizedClockSize(this._clockSize),
+          date_size: normalizedDateSize(this._dateSize),
           background_mode: this._backgroundMode,
           background_color: this._backgroundColor,
           background_image: this._backgroundImage,
@@ -1040,15 +1051,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           <fieldset class="wide group">
             <legend>Style</legend>
             <div class="style-grid">
-              ${this._renderColorField("Iconfarbe", "iconColor", this._iconColor, "var(--primary-color)")}
-              ${this._renderColorField("Tabfarbe aktiv", "activeTabColor", this._activeTabColor, "var(--primary-color)")}
-              ${this._renderColorField("Tabfarbe inaktiv", "inactiveTabColor", this._inactiveTabColor, "transparent")}
-              ${this._renderColorField("Tabfarbe Hover", "hoverTabColor", this._hoverTabColor, "var(--secondary-background-color)")}
-              ${this._renderColorField("Textfarbe aktiv", "activeTabTextColor", this._activeTabTextColor, "var(--text-primary-color)")}
-              ${this._renderColorField("Textfarbe inaktiv", "inactiveTabTextColor", this._inactiveTabTextColor, "var(--primary-text-color)")}
-              ${this._renderColorField("Textfarbe Hover", "hoverTabTextColor", this._hoverTabTextColor, "var(--primary-text-color)")}
               <label>
-                Uhrgröße
+                Größe Uhr
                 <input
                   type="number"
                   min="24"
@@ -1058,6 +1062,25 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   @input=${(ev: Event) => this._setValue("clockSize", (ev.target as HTMLInputElement).value)}
                 />
               </label>
+              <label>
+                Größe Datum
+                <input
+                  type="number"
+                  min="8"
+                  max="48"
+                  step="1"
+                  .value=${this._dateSize}
+                  @input=${(ev: Event) => this._setValue("dateSize", (ev.target as HTMLInputElement).value)}
+                />
+              </label>
+              ${this._renderColorField("Tab aktiv", "activeTabColor", this._activeTabColor, "var(--primary-color)")}
+              ${this._renderColorField("Text aktiv", "activeTabTextColor", this._activeTabTextColor, "var(--text-primary-color)")}
+              ${this._renderColorField("Tab inaktiv", "inactiveTabColor", this._inactiveTabColor, "transparent")}
+              ${this._renderColorField("Text inaktiv", "inactiveTabTextColor", this._inactiveTabTextColor, "var(--primary-text-color)")}
+              ${this._renderColorField("Hover Farbe", "hoverTabColor", this._hoverTabColor, "var(--secondary-background-color)")}
+              ${this._renderColorField("Hover Text", "hoverTabTextColor", this._hoverTabTextColor, "var(--primary-text-color)")}
+              ${this._renderColorField("Icon Farbe", "iconColor", this._iconColor, "var(--primary-color)")}
+              <span class="style-empty" aria-hidden="true"></span>
               <label>
                 Hintergrund
                 <select
@@ -1082,7 +1105,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               ${this._backgroundMode === "image"
                 ? html`
                     <label>
-                      Hintergrundbild
+                      Bild
                       <input
                         placeholder="/local/background.jpg"
                         .value=${this._backgroundImage}
@@ -1331,6 +1354,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           grid-template-columns: 1fr 1fr;
           gap: 12px;
           align-content: start;
+        }
+
+        .style-empty {
+          min-height: 40px;
         }
 
         .actions {

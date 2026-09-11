@@ -120,6 +120,7 @@ export interface DashboardLayoutMenuConfig {
     inactive_tab_text_color?: string;
     hover_tab_text_color?: string;
     clock_size?: string;
+    date_size?: string;
     background_mode?: "none" | "color" | "image";
     background_color?: string;
     background_image?: string;

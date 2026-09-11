@@ -242,6 +242,7 @@ export class BaseLayout extends LitElement {
           style.inactive_tab_text_color ? `--dashboard-layout-v2-inactive-tab-text-color: ${style.inactive_tab_text_color}` : "",
           style.hover_tab_text_color ? `--dashboard-layout-v2-hover-tab-text-color: ${style.hover_tab_text_color}` : "",
           style.clock_size ? `--dashboard-layout-v2-clock-size: ${style.clock_size}` : "",
+          style.date_size ? `--dashboard-layout-v2-date-size: ${style.date_size}` : "",
           background ? `--dashboard-layout-v2-menu-background: ${background}` : "",
         ].filter(Boolean).join(";")}
       >
@@ -330,6 +331,7 @@ export class BaseLayout extends LitElement {
 
       .dashboard-layout-v2-menu small {
         color: var(--secondary-text-color);
+        font-size: var(--dashboard-layout-v2-date-size, 12px);
       }
 
       .dashboard-layout-v2-analog-clock {
