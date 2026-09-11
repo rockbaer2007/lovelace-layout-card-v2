@@ -15,6 +15,7 @@ layout-card without overwriting it.
 - Supports non-clickable menu spacers and rounded divider bars.
 - Divider bars support their own color and optional 3D frame color.
 - Supports Home Assistant-style Sections views through `custom:sections-layout-v2`.
+- Creates new dashboard subviews as Sections V2 by default.
 - Keeps the menu visible while switching between linked dashboard subviews.
 - Stores shared dashboard menu settings once on the home view.
 - Lets linked subviews inherit menu style through `inherits_from`.
