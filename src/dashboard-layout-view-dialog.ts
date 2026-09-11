@@ -1207,13 +1207,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                             ? "Trenner"
                             : pageTitle(page, index)}
                       </span>
-                      <small>
-                        ${page.type === "spacer"
-                          ? "leer"
-                          : page.type === "divider"
-                            ? page.color ?? "#ffffff"
-                            : page.path ?? ""}
-                      </small>
+                      ${page.type === "divider"
+                        ? nothing
+                        : html`<small>${page.type === "spacer" ? "leer" : page.path ?? ""}</small>`}
                     </button>
                   `
                 )}
