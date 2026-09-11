@@ -70,7 +70,8 @@ reference the home view with `inherits_from`.
 
 The optional `menu.status` block shows up to four read-only Home Assistant
 entity states at the bottom of the side menu. The editor uses Home Assistant's
-entity selector for these entries. `label` overrides the friendly
+entity selector when available and falls back to a searchable entity input.
+`label` overrides the friendly
 name, and `unit` is used only when the entity does not provide
 `unit_of_measurement`. If `border_color` is empty, the status block uses the
 tab border color; if that is empty or transparent, it falls back to white.

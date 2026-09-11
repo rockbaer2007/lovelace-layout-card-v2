@@ -360,6 +360,13 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _pagesText = "[]";
   @state() private _error = "";
 
+  connectedCallback() {
+    super.connectedCallback();
+    Promise.all([customElements.whenDefined("ha-form"), customElements.whenDefined("ha-selector")]).then(() =>
+      this.requestUpdate()
+    );
+  }
+
   showDialog(params: DashboardLayoutV2DialogParams) {
     this.hass = params.hass;
     this.lovelace = params.lovelace;
@@ -545,6 +552,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         unit: item.unit?.trim() ?? "",
       }))
       .filter((item) => item.entity);
+  }
+
+  private _statusEntityOptions() {
+    return Object.keys(this.hass?.states ?? {}).sort((a, b) => a.localeCompare(b));
+  }
+
+  private _canUseNativeStatusEntitySelector() {
+    return Boolean(customElements.get("ha-form") && customElements.get("ha-selector"));
   }
 
   private _statusEntitySchema = [
@@ -1501,14 +1516,27 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       <span>Einheit</span>
                       ${this._normalizeStatusItems(this._statusItems).map(
                         (item, index) => html`
-                          <ha-form
-                            class="status-entity-form"
-                            .hass=${this.hass}
-                            .schema=${this._statusEntitySchema}
-                            .data=${{ entity: item.entity ?? "" }}
-                            .computeLabel=${this._statusEntityLabel}
-                            @value-changed=${(ev: CustomEvent) => this._updateStatusEntityFromForm(index, ev)}
-                          ></ha-form>
+                          ${this._canUseNativeStatusEntitySelector()
+                            ? html`
+                                <ha-form
+                                  class="status-entity-form"
+                                  .hass=${this.hass}
+                                  .schema=${this._statusEntitySchema}
+                                  .data=${{ entity: item.entity ?? "" }}
+                                  .computeLabel=${this._statusEntityLabel}
+                                  @value-changed=${(ev: CustomEvent) => this._updateStatusEntityFromForm(index, ev)}
+                                ></ha-form>
+                              `
+                            : html`
+                                <input
+                                  class="entity-input"
+                                  list="dashboard-layout-v2-status-entities"
+                                  placeholder=${`sensor.status_${index + 1}`}
+                                  .value=${item.entity ?? ""}
+                                  @input=${(ev: Event) =>
+                                    this._updateStatusItem(index, "entity", (ev.target as HTMLInputElement).value)}
+                                />
+                              `}
                           <input
                             placeholder="Optional"
                             .value=${item.label ?? ""}
@@ -1524,6 +1552,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         `
                       )}
                     </div>
+                    <datalist id="dashboard-layout-v2-status-entities">
+                      ${this._statusEntityOptions().map((entityId) => {
+                        const friendlyName = this.hass?.states?.[entityId]?.attributes?.friendly_name;
+                        return html`<option value=${entityId} label=${friendlyName ?? entityId}></option>`;
+                      })}
+                    </datalist>
                   `
                 : nothing}
             </div>
@@ -1978,7 +2012,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           font-weight: 800;
         }
 
-        .status-items .status-entity-form {
+        .status-items .status-entity-form,
+        .status-items .entity-input {
           min-width: 0;
           width: 100%;
         }
