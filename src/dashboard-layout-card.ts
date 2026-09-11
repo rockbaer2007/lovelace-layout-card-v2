@@ -49,6 +49,17 @@ function pageTitle(page?: DashboardLayoutPageConfig) {
   return String(page?.title ?? (page as any)?.name ?? page?.path ?? "");
 }
 
+function formatStatusValue(value?: string) {
+  if (value === undefined || value === null) return "—";
+  const normalized = String(value).replace(",", ".");
+  if (!/^-?\d+(\.\d+)?$/.test(normalized)) return String(value);
+  const numericValue = Number(normalized);
+  if (!Number.isFinite(numericValue)) return String(value);
+  return numericValue.toLocaleString(undefined, {
+    maximumFractionDigits: 1,
+  });
+}
+
 class DashboardLayoutCardV2 extends LitElement {
   @property() hass;
   @property() editMode = false;
@@ -245,7 +256,7 @@ class DashboardLayoutCardV2 extends LitElement {
           const stateObj = this.hass?.states?.[item.entity ?? ""];
           const label = item.label || stateObj?.attributes?.friendly_name || item.entity;
           const unit = stateObj?.attributes?.unit_of_measurement || item.unit || "";
-          const value = stateObj?.state ?? "—";
+          const value = formatStatusValue(stateObj?.state);
           return html`
             <div class="status-row">
               <span class="status-label">${label}</span>

@@ -19,6 +19,17 @@ function dashboardLayoutV2PageTitle(page: any) {
   return String(page?.title ?? page?.name ?? page?.path ?? "");
 }
 
+function formatDashboardLayoutV2StatusValue(value?: string) {
+  if (value === undefined || value === null) return "—";
+  const normalized = String(value).replace(",", ".");
+  if (!/^-?\d+(\.\d+)?$/.test(normalized)) return String(value);
+  const numericValue = Number(normalized);
+  if (!Number.isFinite(numericValue)) return String(value);
+  return numericValue.toLocaleString(undefined, {
+    maximumFractionDigits: 1,
+  });
+}
+
 export class BaseLayout extends LitElement {
   @property() cards: Array<LovelaceCard | HuiCard> = [];
   @property() index: number;
@@ -315,7 +326,7 @@ export class BaseLayout extends LitElement {
           const stateObj = this.hass?.states?.[item.entity ?? ""];
           const label = item.label || stateObj?.attributes?.friendly_name || item.entity;
           const unit = stateObj?.attributes?.unit_of_measurement || item.unit || "";
-          const value = stateObj?.state ?? "—";
+          const value = formatDashboardLayoutV2StatusValue(stateObj?.state);
           return html`
             <div class="dashboard-layout-v2-status-row">
               <span class="dashboard-layout-v2-status-label">${label}</span>

@@ -77,7 +77,8 @@ name, and `unit` is used only when the entity does not provide
 tab border color; if that is empty or transparent, it falls back to white.
 When an entity is selected and the label is still empty, the editor fills the
 label from the entity's friendly name. Status labels are limited to 18
-characters to keep the menu layout stable.
+characters to keep the menu layout stable. Numeric status values are displayed
+with at most one decimal place.
 
 ```yaml
 views:
