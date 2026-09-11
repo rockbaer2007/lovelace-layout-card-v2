@@ -178,6 +178,10 @@ function pagePath(page: any, index: number) {
   return String(page.path ?? (slugifyPath(page.title ?? "") || `dashboard-v2-${index + 1}`));
 }
 
+function pageTitle(page: any, index: number) {
+  return String(page?.title ?? page?.name ?? page?.path ?? `Unterseite ${index + 1}`);
+}
+
 function layoutWithoutDashboardLayoutV2(layout: any) {
   if (!layout || typeof layout !== "object") return undefined;
   const { dashboard_layout_v2: _dashboardLayoutV2, ...rest } = layout;
@@ -208,7 +212,7 @@ function pageNavigationMetadata(page: any) {
   }
 
   const metadata: any = {
-    title: page.title,
+    title: pageTitle(page, 0),
     path: page.path,
     ...(page.icon ? { icon: page.icon } : {}),
     type: page.type,
@@ -548,7 +552,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       };
     }
 
-    const title = String(page.title ?? page.name ?? `Unterseite ${index + 1}`);
+    const title = pageTitle(page, index);
     const path = page.path ?? (slugifyPath(title) || `dashboard-v2-${index + 1}`);
     const type = pageLayoutType(page);
     const cleanPage = pageWithoutRecursiveDashboardLayout(page);
@@ -1097,7 +1101,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                           ? "Abstand"
                           : page.type === "divider"
                             ? "Trenner"
-                            : page.title ?? page.path ?? `Unterseite ${index + 1}`}
+                            : pageTitle(page, index)}
                       </span>
                       <small>
                         ${page.type === "spacer"

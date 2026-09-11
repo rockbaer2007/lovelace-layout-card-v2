@@ -15,6 +15,10 @@ function isDashboardLayoutV2MenuOnlyPage(page: any) {
   return page?.type === "spacer" || page?.type === "divider";
 }
 
+function dashboardLayoutV2PageTitle(page: any) {
+  return String(page?.title ?? page?.name ?? page?.path ?? "");
+}
+
 export class BaseLayout extends LitElement {
   @property() cards: Array<LovelaceCard | HuiCard> = [];
   @property() index: number;
@@ -224,7 +228,7 @@ export class BaseLayout extends LitElement {
         @click=${() => this._navigateDashboardLayoutV2Page(page.path)}
       >
         ${page.icon ? html`<ha-icon .icon=${page.icon}></ha-icon>` : ""}
-        <span>${page.title}</span>
+        <span>${dashboardLayoutV2PageTitle(page)}</span>
       </button>
     `;
   }

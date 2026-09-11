@@ -45,6 +45,10 @@ function isMenuOnlyPage(page?: DashboardLayoutPageConfig) {
   return page?.type === "spacer" || page?.type === "divider";
 }
 
+function pageTitle(page?: DashboardLayoutPageConfig) {
+  return String(page?.title ?? (page as any)?.name ?? page?.path ?? "");
+}
+
 class DashboardLayoutCardV2 extends LitElement {
   @property() hass;
   @property() editMode = false;
@@ -227,7 +231,7 @@ class DashboardLayoutCardV2 extends LitElement {
         @click=${() => this._selectPage(index)}
       >
         ${page.icon ? html`<ha-icon .icon=${page.icon}></ha-icon>` : ""}
-        <span>${page.title}</span>
+        <span>${pageTitle(page)}</span>
       </button>
     `;
   }
