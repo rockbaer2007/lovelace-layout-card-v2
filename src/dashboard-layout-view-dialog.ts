@@ -356,16 +356,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _pages: any[] = [];
   private _pageSourcePaths: Array<string | undefined> = [];
   @state() private _selectedPageIndex = 0;
+  @state() private _openStatusEntityIndex = -1;
   @state() private _jsonExpanded = false;
   @state() private _pagesText = "[]";
   @state() private _error = "";
-
-  connectedCallback() {
-    super.connectedCallback();
-    Promise.all([customElements.whenDefined("ha-form"), customElements.whenDefined("ha-selector")]).then(() =>
-      this.requestUpdate()
-    );
-  }
 
   showDialog(params: DashboardLayoutV2DialogParams) {
     this.hass = params.hass;
@@ -536,7 +530,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       [key]: value,
     };
     if (key === "entity" && !items[index]?.label?.trim()) {
-      nextItem.label = this.hass?.states?.[value]?.attributes?.friendly_name ?? value;
+      const stateObj = this.hass?.states?.[value];
+      nextItem.label = stateObj?.attributes?.friendly_name ?? (value.includes(".") ? value : "");
     }
     items[index] = {
       ...nextItem,
@@ -558,24 +553,71 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     return Object.keys(this.hass?.states ?? {}).sort((a, b) => a.localeCompare(b));
   }
 
-  private _canUseNativeStatusEntitySelector() {
-    return Boolean(customElements.get("ha-form") && customElements.get("ha-selector"));
+  private _statusEntityMatches(query: string) {
+    const normalizedQuery = query.trim().toLowerCase();
+    return this._statusEntityOptions()
+      .filter((entityId) => {
+        if (!normalizedQuery) return true;
+        const friendlyName = this.hass?.states?.[entityId]?.attributes?.friendly_name ?? "";
+        return entityId.toLowerCase().includes(normalizedQuery) || friendlyName.toLowerCase().includes(normalizedQuery);
+      })
+      .slice(0, 50);
   }
 
-  private _statusEntitySchema = [
-    {
-      name: "entity",
-      selector: {
-        entity: {},
-      },
-    },
-  ];
+  private _selectStatusEntity(index: number, entityId: string) {
+    this._updateStatusItem(index, "entity", entityId);
+    this._openStatusEntityIndex = -1;
+  }
 
-  private _statusEntityLabel = () => "";
+  private _closeStatusEntityPicker(index: number) {
+    window.setTimeout(() => {
+      if (this._openStatusEntityIndex === index) {
+        this._openStatusEntityIndex = -1;
+      }
+    }, 150);
+  }
 
-  private _updateStatusEntityFromForm(index: number, ev: CustomEvent) {
-    const value = ev.detail?.value?.entity ?? "";
-    this._updateStatusItem(index, "entity", value);
+  private _renderStatusEntityPicker(item: { entity?: string }, index: number) {
+    const value = item.entity ?? "";
+    const matches = this._statusEntityMatches(value);
+
+    return html`
+      <div class="status-entity-picker">
+        <input
+          class="entity-input"
+          placeholder=${`sensor.status_${index + 1}`}
+          .value=${value}
+          @focus=${() => (this._openStatusEntityIndex = index)}
+          @blur=${() => this._closeStatusEntityPicker(index)}
+          @input=${(ev: Event) => {
+            this._openStatusEntityIndex = index;
+            this._updateStatusItem(index, "entity", (ev.target as HTMLInputElement).value);
+          }}
+        />
+        ${this._openStatusEntityIndex === index
+          ? html`
+              <div class="status-entity-menu">
+                ${matches.length
+                  ? matches.map((entityId) => {
+                      const stateObj = this.hass?.states?.[entityId];
+                      const friendlyName = stateObj?.attributes?.friendly_name ?? entityId;
+                      return html`
+                        <button
+                          type="button"
+                          @mousedown=${(ev: MouseEvent) => ev.preventDefault()}
+                          @click=${() => this._selectStatusEntity(index, entityId)}
+                        >
+                          <span>${friendlyName}</span>
+                          <small>${entityId}</small>
+                        </button>
+                      `;
+                    })
+                  : html`<p>Keine Entität gefunden</p>`}
+              </div>
+            `
+          : nothing}
+      </div>
+    `;
   }
 
   private _homeEntryFromView(configHome?: any) {
@@ -1516,27 +1558,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       <span>Einheit</span>
                       ${this._normalizeStatusItems(this._statusItems).map(
                         (item, index) => html`
-                          ${this._canUseNativeStatusEntitySelector()
-                            ? html`
-                                <ha-form
-                                  class="status-entity-form"
-                                  .hass=${this.hass}
-                                  .schema=${this._statusEntitySchema}
-                                  .data=${{ entity: item.entity ?? "" }}
-                                  .computeLabel=${this._statusEntityLabel}
-                                  @value-changed=${(ev: CustomEvent) => this._updateStatusEntityFromForm(index, ev)}
-                                ></ha-form>
-                              `
-                            : html`
-                                <input
-                                  class="entity-input"
-                                  list="dashboard-layout-v2-status-entities"
-                                  placeholder=${`sensor.status_${index + 1}`}
-                                  .value=${item.entity ?? ""}
-                                  @input=${(ev: Event) =>
-                                    this._updateStatusItem(index, "entity", (ev.target as HTMLInputElement).value)}
-                                />
-                              `}
+                          ${this._renderStatusEntityPicker(item, index)}
                           <input
                             placeholder="Optional"
                             .value=${item.label ?? ""}
@@ -1552,12 +1574,6 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         `
                       )}
                     </div>
-                    <datalist id="dashboard-layout-v2-status-entities">
-                      ${this._statusEntityOptions().map((entityId) => {
-                        const friendlyName = this.hass?.states?.[entityId]?.attributes?.friendly_name;
-                        return html`<option value=${entityId} label=${friendlyName ?? entityId}></option>`;
-                      })}
-                    </datalist>
                   `
                 : nothing}
             </div>
@@ -2012,10 +2028,54 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           font-weight: 800;
         }
 
-        .status-items .status-entity-form,
+        .status-entity-picker {
+          position: relative;
+          min-width: 0;
+        }
+
         .status-items .entity-input {
           min-width: 0;
           width: 100%;
+        }
+
+        .status-entity-menu {
+          position: absolute;
+          top: calc(100% + 4px);
+          left: 0;
+          right: 0;
+          z-index: 5;
+          display: grid;
+          max-height: 260px;
+          overflow: auto;
+          padding: 6px;
+          border: 1px solid var(--divider-color, #333);
+          border-radius: 8px;
+          background: var(--card-background-color, #1c1c1c);
+          box-shadow: var(--ha-card-box-shadow, 0 8px 24px rgba(0, 0, 0, 0.35));
+        }
+
+        .status-entity-menu button {
+          display: grid;
+          justify-items: start;
+          min-width: 0;
+          width: 100%;
+          height: auto;
+          min-height: 44px;
+          padding: 6px 8px;
+          border: 0;
+          background: transparent;
+          text-align: left;
+        }
+
+        .status-entity-menu button:hover {
+          background: color-mix(in srgb, var(--primary-color, #03a9f4) 18%, transparent);
+        }
+
+        .status-entity-menu small,
+        .status-entity-menu p {
+          margin: 0;
+          color: var(--secondary-text-color);
+          font-size: 12px;
         }
 
         .shape-options {
