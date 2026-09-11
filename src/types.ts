@@ -50,6 +50,7 @@ export interface ViewConfig {
     height?: string;
     dashboard_layout_v2?: {
       inherits_from?: string;
+      inherit_theme?: boolean;
       menu?: DashboardLayoutMenuConfig;
       chrome?: DashboardLayoutChromeConfig;
       pages?: Array<DashboardLayoutPageConfig & { path?: string }>;

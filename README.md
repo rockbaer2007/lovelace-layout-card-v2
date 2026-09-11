@@ -18,6 +18,7 @@ layout-card without overwriting it.
 - Keeps the menu visible while switching between linked dashboard subviews.
 - Stores shared dashboard menu settings once on the home view.
 - Lets linked subviews inherit menu style through `inherits_from`.
+- Can apply the home view theme to linked subviews while saving.
 - Supports configurable tab colors, text colors, hover colors, icon color, icon
   background color, icon shape, tab border, view card border, separate tab and
   view 3D frames, menu background, digital or analog clock, optional analog
@@ -73,6 +74,7 @@ views:
     icon: mdi:home
     layout:
       dashboard_layout_v2:
+        inherit_theme: true
         menu:
           position: left
           title: Haus
@@ -167,6 +169,7 @@ dashboard settings are available from the view editor and allow editing:
 
 - menu position: left, none or right
 - home entry
+- whether linked subviews should inherit the home view theme
 - tab pages and their layouts
 - tab, text, hover, icon and background colors
 - tab/view borders and separate 3D frame colors

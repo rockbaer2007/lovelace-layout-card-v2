@@ -9,6 +9,7 @@ type DashboardLayoutV2DialogParams = {
 };
 
 const defaultConfig = {
+  inherit_theme: true,
   menu: {
     position: "left",
     title: "Haus",
@@ -308,6 +309,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _homeTitle = "Home";
   @state() private _homePath = "home";
   @state() private _homeIcon = "mdi:home";
+  @state() private _inheritTheme = true;
   @state() private _clock = "digital";
   @state() private _analogHourMarks = false;
   @state() private _analogMinuteMarks = false;
@@ -367,6 +369,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._homeTitle = homeEntry.title;
     this._homePath = homeEntry.path;
     this._homeIcon = homeEntry.icon;
+    this._inheritTheme = config.inherit_theme !== false;
     this._clock = config.menu.clock ?? "digital";
     this._analogHourMarks = config.menu.analog_hour_marks === true;
     this._analogMinuteMarks = config.menu.analog_minute_marks === true;
@@ -455,6 +458,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "menuPosition") this._menuPosition = value;
     if (key === "menuTitle") this._menuTitle = value;
     if (key === "showHome") this._showHome = value;
+    if (key === "inheritTheme") this._inheritTheme = value;
     if (key === "clock") this._clock = value;
     if (key === "analogHourMarks") this._analogHourMarks = value;
     if (key === "analogMinuteMarks") this._analogMinuteMarks = value;
@@ -839,6 +843,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     };
 
     const dashboardLayoutV2 = {
+      inherit_theme: this._inheritTheme,
       menu: {
         position: this._menuPosition,
         title: this._menuTitle,
@@ -886,6 +891,13 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const existingViewsByPath = new Map(
       views.map((view, index) => [String(view.path ?? index), { view, index }])
     );
+    const homeTheme = existingViewsByPath.get(homePath)?.view.theme ?? views[this.viewIndex].theme;
+    const applyInheritedTheme = (view: any, viewPath: string) => {
+      if (!this._inheritTheme || viewPath === homePath) return view;
+      if (homeTheme) return { ...view, theme: homeTheme };
+      const { theme: _theme, ...viewWithoutTheme } = view;
+      return viewWithoutTheme;
+    };
     const relatedPaths = this._collectRelatedDashboardLayoutV2Paths(views, currentPath, dashboardLayoutV2);
     normalizedPages.forEach((page, index) => {
       if (!isMenuOnlyPage(page)) relatedPaths.add(String(page.path));
@@ -901,14 +913,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         viewPath === homePath || (index === this.viewIndex && !view.subview)
           ? dashboardLayoutV2
           : dashboardLayoutV2Reference(homePath);
-      return {
+      return applyInheritedTheme({
         ...view,
         ...stableViewEditorChrome(view),
         layout: {
           ...(layoutWithoutDashboardLayoutV2(view.layout) ?? {}),
           dashboard_layout_v2: nextDashboardLayoutV2,
         },
-      };
+      }, viewPath);
     });
 
     for (const [pageIndex, page] of normalizedPages.entries()) {
@@ -935,7 +947,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           : [];
 
       if (existing) {
-        const updatedView = {
+        const updatedView = applyInheritedTheme({
           ...existing.view,
           title: page.title,
           path: pagePath,
@@ -943,7 +955,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           type,
           subview: isCurrentView ? existing.view.subview : true,
           layout: pageLayout,
-        };
+        }, pagePath);
         Object.assign(updatedView, stableViewEditorChrome(updatedView));
         if (type === SECTIONS_LAYOUT_V2) {
           delete updatedView.cards;
@@ -958,14 +970,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         continue;
       }
 
-      const newView = {
+      const newView = applyInheritedTheme({
         title: page.title,
         path: pagePath,
         ...(page.icon ? { icon: page.icon } : {}),
         type,
         subview: true,
         layout: pageLayout,
-      };
+      }, pagePath);
       Object.assign(newView, stableViewEditorChrome(newView));
       if (type === SECTIONS_LAYOUT_V2) {
         nextViews.push({
@@ -1042,6 +1054,15 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             </span>
             <small>${this._homePath}</small>
           </fieldset>
+
+          <label class="check">
+            <input
+              type="checkbox"
+              .checked=${this._inheritTheme}
+              @change=${(ev: Event) => this._setValue("inheritTheme", (ev.target as HTMLInputElement).checked)}
+            />
+            Theme von Hauptansicht übernehmen
+          </label>
 
           <label>
             Uhr
