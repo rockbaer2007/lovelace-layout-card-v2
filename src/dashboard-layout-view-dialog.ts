@@ -1193,7 +1193,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       </label>
                       ${selectedPageItemType === "divider"
                         ? html`
-                            <label>
+                            <label class="divider-color-field">
                               Trennerfarbe
                               <div class="color-row">
                                 <input
@@ -1213,7 +1213,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                                 />
                               </div>
                             </label>
-                            <label>
+                            <label class="divider-color-field">
                               3D-Effekt Trenner
                               <div class="color-row">
                                 <input
@@ -1495,11 +1495,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
         .dialog {
           position: absolute;
-          top: 48px;
+          top: 16px;
           left: 50%;
           transform: translateX(-50%);
           width: min(760px, calc(100vw - 32px));
-          height: min(760px, calc(100vh - 96px));
+          height: min(920px, calc(100vh - 32px));
           display: grid;
           grid-template-rows: auto 1fr auto;
           background: var(--card-background-color, #1c1c1c);
@@ -1545,6 +1545,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         }
 
         .wide,
+        .divider-color-field,
         .check,
         .error,
         .hint {
