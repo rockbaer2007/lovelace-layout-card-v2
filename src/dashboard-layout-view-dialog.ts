@@ -16,6 +16,7 @@ const defaultConfig = {
     home: {},
     clock: "digital",
     date: true,
+    weekday: "none",
     style: {
       icon_color: "",
       icon_background_color: "",
@@ -271,6 +272,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _homeIcon = "mdi:home";
   @state() private _clock = "digital";
   @state() private _date = true;
+  @state() private _weekday = "none";
   @state() private _iconColor = "";
   @state() private _iconBackgroundColor = "";
   @state() private _iconShape = "circle";
@@ -320,6 +322,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._homeIcon = homeEntry.icon;
     this._clock = config.menu.clock ?? "digital";
     this._date = config.menu.date !== false;
+    this._weekday = config.menu.weekday ?? "none";
     this._iconColor = config.menu.style?.icon_color ?? "";
     this._iconBackgroundColor = config.menu.style?.icon_background_color ?? config.menu.style?.icon_circle_color ?? "";
     this._iconShape = config.menu.style?.icon_shape ?? "circle";
@@ -394,6 +397,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "showHome") this._showHome = value;
     if (key === "clock") this._clock = value;
     if (key === "date") this._date = value;
+    if (key === "weekday") this._weekday = value;
     if (key === "iconColor") this._iconColor = value;
     if (key === "iconBackgroundColor") this._iconBackgroundColor = value;
     if (key === "iconShape") this._iconShape = value;
@@ -721,6 +725,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         home: homeEntry,
         clock: this._clock,
         date: this._date,
+        weekday: this._weekday,
         style: {
           icon_color: this._iconColor,
           icon_background_color: this._iconBackgroundColor,
@@ -925,6 +930,40 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             />
             Datum anzeigen
           </label>
+
+          <fieldset class="weekday-options group">
+            <legend>Wochentag</legend>
+            <label class="check">
+              <input
+                type="radio"
+                name="dashboard-layout-v2-weekday"
+                value="none"
+                .checked=${this._weekday === "none"}
+                @change=${() => this._setValue("weekday", "none")}
+              />
+              Kein
+            </label>
+            <label class="check">
+              <input
+                type="radio"
+                name="dashboard-layout-v2-weekday"
+                value="short"
+                .checked=${this._weekday === "short"}
+                @change=${() => this._setValue("weekday", "short")}
+              />
+              Kürzel
+            </label>
+            <label class="check">
+              <input
+                type="radio"
+                name="dashboard-layout-v2-weekday"
+                value="long"
+                .checked=${this._weekday === "long"}
+                @change=${() => this._setValue("weekday", "long")}
+              />
+              Ausgeschrieben
+            </label>
+          </fieldset>
 
           <fieldset class="wide group">
             <legend>HA-Oberfläche</legend>
@@ -1334,6 +1373,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         .home-entry {
           align-content: center;
           gap: 6px;
+        }
+
+        .weekday-options {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .weekday-options .check {
+          grid-column: auto;
         }
 
         .home-entry span {

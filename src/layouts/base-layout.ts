@@ -217,6 +217,24 @@ export class BaseLayout extends LitElement {
     return html`<span>${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>`;
   }
 
+  _renderDashboardLayoutV2Date(menu: DashboardLayoutMenuConfig) {
+    if (menu.date === false) return html``;
+    const style = menu.style ?? {};
+    const dateSize = Number(String(style.date_size ?? "12px").replace(/[^\d.]/g, "")) || 12;
+    const now = new Date();
+    const date = now.toLocaleDateString();
+    if (menu.weekday === "short") {
+      return html`<small>${now.toLocaleDateString([], { weekday: "short" })} ${date}</small>`;
+    }
+    if (menu.weekday === "long") {
+      const weekday = now.toLocaleDateString([], { weekday: "long" });
+      return dateSize >= 24
+        ? html`<small class="two-line"><span>${weekday}</span><span>${date}</span></small>`
+        : html`<small>${weekday} ${date}</small>`;
+    }
+    return html`<small>${date}</small>`;
+  }
+
   _renderDashboardLayoutV2Menu() {
     const menu = this._dashboardLayoutV2Menu();
     if (menu.position === "none") return html``;
@@ -253,7 +271,7 @@ export class BaseLayout extends LitElement {
         <header>
           ${menu.title ? html`<strong>${menu.title}</strong>` : ""}
           ${this._renderDashboardLayoutV2Clock(menu)}
-          ${menu.date !== false ? html`<small>${new Date().toLocaleDateString()}</small>` : ""}
+          ${this._renderDashboardLayoutV2Date(menu)}
         </header>
         <nav>
           ${pages.map(
@@ -336,6 +354,13 @@ export class BaseLayout extends LitElement {
       .dashboard-layout-v2-menu small {
         color: var(--secondary-text-color);
         font-size: var(--dashboard-layout-v2-date-size, 12px);
+      }
+
+      .dashboard-layout-v2-menu small.two-line {
+        display: grid;
+        justify-items: center;
+        line-height: 1.12;
+        text-align: center;
       }
 
       .dashboard-layout-v2-analog-clock {

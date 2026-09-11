@@ -178,6 +178,23 @@ class DashboardLayoutCardV2 extends LitElement {
     })}</strong>`;
   }
 
+  _renderDate(menu: DashboardLayoutMenuConfig) {
+    if (menu.date === false) return html``;
+    const style = menu.style ?? {};
+    const dateSize = Number(String(style.date_size ?? "12px").replace(/[^\d.]/g, "")) || 12;
+    const date = this._now.toLocaleDateString();
+    if (menu.weekday === "short") {
+      return html`<span class="menu-date">${this._now.toLocaleDateString([], { weekday: "short" })} ${date}</span>`;
+    }
+    if (menu.weekday === "long") {
+      const weekday = this._now.toLocaleDateString([], { weekday: "long" });
+      return dateSize >= 24
+        ? html`<span class="menu-date two-line"><span>${weekday}</span><span>${date}</span></span>`
+        : html`<span class="menu-date">${weekday} ${date}</span>`;
+    }
+    return html`<span class="menu-date">${date}</span>`;
+  }
+
   _renderMenu(menu: DashboardLayoutMenuConfig) {
     if (this._menuPosition(menu) === "none") return html``;
     const style = menu.style ?? {};
@@ -211,7 +228,7 @@ class DashboardLayoutCardV2 extends LitElement {
         <header class="menu-header">
           ${menu.title ? html`<span class="menu-title">${menu.title}</span>` : ""}
           ${this._renderClock(menu)}
-          ${menu.date !== false ? html`<span class="menu-date">${this._now.toLocaleDateString()}</span>` : ""}
+          ${this._renderDate(menu)}
         </header>
         <div class="menu-pages">
           ${this._pages.map((page, index) => html`
@@ -253,6 +270,7 @@ class DashboardLayoutCardV2 extends LitElement {
         title: "Haus",
         clock: "digital",
         date: true,
+        weekday: "none",
       },
       chrome: {
         hide_ha_chrome: false,
@@ -332,6 +350,13 @@ class DashboardLayoutCardV2 extends LitElement {
       .menu-date {
         color: var(--secondary-text-color);
         font-size: var(--dashboard-layout-v2-date-size, 12px);
+      }
+
+      .menu-date.two-line {
+        display: grid;
+        justify-items: center;
+        line-height: 1.12;
+        text-align: center;
       }
 
       .analog-clock {

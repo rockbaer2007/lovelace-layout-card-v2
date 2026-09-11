@@ -46,7 +46,7 @@ class DashboardLayoutCardV2Editor extends LitElement {
   }
 
   _normalizeMenu(menu: DashboardLayoutCardConfig["menu"]): DashboardLayoutMenuConfig {
-    if (!menu) return { position: "left", title: "Haus", clock: "digital", date: true };
+    if (!menu) return { position: "left", title: "Haus", clock: "digital", date: true, weekday: "none" };
     if (typeof menu === "string") return { position: menu };
     return menu;
   }

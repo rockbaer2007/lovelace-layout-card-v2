@@ -18,7 +18,7 @@ layout-card without overwriting it.
 - Lets linked subviews inherit menu style through `inherits_from`.
 - Supports configurable tab colors, text colors, hover colors, icon color, icon
   background color, icon shape, menu background, digital or analog clock, date
-  display, clock size and date text size.
+  display, weekday display, clock size and date text size.
 - Can optionally hide the Home Assistant sidebar/header for selected dashboard
   users while keeping it visible for admins.
 
@@ -79,6 +79,7 @@ views:
             icon: mdi:home
           clock: analog
           date: true
+          weekday: long
           style:
             icon_color: "#fbff00"
             icon_background_color: "#ffffff"
@@ -152,6 +153,7 @@ dashboard settings are available from the view editor and allow editing:
 - tab pages and their layouts
 - tab, text, hover, icon and background colors
 - digital or analog clock
+- weekday display: none, short or long
 - clock size from `24px` to `128px`
 - date text size from `8px` to `48px`
 - Home Assistant sidebar/header visibility behavior

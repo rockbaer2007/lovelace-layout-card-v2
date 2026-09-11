@@ -93,6 +93,7 @@ export interface LayoutCardConfig {
 
 export type DashboardLayoutMenuPosition = "left" | "none" | "right";
 export type DashboardLayoutClockMode = "none" | "digital" | "analog";
+export type DashboardLayoutWeekdayMode = "none" | "short" | "long";
 
 export interface DashboardLayoutChromeConfig {
   hide_ha_chrome?: boolean;
@@ -111,6 +112,7 @@ export interface DashboardLayoutMenuConfig {
   };
   clock?: DashboardLayoutClockMode;
   date?: boolean;
+  weekday?: DashboardLayoutWeekdayMode;
   style?: {
     icon_color?: string;
     icon_background_color?: string;
