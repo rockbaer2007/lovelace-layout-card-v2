@@ -1039,173 +1039,190 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         </header>
 
         <div class="content">
-          <label>
-            Menüposition
-            <select
-              .value=${this._menuPosition}
-              @change=${(ev: Event) => this._setValue("menuPosition", (ev.target as HTMLSelectElement).value)}
-            >
-              <option value="left">Links</option>
-              <option value="none">Keine</option>
-              <option value="right">Rechts</option>
-            </select>
-          </label>
+          <details class="wide collapsible-group" open>
+            <summary>Menü</summary>
+            <div class="section-grid">
+              <label>
+                Menüposition
+                <select
+                  .value=${this._menuPosition}
+                  @change=${(ev: Event) => this._setValue("menuPosition", (ev.target as HTMLSelectElement).value)}
+                >
+                  <option value="left">Links</option>
+                  <option value="none">Keine</option>
+                  <option value="right">Rechts</option>
+                </select>
+              </label>
 
-          <label>
-            Menütitel
-            <input
-              .value=${this._menuTitle}
-              @input=${(ev: Event) => this._setValue("menuTitle", (ev.target as HTMLInputElement).value)}
-            />
-          </label>
+              <label>
+                Menütitel
+                <input
+                  .value=${this._menuTitle}
+                  @input=${(ev: Event) => this._setValue("menuTitle", (ev.target as HTMLInputElement).value)}
+                />
+              </label>
+            </div>
+          </details>
 
-          <label class="check">
-            <input
-              type="checkbox"
-              .checked=${this._showHome}
-              @change=${(ev: Event) => this._setValue("showHome", (ev.target as HTMLInputElement).checked)}
-            />
-            Hauptseite als ersten Menüpunkt anzeigen
-          </label>
+          <details class="wide collapsible-group" open>
+            <summary>Hauptseite</summary>
+            <div class="section-grid">
+              <label class="check">
+                <input
+                  type="checkbox"
+                  .checked=${this._showHome}
+                  @change=${(ev: Event) => this._setValue("showHome", (ev.target as HTMLInputElement).checked)}
+                />
+                Hauptseite als ersten Menüpunkt anzeigen
+              </label>
 
-          <fieldset class="home-entry group">
-            <legend>Hauptseite</legend>
-            <span>
-              <ha-icon .icon=${this._homeIcon}></ha-icon>
-              ${this._homeTitle}
-            </span>
-            <small>${this._homePath}</small>
-          </fieldset>
+              <fieldset class="home-entry group">
+                <legend>Hauptseitefeld</legend>
+                <span>
+                  <ha-icon .icon=${this._homeIcon}></ha-icon>
+                  ${this._homeTitle}
+                </span>
+                <small>${this._homePath}</small>
+              </fieldset>
 
-          <label class="check">
-            <input
-              type="checkbox"
-              .checked=${this._inheritTheme}
-              @change=${(ev: Event) => this._setValue("inheritTheme", (ev.target as HTMLInputElement).checked)}
-            />
-            Theme von Hauptansicht übernehmen
-          </label>
+              <label class="check">
+                <input
+                  type="checkbox"
+                  .checked=${this._inheritTheme}
+                  @change=${(ev: Event) => this._setValue("inheritTheme", (ev.target as HTMLInputElement).checked)}
+                />
+                Theme von Hauptansicht übernehmen
+              </label>
+            </div>
+          </details>
 
-          <label>
-            Uhr
-            <select
-              .value=${this._clock}
-              @change=${(ev: Event) => this._setValue("clock", (ev.target as HTMLSelectElement).value)}
-            >
-              <option value="none">Aus</option>
-              <option value="digital">Digital</option>
-              <option value="analog">Analog</option>
-            </select>
-          </label>
+          <details class="wide collapsible-group" open>
+            <summary>Uhr</summary>
+            <div class="section-grid">
+              <label>
+                Uhr
+                <select
+                  .value=${this._clock}
+                  @change=${(ev: Event) => this._setValue("clock", (ev.target as HTMLSelectElement).value)}
+                >
+                  <option value="none">Aus</option>
+                  <option value="digital">Digital</option>
+                  <option value="analog">Analog</option>
+                </select>
+              </label>
 
-          <fieldset class="display-options group">
-            <legend>Anzeigeauswahl</legend>
-            ${this._clock === "analog"
-              ? html`
+              <fieldset class="display-options group">
+                <legend>Anzeigeauswahl</legend>
+                ${this._clock === "analog"
+                  ? html`
+                    <label class="check compact-check">
+                      <input
+                        type="checkbox"
+                        .checked=${this._analogHourMarks}
+                        @change=${(ev: Event) =>
+                          this._setValue("analogHourMarks", (ev.target as HTMLInputElement).checked)}
+                      />
+                      Stunden
+                    </label>
+                    <label class="check compact-check">
+                      <input
+                        type="checkbox"
+                        .checked=${this._analogMinuteMarks}
+                        @change=${(ev: Event) =>
+                          this._setValue("analogMinuteMarks", (ev.target as HTMLInputElement).checked)}
+                      />
+                      Minuten
+                    </label>
+                    <label class="check compact-check">
+                      <input
+                        type="checkbox"
+                        .checked=${this._analogSeconds}
+                        @change=${(ev: Event) =>
+                          this._setValue("analogSeconds", (ev.target as HTMLInputElement).checked)}
+                      />
+                      Sekundenzeiger
+                    </label>
+                  `
+                  : nothing}
+
                 <label class="check compact-check">
                   <input
                     type="checkbox"
-                    .checked=${this._analogHourMarks}
-                    @change=${(ev: Event) =>
-                      this._setValue("analogHourMarks", (ev.target as HTMLInputElement).checked)}
+                    .checked=${this._date}
+                    @change=${(ev: Event) => this._setValue("date", (ev.target as HTMLInputElement).checked)}
                   />
-                  Stunden
+                  Datum
                 </label>
-                <label class="check compact-check">
+              </fieldset>
+
+              <fieldset class="weekday-options group">
+                <legend>Wochentag</legend>
+                <label class="check">
                   <input
-                    type="checkbox"
-                    .checked=${this._analogMinuteMarks}
-                    @change=${(ev: Event) =>
-                      this._setValue("analogMinuteMarks", (ev.target as HTMLInputElement).checked)}
+                    type="radio"
+                    name="dashboard-layout-v2-weekday"
+                    value="none"
+                    .checked=${this._weekday === "none"}
+                    @change=${() => this._setValue("weekday", "none")}
                   />
-                  Minuten
+                  Kein
                 </label>
-                <label class="check compact-check">
+                <label class="check">
                   <input
-                    type="checkbox"
-                    .checked=${this._analogSeconds}
-                    @change=${(ev: Event) =>
-                      this._setValue("analogSeconds", (ev.target as HTMLInputElement).checked)}
+                    type="radio"
+                    name="dashboard-layout-v2-weekday"
+                    value="short"
+                    .checked=${this._weekday === "short"}
+                    @change=${() => this._setValue("weekday", "short")}
                   />
-                  Sekundenzeiger
+                  Kürzel
                 </label>
-              `
-              : nothing}
+                <label class="check">
+                  <input
+                    type="radio"
+                    name="dashboard-layout-v2-weekday"
+                    value="long"
+                    .checked=${this._weekday === "long"}
+                    @change=${() => this._setValue("weekday", "long")}
+                  />
+                  Ausgeschrieben
+                </label>
+              </fieldset>
+            </div>
+          </details>
 
-            <label class="check compact-check">
-              <input
-                type="checkbox"
-                .checked=${this._date}
-                @change=${(ev: Event) => this._setValue("date", (ev.target as HTMLInputElement).checked)}
-              />
-              Datum
-            </label>
-          </fieldset>
-
-          <fieldset class="weekday-options group">
-            <legend>Wochentag</legend>
-            <label class="check">
-              <input
-                type="radio"
-                name="dashboard-layout-v2-weekday"
-                value="none"
-                .checked=${this._weekday === "none"}
-                @change=${() => this._setValue("weekday", "none")}
-              />
-              Kein
-            </label>
-            <label class="check">
-              <input
-                type="radio"
-                name="dashboard-layout-v2-weekday"
-                value="short"
-                .checked=${this._weekday === "short"}
-                @change=${() => this._setValue("weekday", "short")}
-              />
-              Kürzel
-            </label>
-            <label class="check">
-              <input
-                type="radio"
-                name="dashboard-layout-v2-weekday"
-                value="long"
-                .checked=${this._weekday === "long"}
-                @change=${() => this._setValue("weekday", "long")}
-              />
-              Ausgeschrieben
-            </label>
-          </fieldset>
-
-          <fieldset class="wide group">
-            <legend>HA-Oberfläche</legend>
-            <label class="check">
-              <input
-                type="checkbox"
-                .checked=${this._hideHaChrome}
-                @change=${(ev: Event) => this._setValue("hideHaChrome", (ev.target as HTMLInputElement).checked)}
-              />
-              HA-Sidebar und HA-Header für nicht erlaubte Benutzer ausblenden
-            </label>
-            <label class="check">
-              <input
-                type="checkbox"
-                .checked=${this._adminAlwaysVisible}
-                @change=${(ev: Event) => this._setValue("adminAlwaysVisible", (ev.target as HTMLInputElement).checked)}
-              />
-              Admin immer sichtbar lassen
-            </label>
-            <label>
-              Sichtbare Benutzer
-              <input
-                placeholder="Name oder User-ID, getrennt mit Komma"
-                .value=${this._visibleUsers}
-                @input=${(ev: Event) => this._setValue("visibleUsers", (ev.target as HTMLInputElement).value)}
-              />
-            </label>
-            <p class="hint">
-              Leere Liste blendet die HA-Oberfläche für alle Nicht-Admins aus, sobald die Option aktiv ist.
-            </p>
-          </fieldset>
+          <details class="wide collapsible-group" open>
+            <summary>HA Setting</summary>
+            <div class="section-grid">
+              <label class="check">
+                <input
+                  type="checkbox"
+                  .checked=${this._hideHaChrome}
+                  @change=${(ev: Event) => this._setValue("hideHaChrome", (ev.target as HTMLInputElement).checked)}
+                />
+                HA-Sidebar und HA-Header für nicht erlaubte Benutzer ausblenden
+              </label>
+              <label class="check">
+                <input
+                  type="checkbox"
+                  .checked=${this._adminAlwaysVisible}
+                  @change=${(ev: Event) => this._setValue("adminAlwaysVisible", (ev.target as HTMLInputElement).checked)}
+                />
+                Admin immer sichtbar lassen
+              </label>
+              <label class="wide">
+                Sichtbare Benutzer
+                <input
+                  placeholder="Name oder User-ID, getrennt mit Komma"
+                  .value=${this._visibleUsers}
+                  @input=${(ev: Event) => this._setValue("visibleUsers", (ev.target as HTMLInputElement).value)}
+                />
+              </label>
+              <p class="hint">
+                Leere Liste blendet die HA-Oberfläche für alle Nicht-Admins aus, sobald die Option aktiv ist.
+              </p>
+            </div>
+          </details>
 
           <fieldset class="wide group">
             <legend>Tabs / Unterseiten</legend>
@@ -1694,6 +1711,25 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           padding: 12px;
           border: 1px solid var(--divider-color, #333);
           border-radius: 8px;
+        }
+
+        .collapsible-group {
+          display: grid;
+          gap: 12px;
+          padding: 12px;
+          border: 1px solid var(--divider-color, #333);
+          border-radius: 8px;
+        }
+
+        .collapsible-group:not([open]) {
+          gap: 0;
+        }
+
+        .section-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+          align-content: start;
         }
 
         legend {
