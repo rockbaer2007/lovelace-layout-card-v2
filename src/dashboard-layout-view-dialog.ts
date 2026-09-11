@@ -358,6 +358,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   private _pageSourcePaths: Array<string | undefined> = [];
   @state() private _selectedPageIndex = 0;
   @state() private _openStatusEntityIndex = -1;
+  @state() private _statusEntitySearch: Record<number, string> = {};
   @state() private _jsonExpanded = false;
   @state() private _pagesText = "[]";
   @state() private _error = "";
@@ -580,6 +581,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
   private _selectStatusEntity(index: number, entityId: string) {
     this._updateStatusItem(index, "entity", entityId);
+    this._statusEntitySearch = {
+      ...this._statusEntitySearch,
+      [index]: "",
+    };
     this._openStatusEntityIndex = -1;
   }
 
@@ -593,19 +598,30 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
   private _renderStatusEntityPicker(item: { entity?: string }, index: number) {
     const value = item.entity ?? "";
-    const matches = this._statusEntityMatches(value);
+    const searchValue = this._openStatusEntityIndex === index ? this._statusEntitySearch[index] ?? "" : value;
+    const matches = this._statusEntityMatches(searchValue);
 
     return html`
       <div class="status-entity-picker">
         <input
           class="entity-input"
           placeholder=${`sensor.status_${index + 1}`}
-          .value=${value}
-          @focus=${() => (this._openStatusEntityIndex = index)}
+          .value=${searchValue}
+          @focus=${() => {
+            this._openStatusEntityIndex = index;
+            this._statusEntitySearch = {
+              ...this._statusEntitySearch,
+              [index]: "",
+            };
+          }}
           @blur=${() => this._closeStatusEntityPicker(index)}
           @input=${(ev: Event) => {
             this._openStatusEntityIndex = index;
-            this._updateStatusItem(index, "entity", (ev.target as HTMLInputElement).value);
+            const nextValue = (ev.target as HTMLInputElement).value;
+            this._statusEntitySearch = {
+              ...this._statusEntitySearch,
+              [index]: nextValue,
+            };
           }}
         />
         <span class="entity-arrow" aria-hidden="true">▾</span>
