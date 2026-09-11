@@ -23,6 +23,7 @@ const defaultConfig = {
     weekday: "none",
     style: {
       icon_color: "",
+      icon_active_color: "",
       icon_background_color: "",
       icon_shape: "circle",
       active_tab_color: "",
@@ -317,6 +318,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _date = true;
   @state() private _weekday = "none";
   @state() private _iconColor = "";
+  @state() private _iconActiveColor = "";
   @state() private _iconBackgroundColor = "";
   @state() private _iconShape = "circle";
   @state() private _activeTabColor = "";
@@ -377,6 +379,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._date = config.menu.date !== false;
     this._weekday = config.menu.weekday ?? "none";
     this._iconColor = config.menu.style?.icon_color ?? "";
+    this._iconActiveColor = config.menu.style?.icon_active_color ?? "";
     this._iconBackgroundColor = config.menu.style?.icon_background_color ?? config.menu.style?.icon_circle_color ?? "";
     this._iconShape = config.menu.style?.icon_shape ?? "circle";
     this._activeTabColor = config.menu.style?.active_tab_color ?? "";
@@ -466,6 +469,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "date") this._date = value;
     if (key === "weekday") this._weekday = value;
     if (key === "iconColor") this._iconColor = value;
+    if (key === "iconActiveColor") this._iconActiveColor = value;
     if (key === "iconBackgroundColor") this._iconBackgroundColor = value;
     if (key === "iconShape") this._iconShape = value;
     if (key === "activeTabColor") this._activeTabColor = value;
@@ -874,6 +878,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         weekday: this._weekday,
         style: {
           icon_color: this._iconColor,
+          icon_active_color: this._iconActiveColor,
           icon_background_color: this._iconBackgroundColor,
           icon_shape: this._iconShape,
           active_tab_color: this._activeTabColor,
@@ -1447,30 +1452,36 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   <span>${this._shadowFrameOffset}px</span>
                 </div>
               </label>
-              ${this._renderColorField("Icon Farbe", "iconColor", this._iconColor, "var(--primary-color)")}
-              ${this._renderColorField("Icon-Feld Farbe", "iconBackgroundColor", this._iconBackgroundColor, "transparent")}
-              <label>
-                Icon-Form
-                <div class="shape-options">
-                  <button
-                    class=${this._iconShape === "circle" ? "selected" : ""}
-                    type="button"
-                    title="Kreis"
-                    @click=${() => this._setValue("iconShape", "circle")}
-                  >
-                    <span class="shape-preview circle"></span>
-                  </button>
-                  <button
-                    class=${this._iconShape === "rounded-square" ? "selected" : ""}
-                    type="button"
-                    title="Abgerundetes Quadrat"
-                    @click=${() => this._setValue("iconShape", "rounded-square")}
-                  >
-                    <span class="shape-preview rounded-square"></span>
-                  </button>
+              <div class="icon-style-grid wide">
+                <div class="icon-style-column">
+                  ${this._renderColorField("Icon Farbe", "iconColor", this._iconColor, "var(--primary-color)")}
+                  <label>
+                    Icon-Form
+                    <div class="shape-options">
+                      <button
+                        class=${this._iconShape === "circle" ? "selected" : ""}
+                        type="button"
+                        title="Kreis"
+                        @click=${() => this._setValue("iconShape", "circle")}
+                      >
+                        <span class="shape-preview circle"></span>
+                      </button>
+                      <button
+                        class=${this._iconShape === "rounded-square" ? "selected" : ""}
+                        type="button"
+                        title="Abgerundetes Quadrat"
+                        @click=${() => this._setValue("iconShape", "rounded-square")}
+                      >
+                        <span class="shape-preview rounded-square"></span>
+                      </button>
+                    </div>
+                  </label>
                 </div>
-              </label>
-              <span class="style-empty" aria-hidden="true"></span>
+                <div class="icon-style-column">
+                  ${this._renderColorField("Icon aktiv Farbe", "iconActiveColor", this._iconActiveColor, "Icon Farbe")}
+                  ${this._renderColorField("Icon-Feld Farbe", "iconBackgroundColor", this._iconBackgroundColor, "transparent")}
+                </div>
+              </div>
               <label>
                 Hintergrund
                 <select
@@ -1772,6 +1783,19 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
         .style-empty {
           min-height: 40px;
+        }
+
+        .icon-style-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px 16px;
+          align-items: start;
+        }
+
+        .icon-style-column {
+          display: grid;
+          gap: 12px;
+          align-content: start;
         }
 
         .shape-options {

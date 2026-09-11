@@ -92,6 +92,7 @@ views:
           weekday: long
           style:
             icon_color: "#fbff00"
+            icon_active_color: "#ffffff"
             icon_background_color: "#ffffff"
             icon_shape: circle
             active_tab_color: "#333aff"

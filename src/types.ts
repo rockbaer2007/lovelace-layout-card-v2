@@ -119,6 +119,7 @@ export interface DashboardLayoutMenuConfig {
   weekday?: DashboardLayoutWeekdayMode;
   style?: {
     icon_color?: string;
+    icon_active_color?: string;
     icon_background_color?: string;
     icon_circle_color?: string;
     icon_shape?: "circle" | "rounded-square";

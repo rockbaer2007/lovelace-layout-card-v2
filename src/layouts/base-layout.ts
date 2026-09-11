@@ -306,6 +306,7 @@ export class BaseLayout extends LitElement {
         class="dashboard-layout-v2-menu"
         style=${[
           style.icon_color ? `--dashboard-layout-v2-icon-color: ${style.icon_color}` : "",
+          style.icon_active_color ? `--dashboard-layout-v2-icon-active-color: ${style.icon_active_color}` : "",
           style.icon_background_color || style.icon_circle_color
             ? `--dashboard-layout-v2-icon-background-color: ${style.icon_background_color ?? style.icon_circle_color}`
             : "",
@@ -537,6 +538,13 @@ export class BaseLayout extends LitElement {
       .dashboard-layout-v2-menu button.active {
         color: var(--dashboard-layout-v2-active-tab-text-color, var(--text-primary-color, #fff));
         background: var(--dashboard-layout-v2-active-tab-color, var(--primary-color));
+      }
+
+      .dashboard-layout-v2-menu button.active ha-icon {
+        color: var(
+          --dashboard-layout-v2-icon-active-color,
+          var(--dashboard-layout-v2-icon-color, var(--primary-color))
+        );
       }
 
       .dashboard-layout-v2-menu ha-icon {
