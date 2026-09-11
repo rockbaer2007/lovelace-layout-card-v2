@@ -11,7 +11,7 @@ const dashboardLayoutCardV2ViewLayouts = new Set(
   LAYOUT_CARD_SELECTOR_OPTIONS.map((option) => option.value)
 );
 const dashboardLayoutCardV2Icon =
-  "M3 3h8v8H3V3m10 0h8v8h-8V3M3 13h8v8H3v-8m10 0h8v8h-8v-8z";
+  "M3 4h12v4H3V4m0 6h12v4H3v-4m0 6h8v4H3v-4M17.8 12.2l2 2L13.6 20.4H11.6V18.4L17.8 12.2m2.7-2.7c.3-.3.8-.3 1.1 0l.9.9c.3.3.3.8 0 1.1l-1.2 1.2-2-2 1.2-1.2z";
 
 function appendLayoutCardV2Options(schemaEntry: any) {
   const selector = schemaEntry?.selector;

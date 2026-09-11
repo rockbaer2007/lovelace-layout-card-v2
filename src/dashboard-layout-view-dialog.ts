@@ -54,6 +54,7 @@ const DASHBOARD_LAYOUT_V2_VIEW_TYPES = new Set([
   "custom:vertical-layout-v2",
   "custom:grid-layout-v2",
 ]);
+const MENU_ONLY_PAGE_TYPES = new Set(["spacer", "divider"]);
 
 function slugifyPath(value: string) {
   return value
@@ -147,8 +148,17 @@ function isDashboardLayoutV2View(viewConfig: any) {
 }
 
 function pageLayoutType(page: any) {
+  if (MENU_ONLY_PAGE_TYPES.has(page?.type)) return page.type;
   const type = page.type ?? page.layout_type ?? "custom:masonry-layout-v2";
   return type === "sections" ? SECTIONS_LAYOUT_V2 : type;
+}
+
+function pageItemType(page: any) {
+  return MENU_ONLY_PAGE_TYPES.has(page?.type) ? page.type : "page";
+}
+
+function isMenuOnlyPage(page: any) {
+  return MENU_ONLY_PAGE_TYPES.has(page?.type);
 }
 
 function isSectionsPage(page: any) {
@@ -189,6 +199,14 @@ function dashboardLayoutV2Reference(path: string) {
 }
 
 function pageNavigationMetadata(page: any) {
+  if (page?.type === "spacer") return { type: "spacer" };
+  if (page?.type === "divider") {
+    return {
+      type: "divider",
+      color: page.color || "#ffffff",
+    };
+  }
+
   const metadata: any = {
     title: page.title,
     path: page.path,
@@ -522,6 +540,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   }
 
   private _normalizePage(page: any, index: number) {
+    if (page?.type === "spacer") return { type: "spacer" };
+    if (page?.type === "divider") {
+      return {
+        type: "divider",
+        color: page.color || "#ffffff",
+      };
+    }
+
     const title = String(page.title ?? page.name ?? `Unterseite ${index + 1}`);
     const path = page.path ?? (slugifyPath(title) || `dashboard-v2-${index + 1}`);
     const type = pageLayoutType(page);
@@ -633,6 +659,25 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._syncJsonFromPages();
   }
 
+  private _updatePageItemType(index: number, value: string) {
+    this._pages = this._pages.map((page, pageIndex) => {
+      if (pageIndex !== index) return page;
+      if (value === "spacer") return { type: "spacer" };
+      if (value === "divider") return { type: "divider", color: page.color || "#ffffff" };
+      if (!isMenuOnlyPage(page)) return page;
+
+      const nextIndex = index + 1;
+      return {
+        title: `Unterseite ${nextIndex}`,
+        path: `unterseite-${nextIndex}`,
+        icon: "mdi:view-dashboard",
+        type: "custom:masonry-layout-v2",
+        layout_type: "custom:masonry-layout-v2",
+      };
+    });
+    this._syncJsonFromPages();
+  }
+
   private _addPage() {
     const nextIndex = this._pages.length + 1;
     const page = {
@@ -647,13 +692,31 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._syncJsonFromPages();
   }
 
+  private _addSpacer() {
+    this._pages = [...this._pages, { type: "spacer" }];
+    this._pageSourcePaths = [...this._pageSourcePaths, undefined];
+    this._selectedPageIndex = this._pages.length - 1;
+    this._syncJsonFromPages();
+  }
+
+  private _addDivider() {
+    this._pages = [...this._pages, { type: "divider", color: "#ffffff" }];
+    this._pageSourcePaths = [...this._pageSourcePaths, undefined];
+    this._selectedPageIndex = this._pages.length - 1;
+    this._syncJsonFromPages();
+  }
+
   private _duplicatePage() {
     const page = this._pages[this._selectedPageIndex];
     if (!page) return;
     const copy = {
       ...page,
-      title: `${page.title ?? "Unterseite"} Kopie`,
-      path: `${page.path ?? "unterseite"}-kopie`,
+      ...(isMenuOnlyPage(page)
+        ? {}
+        : {
+            title: `${page.title ?? "Unterseite"} Kopie`,
+            path: `${page.path ?? "unterseite"}-kopie`,
+          }),
     };
     this._pages = [
       ...this._pages.slice(0, this._selectedPageIndex + 1),
@@ -778,7 +841,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     );
     const relatedPaths = this._collectRelatedDashboardLayoutV2Paths(views, currentPath, dashboardLayoutV2);
     normalizedPages.forEach((page, index) => {
-      relatedPaths.add(String(page.path));
+      if (!isMenuOnlyPage(page)) relatedPaths.add(String(page.path));
       const sourcePath = this._pageSourcePaths[index];
       if (sourcePath) relatedPaths.add(sourcePath);
     });
@@ -802,6 +865,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     });
 
     for (const [pageIndex, page] of normalizedPages.entries()) {
+      if (isMenuOnlyPage(page)) continue;
+
       const pagePath = String(page.path);
       const sourcePath = this._pageSourcePaths[pageIndex];
       const existing = sourcePath
@@ -882,6 +947,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (!this.viewConfig) return nothing;
     const selectedPage = this._pages[this._selectedPageIndex];
     const selectedPageLayout = selectedPage ? pageLayoutType(selectedPage) : "";
+    const selectedPageItemType = selectedPage ? pageItemType(selectedPage) : "page";
 
     return html`
       <div class="scrim" @click=${this._close}></div>
@@ -1026,8 +1092,20 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       class=${index === this._selectedPageIndex ? "selected" : ""}
                       @click=${() => (this._selectedPageIndex = index)}
                     >
-                      <span>${page.title ?? page.path ?? `Unterseite ${index + 1}`}</span>
-                      <small>${page.path ?? ""}</small>
+                      <span>
+                        ${page.type === "spacer"
+                          ? "Abstand"
+                          : page.type === "divider"
+                            ? "Trenner"
+                            : page.title ?? page.path ?? `Unterseite ${index + 1}`}
+                      </span>
+                      <small>
+                        ${page.type === "spacer"
+                          ? "leer"
+                          : page.type === "divider"
+                            ? page.color ?? "#ffffff"
+                            : page.path ?? ""}
+                      </small>
                     </button>
                   `
                 )}
@@ -1036,6 +1114,41 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               <div class="page-form">
                 ${selectedPage
                   ? html`
+                      <label>
+                        Typ
+                        <select
+                          .value=${selectedPageItemType}
+                          @change=${(ev: Event) =>
+                            this._updatePageItemType(this._selectedPageIndex, (ev.target as HTMLSelectElement).value)}
+                        >
+                          <option value="page" ?selected=${selectedPageItemType === "page"}>Seite</option>
+                          <option value="spacer" ?selected=${selectedPageItemType === "spacer"}>Abstand</option>
+                          <option value="divider" ?selected=${selectedPageItemType === "divider"}>Trenner</option>
+                        </select>
+                      </label>
+                      ${selectedPageItemType === "divider"
+                        ? html`
+                            <label>
+                              Trennerfarbe
+                              <div class="color-row">
+                                <input
+                                  type="color"
+                                  .value=${colorPickerValue(selectedPage.color ?? "#ffffff")}
+                                  @input=${(ev: Event) =>
+                                    this._updatePage(this._selectedPageIndex, "color", (ev.target as HTMLInputElement).value)}
+                                />
+                                <input
+                                  .value=${selectedPage.color ?? "#ffffff"}
+                                  placeholder="#ffffff"
+                                  @input=${(ev: Event) =>
+                                    this._updatePage(this._selectedPageIndex, "color", (ev.target as HTMLInputElement).value)}
+                                />
+                              </div>
+                            </label>
+                          `
+                        : nothing}
+                      ${selectedPageItemType === "page"
+                        ? html`
                       <label>
                         Titel
                         <input
@@ -1103,6 +1216,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                             </label>
                           `
                         : nothing}
+                        `
+                        : nothing}
                     `
                   : html`<p class="empty">Noch keine Unterseite angelegt.</p>`}
               </div>
@@ -1110,6 +1225,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
             <div class="actions">
               <button @click=${this._addPage}>Hinzufügen</button>
+              <button @click=${this._addSpacer}>Abstand</button>
+              <button @click=${this._addDivider}>Trenner</button>
               <button @click=${this._duplicatePage} ?disabled=${!selectedPage}>Duplizieren</button>
               <button @click=${() => this._movePage(-1)} ?disabled=${this._selectedPageIndex <= 0}>Hoch</button>
               <button @click=${() => this._movePage(1)} ?disabled=${this._selectedPageIndex >= this._pages.length - 1}>Runter</button>

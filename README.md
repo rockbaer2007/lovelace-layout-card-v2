@@ -12,6 +12,7 @@ layout-card without overwriting it.
 
 - Adds V2 view layouts for Masonry, Sections, Horizontal, Vertical and Grid.
 - Adds an optional left or right dashboard tab menu for view navigation.
+- Supports non-clickable menu spacers and divider lines.
 - Supports Home Assistant-style Sections views through `custom:sections-layout-v2`.
 - Keeps the menu visible while switching between linked dashboard subviews.
 - Stores shared dashboard menu settings once on the home view.
@@ -111,6 +112,9 @@ views:
             type: custom:sections-layout-v2
             layout_type: custom:sections-layout-v2
             max_columns: 6
+          - type: spacer
+          - type: divider
+            color: "#ffffff"
           - title: Erdgeschoss
             path: erdgeschoss
             icon: mdi:view-dashboard

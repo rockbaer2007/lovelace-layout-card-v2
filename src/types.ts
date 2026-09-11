@@ -137,10 +137,11 @@ export interface DashboardLayoutMenuConfig {
 }
 
 export interface DashboardLayoutPageConfig {
-  title: string;
+  title?: string;
   icon?: string;
   type?: string;
   path?: string;
+  color?: string;
   layout_type?: string;
   layout?: any;
   cards?: Array<CardConfig>;

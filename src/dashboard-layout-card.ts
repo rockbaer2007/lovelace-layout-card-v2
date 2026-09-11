@@ -41,6 +41,10 @@ function normalizeChrome(chrome?: DashboardLayoutChromeConfig): DashboardLayoutC
   };
 }
 
+function isMenuOnlyPage(page?: DashboardLayoutPageConfig) {
+  return page?.type === "spacer" || page?.type === "divider";
+}
+
 class DashboardLayoutCardV2 extends LitElement {
   @property() hass;
   @property() editMode = false;
@@ -66,6 +70,10 @@ class DashboardLayoutCardV2 extends LitElement {
       })),
     };
     this._activePage = Math.min(this._activePage, this._config.pages.length - 1);
+    if (isMenuOnlyPage(this._config.pages[this._activePage])) {
+      this._activePage = this._config.pages.findIndex((page) => !isMenuOnlyPage(page));
+    }
+    if (this._activePage < 0) this._activePage = 0;
     this._createActivePageLayout();
   }
 
@@ -123,7 +131,7 @@ class DashboardLayoutCardV2 extends LitElement {
 
   async _createActivePageLayout() {
     const page = this._activePageConfig;
-    if (!page) return;
+    if (!page || isMenuOnlyPage(page)) return;
 
     const layoutType = normalizeLayoutType(page.layout_type);
     const layoutElement = document.createElement(layoutType);
@@ -151,6 +159,7 @@ class DashboardLayoutCardV2 extends LitElement {
 
   async _selectPage(index: number) {
     if (index === this._activePage) return;
+    if (isMenuOnlyPage(this._config.pages[index])) return;
     this._activePage = index;
     await this._createActivePageLayout();
   }
@@ -197,6 +206,32 @@ class DashboardLayoutCardV2 extends LitElement {
     return html`<span class="menu-date">${date}</span>`;
   }
 
+  _renderMenuItem(page: DashboardLayoutPageConfig, index: number) {
+    if (page.type === "spacer") {
+      return html`<div class="menu-spacer" aria-hidden="true"></div>`;
+    }
+    if (page.type === "divider") {
+      return html`
+        <div
+          class="menu-divider"
+          style=${`--dashboard-layout-v2-divider-color: ${page.color || "#ffffff"}`}
+          aria-hidden="true"
+        ></div>
+      `;
+    }
+
+    return html`
+      <button
+        class=${index === this._activePage ? "active" : ""}
+        type="button"
+        @click=${() => this._selectPage(index)}
+      >
+        ${page.icon ? html`<ha-icon .icon=${page.icon}></ha-icon>` : ""}
+        <span>${page.title}</span>
+      </button>
+    `;
+  }
+
   _renderMenu(menu: DashboardLayoutMenuConfig) {
     if (this._menuPosition(menu) === "none") return html``;
     const style = menu.style ?? {};
@@ -234,16 +269,7 @@ class DashboardLayoutCardV2 extends LitElement {
           ${this._renderDate(menu)}
         </header>
         <div class="menu-pages">
-          ${this._pages.map((page, index) => html`
-            <button
-              class=${index === this._activePage ? "active" : ""}
-              type="button"
-              @click=${() => this._selectPage(index)}
-            >
-              ${page.icon ? html`<ha-icon .icon=${page.icon}></ha-icon>` : ""}
-              <span>${page.title}</span>
-            </button>
-          `)}
+          ${this._pages.map((page, index) => this._renderMenuItem(page, index))}
         </div>
       </nav>
     `;
@@ -401,6 +427,16 @@ class DashboardLayoutCardV2 extends LitElement {
       .menu-pages {
         display: grid;
         gap: 6px;
+      }
+
+      .menu-spacer {
+        height: 18px;
+      }
+
+      .menu-divider {
+        height: 1px;
+        margin: 8px 4px;
+        background: var(--dashboard-layout-v2-divider-color, #ffffff);
       }
 
       .menu-pages button {

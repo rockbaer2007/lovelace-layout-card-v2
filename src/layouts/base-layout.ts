@@ -11,6 +11,10 @@ import {
 } from "../types";
 import { applyHaChromeVisibility } from "../ha-chrome";
 
+function isDashboardLayoutV2MenuOnlyPage(page: any) {
+  return page?.type === "spacer" || page?.type === "divider";
+}
+
 export class BaseLayout extends LitElement {
   @property() cards: Array<LovelaceCard | HuiCard> = [];
   @property() index: number;
@@ -200,6 +204,31 @@ export class BaseLayout extends LitElement {
     window.dispatchEvent(new Event("location-changed"));
   }
 
+  _renderDashboardLayoutV2MenuItem(page: any) {
+    if (page?.type === "spacer") {
+      return html`<div class="dashboard-layout-v2-menu-spacer" aria-hidden="true"></div>`;
+    }
+    if (page?.type === "divider") {
+      return html`
+        <div
+          class="dashboard-layout-v2-menu-divider"
+          style=${`--dashboard-layout-v2-divider-color: ${page.color || "#ffffff"}`}
+          aria-hidden="true"
+        ></div>
+      `;
+    }
+
+    return html`
+      <button
+        class=${location.pathname.endsWith(`/${page.path}`) ? "active" : ""}
+        @click=${() => this._navigateDashboardLayoutV2Page(page.path)}
+      >
+        ${page.icon ? html`<ha-icon .icon=${page.icon}></ha-icon>` : ""}
+        <span>${page.title}</span>
+      </button>
+    `;
+  }
+
   _renderDashboardLayoutV2Clock(menu: DashboardLayoutMenuConfig) {
     if (menu.clock === "none") return html``;
     if (menu.clock === "analog") {
@@ -277,17 +306,7 @@ export class BaseLayout extends LitElement {
           ${this._renderDashboardLayoutV2Date(menu)}
         </header>
         <nav>
-          ${pages.map(
-            (page) => html`
-              <button
-                class=${location.pathname.endsWith(`/${page.path}`) ? "active" : ""}
-                @click=${() => this._navigateDashboardLayoutV2Page(page.path)}
-              >
-                ${page.icon ? html`<ha-icon .icon=${page.icon}></ha-icon>` : ""}
-                <span>${page.title}</span>
-              </button>
-            `
-          )}
+          ${pages.map((page) => this._renderDashboardLayoutV2MenuItem(page))}
         </nav>
       </aside>
     `;
@@ -416,6 +435,16 @@ export class BaseLayout extends LitElement {
       .dashboard-layout-v2-menu nav {
         display: grid;
         gap: 6px;
+      }
+
+      .dashboard-layout-v2-menu-spacer {
+        height: 18px;
+      }
+
+      .dashboard-layout-v2-menu-divider {
+        height: 1px;
+        margin: 8px 4px;
+        background: var(--dashboard-layout-v2-divider-color, #ffffff);
       }
 
       .dashboard-layout-v2-menu button {
