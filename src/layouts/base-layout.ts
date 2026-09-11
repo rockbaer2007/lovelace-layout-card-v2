@@ -483,8 +483,9 @@ export class BaseLayout extends LitElement {
       }
 
       .dashboard-layout-v2-menu-divider {
-        height: 1px;
-        margin: 8px 4px;
+        height: 4px;
+        margin: 10px 4px;
+        border-radius: 999px;
         background: var(--dashboard-layout-v2-divider-color, #ffffff);
         box-shadow: var(--dashboard-layout-v2-shadow-frame-offset, 4px) var(--dashboard-layout-v2-shadow-frame-offset, 4px) 0 0 var(--dashboard-layout-v2-divider-shadow-frame-color, transparent);
       }
