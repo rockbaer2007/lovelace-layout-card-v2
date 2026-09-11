@@ -14,6 +14,7 @@ layout-card without overwriting it.
 - Adds an optional left or right dashboard tab menu for view navigation.
 - Supports non-clickable menu spacers and rounded divider bars.
 - Divider bars support their own color and optional 3D frame color.
+- Supports an optional notification box above the side-menu status values.
 - Supports an optional bottom menu status list with up to four read-only entity values.
 - Supports Home Assistant-style Sections views through `custom:sections-layout-v2`.
 - Creates new dashboard subviews as Sections V2 by default.
@@ -75,6 +76,14 @@ the side menu. The recommended helper is `input_text.dashboard_notification`.
 Create it in Home Assistant via Settings > Devices & services > Helpers >
 Create helper > Text. If `border_color` is empty, the notification box uses the
 Home Assistant error color.
+
+![Notification helper missing in the editor](docs/images/notify-helper-missing.png)
+
+When the helper contains a message, the notification appears above the status
+values. This is useful for short dashboard-wide alerts such as heating faults,
+maintenance notes or other important helper-driven messages.
+
+![Notification and status values in the side menu](docs/images/notify-and-status.png)
 
 The optional `menu.status` block shows up to four read-only Home Assistant
 entity states at the bottom of the side menu. The editor provides a built-in
