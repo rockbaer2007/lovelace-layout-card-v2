@@ -18,7 +18,8 @@ const defaultConfig = {
     date: true,
     style: {
       icon_color: "",
-      icon_circle_color: "",
+      icon_background_color: "",
+      icon_shape: "circle",
       active_tab_color: "",
       inactive_tab_color: "",
       hover_tab_color: "",
@@ -271,7 +272,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _clock = "digital";
   @state() private _date = true;
   @state() private _iconColor = "";
-  @state() private _iconCircleColor = "";
+  @state() private _iconBackgroundColor = "";
+  @state() private _iconShape = "circle";
   @state() private _activeTabColor = "";
   @state() private _inactiveTabColor = "";
   @state() private _hoverTabColor = "";
@@ -319,7 +321,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._clock = config.menu.clock ?? "digital";
     this._date = config.menu.date !== false;
     this._iconColor = config.menu.style?.icon_color ?? "";
-    this._iconCircleColor = config.menu.style?.icon_circle_color ?? "";
+    this._iconBackgroundColor = config.menu.style?.icon_background_color ?? config.menu.style?.icon_circle_color ?? "";
+    this._iconShape = config.menu.style?.icon_shape ?? "circle";
     this._activeTabColor = config.menu.style?.active_tab_color ?? "";
     this._inactiveTabColor = config.menu.style?.inactive_tab_color ?? "";
     this._hoverTabColor = config.menu.style?.hover_tab_color ?? "";
@@ -392,7 +395,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "clock") this._clock = value;
     if (key === "date") this._date = value;
     if (key === "iconColor") this._iconColor = value;
-    if (key === "iconCircleColor") this._iconCircleColor = value;
+    if (key === "iconBackgroundColor") this._iconBackgroundColor = value;
+    if (key === "iconShape") this._iconShape = value;
     if (key === "activeTabColor") this._activeTabColor = value;
     if (key === "inactiveTabColor") this._inactiveTabColor = value;
     if (key === "hoverTabColor") this._hoverTabColor = value;
@@ -719,7 +723,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         date: this._date,
         style: {
           icon_color: this._iconColor,
-          icon_circle_color: this._iconCircleColor,
+          icon_background_color: this._iconBackgroundColor,
+          icon_shape: this._iconShape,
           active_tab_color: this._activeTabColor,
           inactive_tab_color: this._inactiveTabColor,
           hover_tab_color: this._hoverTabColor,
@@ -1085,7 +1090,29 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               ${this._renderColorField("Hover Farbe", "hoverTabColor", this._hoverTabColor, "var(--secondary-background-color)")}
               ${this._renderColorField("Hover Text", "hoverTabTextColor", this._hoverTabTextColor, "var(--primary-text-color)")}
               ${this._renderColorField("Icon Farbe", "iconColor", this._iconColor, "var(--primary-color)")}
-              ${this._renderColorField("Icon-Kreis Farbe", "iconCircleColor", this._iconCircleColor, "transparent")}
+              ${this._renderColorField("Icon-Feld Farbe", "iconBackgroundColor", this._iconBackgroundColor, "transparent")}
+              <label>
+                Icon-Form
+                <div class="shape-options">
+                  <button
+                    class=${this._iconShape === "circle" ? "selected" : ""}
+                    type="button"
+                    title="Kreis"
+                    @click=${() => this._setValue("iconShape", "circle")}
+                  >
+                    <span class="shape-preview circle"></span>
+                  </button>
+                  <button
+                    class=${this._iconShape === "rounded-square" ? "selected" : ""}
+                    type="button"
+                    title="Abgerundetes Quadrat"
+                    @click=${() => this._setValue("iconShape", "rounded-square")}
+                  >
+                    <span class="shape-preview rounded-square"></span>
+                  </button>
+                </div>
+              </label>
+              <span class="style-empty" aria-hidden="true"></span>
               <label>
                 Hintergrund
                 <select
@@ -1363,6 +1390,41 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
         .style-empty {
           min-height: 40px;
+        }
+
+        .shape-options {
+          display: grid;
+          grid-template-columns: repeat(2, 48px);
+          gap: 8px;
+        }
+
+        .shape-options button {
+          display: grid;
+          place-items: center;
+          min-width: 0;
+          width: 48px;
+          height: 40px;
+          padding: 0;
+        }
+
+        .shape-options button.selected {
+          border-color: var(--primary-color, #03a9f4);
+          background: color-mix(in srgb, var(--primary-color, #03a9f4) 24%, transparent);
+        }
+
+        .shape-preview {
+          width: 24px;
+          height: 24px;
+          border: 2px solid var(--primary-text-color, #fff);
+          background: var(--primary-color, #03a9f4);
+        }
+
+        .shape-preview.circle {
+          border-radius: 50%;
+        }
+
+        .shape-preview.rounded-square {
+          border-radius: 7px;
         }
 
         .actions {

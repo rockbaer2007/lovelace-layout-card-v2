@@ -235,7 +235,10 @@ export class BaseLayout extends LitElement {
         class="dashboard-layout-v2-menu"
         style=${[
           style.icon_color ? `--dashboard-layout-v2-icon-color: ${style.icon_color}` : "",
-          style.icon_circle_color ? `--dashboard-layout-v2-icon-circle-color: ${style.icon_circle_color}` : "",
+          style.icon_background_color || style.icon_circle_color
+            ? `--dashboard-layout-v2-icon-background-color: ${style.icon_background_color ?? style.icon_circle_color}`
+            : "",
+          style.icon_shape === "rounded-square" ? "--dashboard-layout-v2-icon-radius: 8px" : "",
           style.active_tab_color ? `--dashboard-layout-v2-active-tab-color: ${style.active_tab_color}` : "",
           style.inactive_tab_color ? `--dashboard-layout-v2-inactive-tab-color: ${style.inactive_tab_color}` : "",
           style.hover_tab_color ? `--dashboard-layout-v2-hover-tab-color: ${style.hover_tab_color}` : "",
@@ -410,8 +413,8 @@ export class BaseLayout extends LitElement {
         min-width: 28px;
         padding: 4px;
         box-sizing: border-box;
-        border-radius: 50%;
-        background: var(--dashboard-layout-v2-icon-circle-color, transparent);
+        border-radius: var(--dashboard-layout-v2-icon-radius, 50%);
+        background: var(--dashboard-layout-v2-icon-background-color, transparent);
         color: var(--dashboard-layout-v2-icon-color, var(--primary-color));
       }
     `;
