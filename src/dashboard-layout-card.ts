@@ -680,7 +680,7 @@ class DashboardLayoutCardV2 extends LitElement {
 
       .page {
         min-width: 0;
-        padding: 8px;
+        padding: 8px 13px 8px 8px;
         border: 1px solid var(--dashboard-layout-v2-card-border-color, transparent);
         border-radius: var(--ha-card-border-radius, 12px);
         box-shadow: var(--dashboard-layout-v2-shadow-frame-offset, 4px) var(--dashboard-layout-v2-shadow-frame-offset, 4px) 0 0 var(--dashboard-layout-v2-shadow-frame-color, transparent);

@@ -473,6 +473,7 @@ export class BaseLayout extends LitElement {
 
       .dashboard-layout-v2-content {
         min-width: 0;
+        padding-right: 5px;
         border: 1px solid var(--dashboard-layout-v2-card-border-color, transparent);
         border-radius: var(--ha-card-border-radius, 12px);
         box-shadow: var(--dashboard-layout-v2-shadow-frame-offset, 4px) var(--dashboard-layout-v2-shadow-frame-offset, 4px) 0 0 var(--dashboard-layout-v2-shadow-frame-color, transparent);
