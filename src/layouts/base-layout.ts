@@ -358,6 +358,10 @@ export class BaseLayout extends LitElement {
 
       .dashboard-layout-v2-content {
         min-width: 0;
+        border: 1px solid var(--dashboard-layout-v2-card-border-color, transparent);
+        border-radius: var(--ha-card-border-radius, 12px);
+        box-shadow: 3px 3px 0 0 var(--dashboard-layout-v2-shadow-frame-color, transparent);
+        box-sizing: border-box;
       }
 
       .dashboard-layout-v2-menu {

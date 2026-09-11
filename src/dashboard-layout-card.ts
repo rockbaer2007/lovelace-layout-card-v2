@@ -483,6 +483,10 @@ class DashboardLayoutCardV2 extends LitElement {
       .page {
         min-width: 0;
         padding: 8px;
+        border: 1px solid var(--dashboard-layout-v2-card-border-color, transparent);
+        border-radius: var(--ha-card-border-radius, 12px);
+        box-shadow: 3px 3px 0 0 var(--dashboard-layout-v2-shadow-frame-color, transparent);
+        box-sizing: border-box;
       }
     `;
   }

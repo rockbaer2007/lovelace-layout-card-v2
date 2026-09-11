@@ -670,10 +670,6 @@ class SectionsLayout extends BaseLayout {
           align-self: start;
           grid-column: span var(--column-span, 1);
           grid-row: span var(--row-span, 1);
-          border: 1px solid var(--dashboard-layout-v2-card-border-color, transparent);
-          border-radius: var(--ha-card-border-radius, 12px);
-          box-shadow: 3px 3px 0 0 var(--dashboard-layout-v2-shadow-frame-color, transparent);
-          box-sizing: border-box;
         }
 
         .section.edit-mode {
