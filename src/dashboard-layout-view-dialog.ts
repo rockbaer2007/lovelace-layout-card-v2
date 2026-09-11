@@ -704,10 +704,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       if (pageIndex !== index) return page;
       if (value === "spacer") return { type: "spacer" };
       if (value === "divider") {
+        const colors = this._lastDividerColors(index);
         return {
           type: "divider",
-          color: page.color || "#ffffff",
-          shadow_frame_color: page.shadow_frame_color || "transparent",
+          color: page.color || colors.color,
+          shadow_frame_color: page.shadow_frame_color || colors.shadow_frame_color,
         };
       }
       if (!isMenuOnlyPage(page)) return page;
@@ -750,8 +751,19 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._syncJsonFromPages();
   }
 
+  private _lastDividerColors(skipIndex = -1) {
+    const source = [...this._pages]
+      .map((page, index) => ({ page, index }))
+      .reverse()
+      .find(({ page, index }) => index !== skipIndex && page?.type === "divider");
+    return {
+      color: source?.page?.color || "#ffffff",
+      shadow_frame_color: source?.page?.shadow_frame_color || "transparent",
+    };
+  }
+
   private _addDivider() {
-    this._pages = [...this._pages, { type: "divider", color: "#ffffff", shadow_frame_color: "transparent" }];
+    this._pages = [...this._pages, { type: "divider", ...this._lastDividerColors() }];
     this._pageSourcePaths = [...this._pageSourcePaths, undefined];
     this._selectedPageIndex = this._pages.length - 1;
     this._syncJsonFromPages();
