@@ -8,6 +8,8 @@ type DashboardLayoutV2DialogParams = {
   viewConfig: any;
 };
 
+const DEFAULT_NOTIFY_ENTITY = "input_text.dashboard_notification";
+
 const defaultConfig = {
   inherit_theme: true,
   menu: {
@@ -21,6 +23,11 @@ const defaultConfig = {
     analog_seconds: false,
     date: true,
     weekday: "none",
+    notify: {
+      enabled: false,
+      entity: DEFAULT_NOTIFY_ENTITY,
+      border_color: "",
+    },
     status: {
       enabled: false,
       border_color: "",
@@ -94,6 +101,10 @@ function normalizeConfig(viewConfig: any) {
     menu: {
       ...defaultConfig.menu,
       ...(dashboardLayoutConfig?.menu ?? {}),
+      notify: {
+        ...defaultConfig.menu.notify,
+        ...(dashboardLayoutConfig?.menu?.notify ?? {}),
+      },
       status: {
         ...defaultConfig.menu.status,
         ...(dashboardLayoutConfig?.menu?.status ?? {}),
@@ -327,6 +338,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _analogSeconds = false;
   @state() private _date = true;
   @state() private _weekday = "none";
+  @state() private _notifyEnabled = false;
+  @state() private _notifyEntity = DEFAULT_NOTIFY_ENTITY;
+  @state() private _notifyBorderColor = "";
   @state() private _statusEnabled = false;
   @state() private _statusBorderColor = "";
   @state() private _statusItems: Array<{ entity?: string; label?: string; unit?: string }> = [];
@@ -357,6 +371,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _pages: any[] = [];
   private _pageSourcePaths: Array<string | undefined> = [];
   @state() private _selectedPageIndex = 0;
+  @state() private _openNotifyEntityPicker = false;
+  @state() private _notifyEntitySearch = "";
   @state() private _openStatusEntityIndex = -1;
   @state() private _statusEntitySearch: Record<number, string> = {};
   @state() private _jsonExpanded = false;
@@ -393,6 +409,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._analogSeconds = config.menu.analog_seconds === true;
     this._date = config.menu.date !== false;
     this._weekday = config.menu.weekday ?? "none";
+    this._notifyEnabled = config.menu.notify?.enabled === true;
+    this._notifyEntity = config.menu.notify?.entity ?? DEFAULT_NOTIFY_ENTITY;
+    this._notifyBorderColor = config.menu.notify?.border_color ?? "";
     this._statusEnabled = config.menu.status?.enabled === true;
     this._statusBorderColor = config.menu.status?.border_color ?? "";
     this._statusItems = this._normalizeStatusItems(config.menu.status?.items);
@@ -486,6 +505,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "analogSeconds") this._analogSeconds = value;
     if (key === "date") this._date = value;
     if (key === "weekday") this._weekday = value;
+    if (key === "notifyEnabled") this._notifyEnabled = value;
+    if (key === "notifyEntity") this._notifyEntity = value;
+    if (key === "notifyBorderColor") this._notifyBorderColor = value;
     if (key === "statusEnabled") this._statusEnabled = value;
     if (key === "statusBorderColor") this._statusBorderColor = value;
     if (key === "iconColor") this._iconColor = value;
@@ -596,13 +618,87 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     }, 150);
   }
 
+  private _selectNotifyEntity(entityId: string) {
+    this._notifyEntity = entityId;
+    this._notifyEntitySearch = "";
+    this._openNotifyEntityPicker = false;
+  }
+
+  private _closeNotifyEntityPicker() {
+    window.setTimeout(() => {
+      this._openNotifyEntityPicker = false;
+    }, 150);
+  }
+
+  private _notifyEntityMissing() {
+    const entityId = (this._notifyEntity || DEFAULT_NOTIFY_ENTITY).trim();
+    return this._notifyEnabled && entityId && !this.hass?.states?.[entityId];
+  }
+
+  private _renderNotifyEntityPicker() {
+    const value = this._notifyEntity || DEFAULT_NOTIFY_ENTITY;
+    const searchValue = this._openNotifyEntityPicker ? this._notifyEntitySearch : value;
+    const matches = this._statusEntityMatches(searchValue);
+
+    return html`
+      <div class="entity-picker">
+        <input
+          class="entity-input"
+          placeholder=${DEFAULT_NOTIFY_ENTITY}
+          .value=${searchValue}
+          @focus=${() => {
+            this._openNotifyEntityPicker = true;
+            this._notifyEntitySearch = "";
+          }}
+          @blur=${() => {
+            if (this._notifyEntitySearch.trim()) {
+              this._notifyEntity = this._notifyEntitySearch.trim();
+            }
+            this._closeNotifyEntityPicker();
+          }}
+          @input=${(ev: Event) => {
+            this._openNotifyEntityPicker = true;
+            const nextValue = (ev.target as HTMLInputElement).value;
+            this._notifyEntitySearch = nextValue;
+            if (!nextValue.trim()) {
+              this._notifyEntity = "";
+            }
+          }}
+        />
+        <span class="entity-arrow" aria-hidden="true">▾</span>
+        ${this._openNotifyEntityPicker
+          ? html`
+              <div class="entity-menu">
+                ${matches.length
+                  ? matches.map((entityId) => {
+                      const stateObj = this.hass?.states?.[entityId];
+                      const friendlyName = stateObj?.attributes?.friendly_name ?? entityId;
+                      return html`
+                        <button
+                          type="button"
+                          @mousedown=${(ev: MouseEvent) => ev.preventDefault()}
+                          @click=${() => this._selectNotifyEntity(entityId)}
+                        >
+                          <span>${friendlyName}</span>
+                          <small>${entityId}</small>
+                        </button>
+                      `;
+                    })
+                  : html`<p>Keine Entität gefunden</p>`}
+              </div>
+            `
+          : nothing}
+      </div>
+    `;
+  }
+
   private _renderStatusEntityPicker(item: { entity?: string }, index: number) {
     const value = item.entity ?? "";
     const searchValue = this._openStatusEntityIndex === index ? this._statusEntitySearch[index] ?? "" : value;
     const matches = this._statusEntityMatches(searchValue);
 
     return html`
-      <div class="status-entity-picker">
+      <div class="entity-picker">
         <input
           class="entity-input"
           placeholder=${`sensor.status_${index + 1}`}
@@ -627,7 +723,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         <span class="entity-arrow" aria-hidden="true">▾</span>
         ${this._openStatusEntityIndex === index
           ? html`
-              <div class="status-entity-menu">
+              <div class="entity-menu">
                 ${matches.length
                   ? matches.map((entityId) => {
                       const stateObj = this.hass?.states?.[entityId];
@@ -1032,6 +1128,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         analog_seconds: this._analogSeconds,
         date: this._date,
         weekday: this._weekday,
+        notify: {
+          enabled: this._notifyEnabled,
+          entity: (this._notifyEntity || DEFAULT_NOTIFY_ENTITY).trim(),
+          border_color: this._notifyBorderColor,
+        },
         status: {
           enabled: this._statusEnabled,
           border_color: this._statusBorderColor,
@@ -1566,6 +1667,54 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           </details>
 
           <details class="wide collapsible-group">
+            <summary>Benachrichtigung</summary>
+            <div class="notify-editor">
+              <label class="check">
+                <input
+                  type="checkbox"
+                  .checked=${this._notifyEnabled}
+                  @change=${(ev: Event) => this._setValue("notifyEnabled", (ev.target as HTMLInputElement).checked)}
+                />
+                Benachrichtigung anzeigen
+              </label>
+              ${this._notifyEnabled
+                ? html`
+                    <label>
+                      Entity
+                      ${this._renderNotifyEntityPicker()}
+                    </label>
+                    ${this._renderColorField(
+                      "Rahmenfarbe",
+                      "notifyBorderColor",
+                      this._notifyBorderColor,
+                      "leer = rot"
+                    )}
+                    ${this._notifyEntityMissing()
+                      ? html`
+                          <div class="helper-hint">
+                            <strong>Helper nicht gefunden</strong>
+                            <p>
+                              Erstelle in Home Assistant einen Text-Helfer mit der Entity
+                              <code>${this._notifyEntity || DEFAULT_NOTIFY_ENTITY}</code>.
+                            </p>
+                            <p>
+                              Pfad: Einstellungen &gt; Geräte &amp; Dienste &gt; Helfer &gt; Helfer erstellen &gt; Text.
+                              Bleibt der Text leer, wird die Benachrichtigung ausgeblendet.
+                            </p>
+                          </div>
+                        `
+                      : html`
+                          <p class="hint">
+                            Die Box erscheint nur, wenn die Entity einen Text enthält. Leer, unknown und unavailable
+                            werden ausgeblendet.
+                          </p>
+                        `}
+                  `
+                : nothing}
+            </div>
+          </details>
+
+          <details class="wide collapsible-group">
             <summary>Statuswerte</summary>
             <div class="status-editor">
               <label class="check">
@@ -2045,6 +2194,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           align-content: start;
         }
 
+        .notify-editor,
         .status-editor {
           display: grid;
           gap: 12px;
@@ -2063,12 +2213,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           font-weight: 800;
         }
 
-        .status-entity-picker {
+        .entity-picker {
           position: relative;
           min-width: 0;
         }
 
-        .status-items .entity-input {
+        .entity-input {
           min-width: 0;
           width: 100%;
           padding-right: 28px;
@@ -2088,7 +2238,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           border-color: var(--error-color, #db4437);
         }
 
-        .status-entity-menu {
+        .entity-menu {
           position: absolute;
           top: calc(100% + 4px);
           left: 0;
@@ -2104,7 +2254,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           box-shadow: var(--ha-card-box-shadow, 0 8px 24px rgba(0, 0, 0, 0.35));
         }
 
-        .status-entity-menu button {
+        .entity-menu button {
           display: grid;
           justify-items: start;
           min-width: 0;
@@ -2118,14 +2268,36 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           text-align: left;
         }
 
-        .status-entity-menu button:hover {
+        .entity-menu button:hover {
           background: color-mix(in srgb, var(--primary-color, #03a9f4) 18%, transparent);
         }
 
-        .status-entity-menu small,
-        .status-entity-menu p {
+        .entity-menu small,
+        .entity-menu p {
           margin: 0;
           color: var(--secondary-text-color);
+          font-size: 12px;
+        }
+
+        .helper-hint {
+          display: grid;
+          gap: 6px;
+          padding: 10px 12px;
+          border: 1px solid var(--warning-color, #ffa600);
+          border-radius: 8px;
+          color: var(--primary-text-color);
+          background: color-mix(in srgb, var(--warning-color, #ffa600) 10%, transparent);
+        }
+
+        .helper-hint p {
+          margin: 0;
+          color: var(--secondary-text-color);
+          font-size: 12px;
+          line-height: 1.4;
+        }
+
+        .helper-hint code {
+          color: var(--primary-text-color);
           font-size: 12px;
         }
 

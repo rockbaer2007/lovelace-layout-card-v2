@@ -60,6 +60,13 @@ function formatStatusValue(value?: string) {
   });
 }
 
+function notifyMessage(value?: string) {
+  if (value === undefined || value === null) return "";
+  const message = String(value).trim();
+  if (!message || message === "unknown" || message === "unavailable") return "";
+  return message;
+}
+
 class DashboardLayoutCardV2 extends LitElement {
   @property() hass;
   @property() editMode = false;
@@ -244,6 +251,25 @@ class DashboardLayoutCardV2 extends LitElement {
     return "#ffffff";
   }
 
+  _notifyBorderColor(menu: DashboardLayoutMenuConfig) {
+    return menu.notify?.border_color?.trim() || "var(--error-color, #db4437)";
+  }
+
+  _renderNotify(menu: DashboardLayoutMenuConfig) {
+    const notify = menu.notify;
+    if (notify?.enabled !== true) return html``;
+    const entityId = notify.entity?.trim() || "input_text.dashboard_notification";
+    const stateObj = this.hass?.states?.[entityId];
+    const message = notifyMessage(stateObj?.state);
+    if (!message) return html``;
+
+    return html`
+      <div class="menu-notify" style=${`--dashboard-layout-v2-notify-border-color: ${this._notifyBorderColor(menu)}`}>
+        ${message}
+      </div>
+    `;
+  }
+
   _renderStatus(menu: DashboardLayoutMenuConfig) {
     const status = menu.status;
     if (status?.enabled !== true) return html``;
@@ -339,7 +365,10 @@ class DashboardLayoutCardV2 extends LitElement {
         <div class="menu-pages">
           ${this._pages.map((page, index) => this._renderMenuItem(page, index))}
         </div>
-        ${this._renderStatus(menu)}
+        <div class="menu-bottom">
+          ${this._renderNotify(menu)}
+          ${this._renderStatus(menu)}
+        </div>
       </nav>
     `;
   }
@@ -593,10 +622,32 @@ class DashboardLayoutCardV2 extends LitElement {
         color: var(--dashboard-layout-v2-icon-color, var(--primary-color));
       }
 
+      .menu-bottom {
+        display: grid;
+        gap: 8px;
+        margin-top: auto;
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      .menu-notify {
+        min-width: 0;
+        max-width: 100%;
+        padding: 8px;
+        border: 1px solid var(--dashboard-layout-v2-notify-border-color, var(--error-color, #db4437));
+        border-radius: 8px;
+        box-sizing: border-box;
+        color: var(--primary-text-color);
+        background: color-mix(in srgb, var(--dashboard-layout-v2-notify-border-color, var(--error-color, #db4437)) 10%, transparent);
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.3;
+        overflow-wrap: anywhere;
+      }
+
       .menu-status {
         display: grid;
         gap: 4px;
-        margin-top: auto;
         min-width: 0;
         max-width: 100%;
         padding: 8px;

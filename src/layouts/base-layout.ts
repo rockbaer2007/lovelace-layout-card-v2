@@ -30,6 +30,13 @@ function formatDashboardLayoutV2StatusValue(value?: string) {
   });
 }
 
+function dashboardLayoutV2NotifyMessage(value?: string) {
+  if (value === undefined || value === null) return "";
+  const message = String(value).trim();
+  if (!message || message === "unknown" || message === "unavailable") return "";
+  return message;
+}
+
 export class BaseLayout extends LitElement {
   @property() cards: Array<LovelaceCard | HuiCard> = [];
   @property() index: number;
@@ -129,6 +136,10 @@ export class BaseLayout extends LitElement {
       home: {
         ...(parentMenu.home ?? {}),
         ...(localMenu.home ?? {}),
+      },
+      notify: {
+        ...(parentMenu.notify ?? {}),
+        ...(localMenu.notify ?? {}),
       },
       status: {
         ...(parentMenu.status ?? {}),
@@ -311,6 +322,28 @@ export class BaseLayout extends LitElement {
     return "#ffffff";
   }
 
+  _dashboardLayoutV2NotifyBorderColor(menu: DashboardLayoutMenuConfig) {
+    return menu.notify?.border_color?.trim() || "var(--error-color, #db4437)";
+  }
+
+  _renderDashboardLayoutV2Notify(menu: DashboardLayoutMenuConfig) {
+    const notify = menu.notify;
+    if (notify?.enabled !== true) return html``;
+    const entityId = notify.entity?.trim() || "input_text.dashboard_notification";
+    const stateObj = this.hass?.states?.[entityId];
+    const message = dashboardLayoutV2NotifyMessage(stateObj?.state);
+    if (!message) return html``;
+
+    return html`
+      <div
+        class="dashboard-layout-v2-menu-notify"
+        style=${`--dashboard-layout-v2-notify-border-color: ${this._dashboardLayoutV2NotifyBorderColor(menu)}`}
+      >
+        ${message}
+      </div>
+    `;
+  }
+
   _renderDashboardLayoutV2Status(menu: DashboardLayoutMenuConfig) {
     const status = menu.status;
     if (status?.enabled !== true) return html``;
@@ -383,7 +416,10 @@ export class BaseLayout extends LitElement {
         <nav>
           ${pages.map((page) => this._renderDashboardLayoutV2MenuItem(page))}
         </nav>
-        ${this._renderDashboardLayoutV2Status(menu)}
+        <div class="dashboard-layout-v2-menu-bottom">
+          ${this._renderDashboardLayoutV2Notify(menu)}
+          ${this._renderDashboardLayoutV2Status(menu)}
+        </div>
       </aside>
     `;
   }
@@ -614,10 +650,31 @@ export class BaseLayout extends LitElement {
         color: var(--dashboard-layout-v2-icon-color, var(--primary-color));
       }
 
+      .dashboard-layout-v2-menu-bottom {
+        display: grid;
+        gap: 8px;
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      .dashboard-layout-v2-menu-notify {
+        min-width: 0;
+        max-width: 100%;
+        padding: 8px;
+        border: 1px solid var(--dashboard-layout-v2-notify-border-color, var(--error-color, #db4437));
+        border-radius: 8px;
+        box-sizing: border-box;
+        color: var(--primary-text-color);
+        background: color-mix(in srgb, var(--dashboard-layout-v2-notify-border-color, var(--error-color, #db4437)) 10%, transparent);
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.3;
+        overflow-wrap: anywhere;
+      }
+
       .dashboard-layout-v2-menu-status {
         display: grid;
         gap: 4px;
-        margin-top: auto;
         min-width: 0;
         max-width: 100%;
         padding: 8px;

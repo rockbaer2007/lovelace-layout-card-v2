@@ -68,6 +68,14 @@ Cards and helpers:
 The home view stores the shared dashboard configuration. Linked subviews only
 reference the home view with `inherits_from`.
 
+The optional `menu.notify` block shows one notification box above the status
+values. It is hidden while the configured entity is missing, empty, `unknown`,
+or `unavailable`; as soon as the entity contains text, the message is shown in
+the side menu. The recommended helper is `input_text.dashboard_notification`.
+Create it in Home Assistant via Settings > Devices & services > Helpers >
+Create helper > Text. If `border_color` is empty, the notification box uses the
+Home Assistant error color.
+
 The optional `menu.status` block shows up to four read-only Home Assistant
 entity states at the bottom of the side menu. The editor provides a built-in
 searchable entity picker for these entries.
@@ -103,6 +111,10 @@ views:
           analog_seconds: false
           date: true
           weekday: long
+          notify:
+            enabled: true
+            entity: input_text.dashboard_notification
+            border_color: ""
           status:
             enabled: true
             border_color: ""

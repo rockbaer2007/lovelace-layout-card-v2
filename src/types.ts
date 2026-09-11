@@ -117,6 +117,11 @@ export interface DashboardLayoutMenuConfig {
   analog_seconds?: boolean;
   date?: boolean;
   weekday?: DashboardLayoutWeekdayMode;
+  notify?: {
+    enabled?: boolean;
+    entity?: string;
+    border_color?: string;
+  };
   status?: {
     enabled?: boolean;
     border_color?: string;
