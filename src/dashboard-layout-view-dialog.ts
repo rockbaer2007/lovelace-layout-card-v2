@@ -1224,8 +1224,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             </div>
           </details>
 
-          <fieldset class="wide group">
-            <legend>Tabs / Unterseiten</legend>
+          <details class="wide collapsible-group" open>
+            <summary>Tabs / Unterseiten</summary>
             <div class="page-editor">
               <div class="page-list">
                 ${this._pages.map(
@@ -1401,10 +1401,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               <button @click=${() => this._movePage(1)} ?disabled=${this._selectedPageIndex >= this._pages.length - 1}>Runter</button>
               <button class="danger" @click=${this._deletePage} ?disabled=${!selectedPage}>Löschen</button>
             </div>
-          </fieldset>
+          </details>
 
-          <fieldset class="wide group">
-            <legend>Style</legend>
+          <details class="wide collapsible-group">
+            <summary>Style</summary>
             <div class="style-grid">
               <label>
                 Größe Uhr
@@ -1533,7 +1533,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   `
                 : nothing}
             </div>
-          </fieldset>
+          </details>
 
           <details class="wide json-box" ?open=${this._jsonExpanded} @toggle=${(ev: Event) => (this._jsonExpanded = (ev.target as HTMLDetailsElement).open)}>
             <summary>Spezialoptionen / JSON bearbeiten</summary>
