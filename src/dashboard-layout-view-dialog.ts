@@ -331,6 +331,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _homeTitle = "Home";
   @state() private _homePath = "home";
   @state() private _homeIcon = "mdi:home";
+  @state() private _homeMaxColumns = 4;
+  @state() private _homeDenseSectionPlacement = false;
+  @state() private _homeTopMargin = false;
   @state() private _inheritTheme = true;
   @state() private _clock = "digital";
   @state() private _analogHourMarks = false;
@@ -402,6 +405,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._homeTitle = homeEntry.title;
     this._homePath = homeEntry.path;
     this._homeIcon = homeEntry.icon;
+    this._homeMaxColumns = Number(params.viewConfig?.max_columns ?? 4);
+    this._homeDenseSectionPlacement = params.viewConfig?.dense_section_placement === true;
+    this._homeTopMargin = params.viewConfig?.top_margin === true;
     this._inheritTheme = config.inherit_theme !== false;
     this._clock = config.menu.clock ?? "digital";
     this._analogHourMarks = config.menu.analog_hour_marks === true;
@@ -498,6 +504,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "menuPosition") this._menuPosition = value;
     if (key === "menuTitle") this._menuTitle = value;
     if (key === "showHome") this._showHome = value;
+    if (key === "homeMaxColumns") this._homeMaxColumns = value;
+    if (key === "homeDenseSectionPlacement") this._homeDenseSectionPlacement = value;
+    if (key === "homeTopMargin") this._homeTopMargin = value;
     if (key === "inheritTheme") this._inheritTheme = value;
     if (key === "clock") this._clock = value;
     if (key === "analogHourMarks") this._analogHourMarks = value;
@@ -1182,6 +1191,15 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       const { theme: _theme, ...viewWithoutTheme } = view;
       return viewWithoutTheme;
     };
+    const applyHomeSectionsOptions = (view: any, viewPath: string) => {
+      if (viewPath !== homePath || pageLayoutType(view) !== SECTIONS_LAYOUT_V2) return view;
+      return {
+        ...view,
+        max_columns: this._homeMaxColumns,
+        dense_section_placement: this._homeDenseSectionPlacement,
+        top_margin: this._homeTopMargin,
+      };
+    };
     const relatedPaths = this._collectRelatedDashboardLayoutV2Paths(views, currentPath, dashboardLayoutV2);
     normalizedPages.forEach((page, index) => {
       if (!isMenuOnlyPage(page)) relatedPaths.add(String(page.path));
@@ -1197,14 +1215,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         viewPath === homePath || (index === this.viewIndex && !view.subview)
           ? dashboardLayoutV2
           : dashboardLayoutV2Reference(homePath);
-      return applyInheritedTheme({
+      return applyHomeSectionsOptions(applyInheritedTheme({
         ...view,
         ...stableViewEditorChrome(view),
         layout: {
           ...(layoutWithoutDashboardLayoutV2(view.layout) ?? {}),
           dashboard_layout_v2: nextDashboardLayoutV2,
         },
-      }, viewPath);
+      }, viewPath), viewPath);
     });
 
     for (const [pageIndex, page] of normalizedPages.entries()) {
@@ -1346,6 +1364,38 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   ${this._homeTitle}
                 </span>
                 <small>${this._homePath}</small>
+              </fieldset>
+
+              <fieldset class="home-entry group">
+                <legend>Abschnittsansicht</legend>
+                <label>
+                  Maximalzahl von Abschnitten in der Breite
+                  <input
+                    type="number"
+                    min="1"
+                    max="10"
+                    .value=${String(this._homeMaxColumns)}
+                    @input=${(ev: Event) =>
+                      this._setValue("homeMaxColumns", Number((ev.target as HTMLInputElement).value))}
+                  />
+                </label>
+                <label class="check">
+                  <input
+                    type="checkbox"
+                    .checked=${this._homeDenseSectionPlacement}
+                    @change=${(ev: Event) =>
+                      this._setValue("homeDenseSectionPlacement", (ev.target as HTMLInputElement).checked)}
+                  />
+                  Dichte Abschnittsplatzierung
+                </label>
+                <label class="check">
+                  <input
+                    type="checkbox"
+                    .checked=${this._homeTopMargin}
+                    @change=${(ev: Event) => this._setValue("homeTopMargin", (ev.target as HTMLInputElement).checked)}
+                  />
+                  Zusätzlichen Platz oben hinzufügen
+                </label>
               </fieldset>
 
               <label class="check">
