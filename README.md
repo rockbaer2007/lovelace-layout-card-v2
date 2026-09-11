@@ -92,6 +92,7 @@ views:
             hover_tab_text_color: "#000000"
             clock_size: 96px
             date_size: 12px
+            weekday_wrap_size: 21px
             background_mode: none
             background_color: ""
             background_image: ""
@@ -156,6 +157,7 @@ dashboard settings are available from the view editor and allow editing:
 - weekday display: none, short or long
 - clock size from `24px` to `128px`
 - date text size from `8px` to `48px`
+- long weekday line break threshold from `12px` to `48px`
 - Home Assistant sidebar/header visibility behavior
 
 The JSON section in the editor is optional and meant for advanced page edits.

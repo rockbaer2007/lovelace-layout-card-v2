@@ -126,6 +126,7 @@ export interface DashboardLayoutMenuConfig {
     hover_tab_text_color?: string;
     clock_size?: string;
     date_size?: string;
+    weekday_wrap_size?: string;
     background_mode?: "none" | "color" | "image";
     background_color?: string;
     background_image?: string;

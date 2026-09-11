@@ -221,6 +221,7 @@ export class BaseLayout extends LitElement {
     if (menu.date === false) return html``;
     const style = menu.style ?? {};
     const dateSize = Number(String(style.date_size ?? "12px").replace(/[^\d.]/g, "")) || 12;
+    const wrapSize = Number(String(style.weekday_wrap_size ?? "21px").replace(/[^\d.]/g, "")) || 21;
     const now = new Date();
     const date = now.toLocaleDateString();
     if (menu.weekday === "short") {
@@ -229,7 +230,7 @@ export class BaseLayout extends LitElement {
     }
     if (menu.weekday === "long") {
       const weekday = now.toLocaleDateString([], { weekday: "long" });
-      return dateSize >= 24
+      return dateSize >= wrapSize
         ? html`<small class="two-line"><span>${weekday}</span><span>${date}</span></small>`
         : html`<small>${weekday} ${date}</small>`;
     }

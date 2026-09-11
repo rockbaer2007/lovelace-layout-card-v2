@@ -29,6 +29,7 @@ const defaultConfig = {
       hover_tab_text_color: "",
       clock_size: "44px",
       date_size: "12px",
+      weekday_wrap_size: "21px",
       background_mode: "none",
       background_color: "",
       background_image: "",
@@ -284,6 +285,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _hoverTabTextColor = "";
   @state() private _clockSize = "44";
   @state() private _dateSize = "12";
+  @state() private _weekdayWrapSize = "21";
   @state() private _backgroundMode = "none";
   @state() private _backgroundColor = "";
   @state() private _backgroundImage = "";
@@ -334,6 +336,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._hoverTabTextColor = config.menu.style?.hover_tab_text_color ?? "";
     this._clockSize = clockSizeInputValue(config.menu.style?.clock_size ?? "44px");
     this._dateSize = clockSizeInputValue(config.menu.style?.date_size ?? "12px");
+    this._weekdayWrapSize = clockSizeInputValue(config.menu.style?.weekday_wrap_size ?? "21px");
     this._backgroundMode = config.menu.style?.background_mode ?? "none";
     this._backgroundColor = config.menu.style?.background_color ?? "";
     this._backgroundImage = config.menu.style?.background_image ?? "";
@@ -409,6 +412,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "hoverTabTextColor") this._hoverTabTextColor = value;
     if (key === "clockSize") this._clockSize = value;
     if (key === "dateSize") this._dateSize = value;
+    if (key === "weekdayWrapSize") this._weekdayWrapSize = value;
     if (key === "backgroundMode") this._backgroundMode = value;
     if (key === "backgroundColor") this._backgroundColor = value;
     if (key === "backgroundImage") this._backgroundImage = value;
@@ -738,6 +742,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           hover_tab_text_color: this._hoverTabTextColor,
           clock_size: normalizedClockSize(this._clockSize),
           date_size: normalizedDateSize(this._dateSize),
+          weekday_wrap_size: normalizedDateSize(this._weekdayWrapSize),
           background_mode: this._backgroundMode,
           background_color: this._backgroundColor,
           background_image: this._backgroundImage,
@@ -1122,6 +1127,23 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   @input=${(ev: Event) => this._setValue("dateSize", (ev.target as HTMLInputElement).value)}
                 />
               </label>
+              ${this._weekday === "long"
+                ? html`
+                    <label>
+                      Zeilenumbruch ab
+                      <input
+                        type="number"
+                        min="12"
+                        max="48"
+                        step="1"
+                        .value=${this._weekdayWrapSize}
+                        @input=${(ev: Event) =>
+                          this._setValue("weekdayWrapSize", (ev.target as HTMLInputElement).value)}
+                      />
+                    </label>
+                    <span class="style-empty" aria-hidden="true"></span>
+                  `
+                : nothing}
               ${this._renderColorField("Tab aktiv", "activeTabColor", this._activeTabColor, "var(--primary-color)")}
               ${this._renderColorField("Text aktiv", "activeTabTextColor", this._activeTabTextColor, "var(--text-primary-color)")}
               ${this._renderColorField("Tab inaktiv", "inactiveTabColor", this._inactiveTabColor, "transparent")}
