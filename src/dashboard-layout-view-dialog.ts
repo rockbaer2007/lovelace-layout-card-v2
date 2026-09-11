@@ -504,6 +504,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "menuPosition") this._menuPosition = value;
     if (key === "menuTitle") this._menuTitle = value;
     if (key === "showHome") this._showHome = value;
+    if (key === "homeTitle") this._homeTitle = value;
+    if (key === "homePath") this._homePath = value;
+    if (key === "homeIcon") this._homeIcon = value;
     if (key === "homeMaxColumns") this._homeMaxColumns = value;
     if (key === "homeDenseSectionPlacement") this._homeDenseSectionPlacement = value;
     if (key === "homeTopMargin") this._homeTopMargin = value;
@@ -1191,8 +1194,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       const { theme: _theme, ...viewWithoutTheme } = view;
       return viewWithoutTheme;
     };
-    const applyHomeSectionsOptions = (view: any, viewPath: string) => {
-      if (viewPath !== homePath || pageLayoutType(view) !== SECTIONS_LAYOUT_V2) return view;
+    const applyHomeSectionsOptions = (view: any, isHomeView: boolean) => {
+      if (!isHomeView || pageLayoutType(view) !== SECTIONS_LAYOUT_V2) return view;
       return {
         ...view,
         max_columns: this._homeMaxColumns,
@@ -1208,21 +1211,30 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     });
     const nextViews = views.map((view, index) => {
       const viewPath = String(view.path ?? index);
+      const isHomeView = viewPath === currentPath || viewPath === homePath || (index === this.viewIndex && !view.subview);
       const isRelatedDashboardLayoutV2View =
         relatedPaths.has(viewPath) && isDashboardLayoutV2View(view);
       if (!isRelatedDashboardLayoutV2View) return view;
       const nextDashboardLayoutV2 =
-        viewPath === homePath || (index === this.viewIndex && !view.subview)
+        isHomeView
           ? dashboardLayoutV2
           : dashboardLayoutV2Reference(homePath);
-      return applyHomeSectionsOptions(applyInheritedTheme({
+      const nextView = {
         ...view,
+        ...(isHomeView
+          ? {
+              title: homeEntry.title,
+              path: homePath,
+              icon: homeEntry.icon,
+            }
+          : {}),
         ...stableViewEditorChrome(view),
         layout: {
           ...(layoutWithoutDashboardLayoutV2(view.layout) ?? {}),
           dashboard_layout_v2: nextDashboardLayoutV2,
         },
-      }, viewPath), viewPath);
+      };
+      return applyHomeSectionsOptions(applyInheritedTheme(nextView, isHomeView ? homePath : viewPath), isHomeView);
     });
 
     for (const [pageIndex, page] of normalizedPages.entries()) {
@@ -1359,11 +1371,27 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
               <fieldset class="home-entry group">
                 <legend>Hauptseitefeld</legend>
-                <span>
-                  <ha-icon .icon=${this._homeIcon}></ha-icon>
-                  ${this._homeTitle}
-                </span>
-                <small>${this._homePath}</small>
+                <label>
+                  Titel
+                  <input
+                    .value=${this._homeTitle}
+                    @input=${(ev: Event) => this._setValue("homeTitle", (ev.target as HTMLInputElement).value)}
+                  />
+                </label>
+                <label>
+                  Pfad
+                  <input
+                    .value=${this._homePath}
+                    @input=${(ev: Event) => this._setValue("homePath", (ev.target as HTMLInputElement).value)}
+                  />
+                </label>
+                <label>
+                  Icon
+                  <input
+                    .value=${this._homeIcon}
+                    @input=${(ev: Event) => this._setValue("homeIcon", (ev.target as HTMLInputElement).value)}
+                  />
+                </label>
               </fieldset>
 
               <fieldset class="home-entry group">
