@@ -223,8 +223,6 @@ class DashboardLayoutCardV2 extends LitElement {
           style.inactive_tab_text_color ? `--dashboard-layout-v2-inactive-tab-text-color: ${style.inactive_tab_text_color}` : "",
           style.hover_tab_text_color ? `--dashboard-layout-v2-hover-tab-text-color: ${style.hover_tab_text_color}` : "",
           style.tab_border_color ? `--dashboard-layout-v2-tab-border-color: ${style.tab_border_color}` : "",
-          style.card_border_color ? `--dashboard-layout-v2-card-border-color: ${style.card_border_color}` : "",
-          style.shadow_frame_color ? `--dashboard-layout-v2-shadow-frame-color: ${style.shadow_frame_color}` : "",
           style.clock_size ? `--dashboard-layout-v2-clock-size: ${style.clock_size}` : "",
           style.date_size ? `--dashboard-layout-v2-date-size: ${style.date_size}` : "",
           background ? `--dashboard-layout-v2-menu-background: ${background}` : "",
@@ -251,12 +249,23 @@ class DashboardLayoutCardV2 extends LitElement {
     `;
   }
 
+  _contentStyle(menu: DashboardLayoutMenuConfig) {
+    const style = menu.style ?? {};
+    return [
+      style.card_border_color ? `--dashboard-layout-v2-card-border-color: ${style.card_border_color}` : "",
+      style.card_border_color ? `--ha-card-border-color: ${style.card_border_color}` : "",
+      style.card_border_color ? "--ha-card-border-width: 1px" : "",
+      style.shadow_frame_color ? `--dashboard-layout-v2-shadow-frame-color: ${style.shadow_frame_color}` : "",
+      style.shadow_frame_color ? `--ha-card-box-shadow: 3px 3px 0 0 ${style.shadow_frame_color}` : "",
+    ].filter(Boolean).join(";");
+  }
+
   render() {
     if (!this._config) return html``;
     const menu = normalizeMenu(this._config.menu);
     const position = this._menuPosition(menu);
     return html`
-      <ha-card class=${`dashboard-layout-card menu-${position}`}>
+      <ha-card class=${`dashboard-layout-card menu-${position}`} style=${this._contentStyle(menu)}>
         ${position === "left" ? this._renderMenu(menu) : ""}
         <main class="page">${this._layoutElement}</main>
         ${position === "right" ? this._renderMenu(menu) : ""}
@@ -319,10 +328,7 @@ class DashboardLayoutCardV2 extends LitElement {
         flex-direction: column;
         gap: 12px;
         padding: 12px;
-        border: 1px solid var(--dashboard-layout-v2-card-border-color, transparent);
-        border-right-color: var(--dashboard-layout-v2-card-border-color, var(--divider-color));
-        box-shadow: 3px 3px 0 0 var(--dashboard-layout-v2-shadow-frame-color, transparent);
-        box-sizing: border-box;
+        border-right: 1px solid var(--divider-color);
         background: var(
           --dashboard-layout-v2-menu-background,
           color-mix(in srgb, var(--card-background-color) 92%, var(--primary-color))
@@ -330,8 +336,8 @@ class DashboardLayoutCardV2 extends LitElement {
       }
 
       ha-card.menu-right .menu {
-        border-right-color: var(--dashboard-layout-v2-card-border-color, transparent);
-        border-left-color: var(--dashboard-layout-v2-card-border-color, var(--divider-color));
+        border-right: 0;
+        border-left: 1px solid var(--divider-color);
       }
 
       .menu-header {

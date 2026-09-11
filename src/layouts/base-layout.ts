@@ -266,8 +266,6 @@ export class BaseLayout extends LitElement {
           style.inactive_tab_text_color ? `--dashboard-layout-v2-inactive-tab-text-color: ${style.inactive_tab_text_color}` : "",
           style.hover_tab_text_color ? `--dashboard-layout-v2-hover-tab-text-color: ${style.hover_tab_text_color}` : "",
           style.tab_border_color ? `--dashboard-layout-v2-tab-border-color: ${style.tab_border_color}` : "",
-          style.card_border_color ? `--dashboard-layout-v2-card-border-color: ${style.card_border_color}` : "",
-          style.shadow_frame_color ? `--dashboard-layout-v2-shadow-frame-color: ${style.shadow_frame_color}` : "",
           style.clock_size ? `--dashboard-layout-v2-clock-size: ${style.clock_size}` : "",
           style.date_size ? `--dashboard-layout-v2-date-size: ${style.date_size}` : "",
           background ? `--dashboard-layout-v2-menu-background: ${background}` : "",
@@ -295,12 +293,23 @@ export class BaseLayout extends LitElement {
     `;
   }
 
+  _dashboardLayoutV2ContentStyle(menu: DashboardLayoutMenuConfig) {
+    const style = menu.style ?? {};
+    return [
+      style.card_border_color ? `--dashboard-layout-v2-card-border-color: ${style.card_border_color}` : "",
+      style.card_border_color ? `--ha-card-border-color: ${style.card_border_color}` : "",
+      style.card_border_color ? "--ha-card-border-width: 1px" : "",
+      style.shadow_frame_color ? `--dashboard-layout-v2-shadow-frame-color: ${style.shadow_frame_color}` : "",
+      style.shadow_frame_color ? `--ha-card-box-shadow: 3px 3px 0 0 ${style.shadow_frame_color}` : "",
+    ].filter(Boolean).join(";");
+  }
+
   _renderDashboardLayoutV2Shell(content) {
     const menu = this._dashboardLayoutV2Menu();
     if (menu.position === "none") return content;
 
     return html`
-      <section class=${`dashboard-layout-v2-shell menu-${menu.position}`}>
+      <section class=${`dashboard-layout-v2-shell menu-${menu.position}`} style=${this._dashboardLayoutV2ContentStyle(menu)}>
         ${menu.position === "left" ? this._renderDashboardLayoutV2Menu() : ""}
         <div class="dashboard-layout-v2-content">${content}</div>
         ${menu.position === "right" ? this._renderDashboardLayoutV2Menu() : ""}
@@ -337,10 +346,7 @@ export class BaseLayout extends LitElement {
         align-content: start;
         gap: 12px;
         padding: 8px;
-        border: 1px solid var(--dashboard-layout-v2-card-border-color, transparent);
         border-radius: 12px;
-        box-shadow: 3px 3px 0 0 var(--dashboard-layout-v2-shadow-frame-color, transparent);
-        box-sizing: border-box;
         background: var(
           --dashboard-layout-v2-menu-background,
           var(--card-background-color, rgba(0, 0, 0, 0.18))
