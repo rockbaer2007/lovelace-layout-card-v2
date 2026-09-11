@@ -198,6 +198,11 @@ Use this path in the editor:
 /local/image/back2.jpg
 ```
 
+For a left or right menu background, portrait images work best. A practical
+target aspect ratio is about `1:2.5` (width:height). Other image shapes are
+supported, but the menu uses `cover`, so wide or square images may be cropped
+or feel stretched depending on the visible menu height.
+
 Only use images you own or images with a compatible open-source/free license.
 Do not redistribute screenshots, wallpapers or photos unless their license
 allows it.
