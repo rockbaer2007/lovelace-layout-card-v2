@@ -67,6 +67,7 @@ const DASHBOARD_LAYOUT_V2_VIEW_TYPES = new Set([
   "custom:grid-layout-v2",
 ]);
 const MENU_ONLY_PAGE_TYPES = new Set(["spacer", "divider"]);
+const STATUS_LABEL_MAX_LENGTH = 18;
 
 function slugifyPath(value: string) {
   return value
@@ -549,6 +550,19 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       .filter((item) => item.entity);
   }
 
+  private _tooLongStatusLabels() {
+    return this._normalizeStatusItems(this._statusItems)
+      .map((item, index) => ({ index, label: item.label?.trim() ?? "" }))
+      .filter((item) => item.label.length > STATUS_LABEL_MAX_LENGTH);
+  }
+
+  private _statusLabelError() {
+    const labels = this._tooLongStatusLabels();
+    if (!labels.length) return "";
+    const rows = labels.map((item) => item.index + 1).join(", ");
+    return `Status-Label in Zeile ${rows} ist zu lang. Bitte auf maximal ${STATUS_LABEL_MAX_LENGTH} Zeichen kürzen.`;
+  }
+
   private _statusEntityOptions() {
     return Object.keys(this.hass?.states ?? {}).sort((a, b) => a.localeCompare(b));
   }
@@ -594,6 +608,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             this._updateStatusItem(index, "entity", (ev.target as HTMLInputElement).value);
           }}
         />
+        <span class="entity-arrow" aria-hidden="true">▾</span>
         ${this._openStatusEntityIndex === index
           ? html`
               <div class="status-entity-menu">
@@ -1159,6 +1174,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const selectedPage = this._pages[this._selectedPageIndex];
     const selectedPageLayout = selectedPage ? pageLayoutType(selectedPage) : "";
     const selectedPageItemType = selectedPage ? pageItemType(selectedPage) : "page";
+    const statusLabelError = this._statusLabelError();
 
     return html`
       <div class="scrim" @click=${this._close}></div>
@@ -1560,8 +1576,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         (item, index) => html`
                           ${this._renderStatusEntityPicker(item, index)}
                           <input
+                            class=${(item.label ?? "").length > STATUS_LABEL_MAX_LENGTH ? "invalid" : ""}
                             placeholder="Optional"
                             .value=${item.label ?? ""}
+                            maxlength=${String(STATUS_LABEL_MAX_LENGTH + 20)}
                             @input=${(ev: Event) =>
                               this._updateStatusItem(index, "label", (ev.target as HTMLInputElement).value)}
                           />
@@ -1574,6 +1592,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         `
                       )}
                     </div>
+                    ${statusLabelError ? html`<p class="error">${statusLabelError}</p>` : nothing}
                   `
                 : nothing}
             </div>
@@ -1725,7 +1744,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
         <footer>
           <button @click=${this._close}>Abbrechen</button>
-          <button class="primary" @click=${this._save}>Speichern</button>
+          <button class="primary" @click=${this._save} ?disabled=${Boolean(statusLabelError)}>Speichern</button>
         </footer>
       </section>
     `;
@@ -2017,7 +2036,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
         .status-items {
           display: grid;
-          grid-template-columns: minmax(180px, 1.4fr) minmax(120px, 1fr) minmax(80px, 0.7fr);
+          grid-template-columns: minmax(240px, 1.6fr) minmax(160px, 1fr) minmax(72px, 0.45fr);
           gap: 8px;
           align-items: center;
         }
@@ -2036,6 +2055,21 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         .status-items .entity-input {
           min-width: 0;
           width: 100%;
+          padding-right: 28px;
+          box-sizing: border-box;
+        }
+
+        .entity-arrow {
+          position: absolute;
+          top: 50%;
+          right: 9px;
+          transform: translateY(-50%);
+          color: var(--secondary-text-color);
+          pointer-events: none;
+        }
+
+        input.invalid {
+          border-color: var(--error-color, #db4437);
         }
 
         .status-entity-menu {

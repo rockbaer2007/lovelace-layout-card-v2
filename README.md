@@ -76,7 +76,8 @@ name, and `unit` is used only when the entity does not provide
 `unit_of_measurement`. If `border_color` is empty, the status block uses the
 tab border color; if that is empty or transparent, it falls back to white.
 When an entity is selected and the label is still empty, the editor fills the
-label from the entity's friendly name.
+label from the entity's friendly name. Status labels are limited to 18
+characters to keep the menu layout stable.
 
 ```yaml
 views:
