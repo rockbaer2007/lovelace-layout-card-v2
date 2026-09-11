@@ -331,20 +331,12 @@ export class BaseLayout extends LitElement {
 
   _dashboardLayoutV2ContentStyle(menu: DashboardLayoutMenuConfig) {
     const style = menu.style ?? {};
-    const background =
-      style.background_mode === "color" && style.background_color
-        ? style.background_color
-        : style.background_mode === "image" && style.background_image
-          ? `center / cover no-repeat url("${style.background_image}")`
-          : "";
-
     return [
       style.card_border_color ? `--dashboard-layout-v2-card-border-color: ${style.card_border_color}` : "",
       style.card_border_color ? `--ha-card-border-color: ${style.card_border_color}` : "",
       style.card_border_color ? "--ha-card-border-width: 1px" : "",
       style.shadow_frame_color ? `--dashboard-layout-v2-shadow-frame-color: ${style.shadow_frame_color}` : "",
       style.shadow_frame_offset ? `--dashboard-layout-v2-shadow-frame-offset: ${style.shadow_frame_offset}` : "",
-      background ? `--dashboard-layout-v2-content-background: ${background}` : "",
       style.shadow_frame_color
         ? `--ha-card-box-shadow: var(--dashboard-layout-v2-shadow-frame-offset, 4px) var(--dashboard-layout-v2-shadow-frame-offset, 4px) 0 0 ${style.shadow_frame_color}`
         : "",
@@ -388,7 +380,6 @@ export class BaseLayout extends LitElement {
         min-width: 0;
         border: 1px solid var(--dashboard-layout-v2-card-border-color, transparent);
         border-radius: var(--ha-card-border-radius, 12px);
-        background: var(--dashboard-layout-v2-content-background, transparent);
         box-shadow: var(--dashboard-layout-v2-shadow-frame-offset, 4px) var(--dashboard-layout-v2-shadow-frame-offset, 4px) 0 0 var(--dashboard-layout-v2-shadow-frame-color, transparent);
         box-sizing: border-box;
       }
