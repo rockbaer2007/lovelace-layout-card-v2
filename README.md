@@ -16,9 +16,9 @@ layout-card without overwriting it.
 - Keeps the menu visible while switching between linked dashboard subviews.
 - Stores shared dashboard menu settings once on the home view.
 - Lets linked subviews inherit menu style through `inherits_from`.
-- Supports configurable tab colors, text colors, hover colors, icon color,
-  menu background, digital or analog clock, date display, clock size and date
-  text size.
+- Supports configurable tab colors, text colors, hover colors, icon color, icon
+  circle color, menu background, digital or analog clock, date display, clock
+  size and date text size.
 - Can optionally hide the Home Assistant sidebar/header for selected dashboard
   users while keeping it visible for admins.
 
@@ -81,6 +81,7 @@ views:
           date: true
           style:
             icon_color: "#fbff00"
+            icon_circle_color: "#ffffff"
             active_tab_color: "#333aff"
             inactive_tab_color: "#bfbfbf"
             hover_tab_color: "#33ffe7"

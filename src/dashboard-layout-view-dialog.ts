@@ -18,6 +18,7 @@ const defaultConfig = {
     date: true,
     style: {
       icon_color: "",
+      icon_circle_color: "",
       active_tab_color: "",
       inactive_tab_color: "",
       hover_tab_color: "",
@@ -270,12 +271,13 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _clock = "digital";
   @state() private _date = true;
   @state() private _iconColor = "";
+  @state() private _iconCircleColor = "";
   @state() private _activeTabColor = "";
   @state() private _inactiveTabColor = "";
   @state() private _hoverTabColor = "";
   @state() private _activeTabTextColor = "";
   @state() private _inactiveTabTextColor = "";
-@state() private _hoverTabTextColor = "";
+  @state() private _hoverTabTextColor = "";
   @state() private _clockSize = "44";
   @state() private _dateSize = "12";
   @state() private _backgroundMode = "none";
@@ -317,6 +319,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._clock = config.menu.clock ?? "digital";
     this._date = config.menu.date !== false;
     this._iconColor = config.menu.style?.icon_color ?? "";
+    this._iconCircleColor = config.menu.style?.icon_circle_color ?? "";
     this._activeTabColor = config.menu.style?.active_tab_color ?? "";
     this._inactiveTabColor = config.menu.style?.inactive_tab_color ?? "";
     this._hoverTabColor = config.menu.style?.hover_tab_color ?? "";
@@ -389,6 +392,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "clock") this._clock = value;
     if (key === "date") this._date = value;
     if (key === "iconColor") this._iconColor = value;
+    if (key === "iconCircleColor") this._iconCircleColor = value;
     if (key === "activeTabColor") this._activeTabColor = value;
     if (key === "inactiveTabColor") this._inactiveTabColor = value;
     if (key === "hoverTabColor") this._hoverTabColor = value;
@@ -715,6 +719,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         date: this._date,
         style: {
           icon_color: this._iconColor,
+          icon_circle_color: this._iconCircleColor,
           active_tab_color: this._activeTabColor,
           inactive_tab_color: this._inactiveTabColor,
           hover_tab_color: this._hoverTabColor,
@@ -1080,7 +1085,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               ${this._renderColorField("Hover Farbe", "hoverTabColor", this._hoverTabColor, "var(--secondary-background-color)")}
               ${this._renderColorField("Hover Text", "hoverTabTextColor", this._hoverTabTextColor, "var(--primary-text-color)")}
               ${this._renderColorField("Icon Farbe", "iconColor", this._iconColor, "var(--primary-color)")}
-              <span class="style-empty" aria-hidden="true"></span>
+              ${this._renderColorField("Icon-Kreis Farbe", "iconCircleColor", this._iconCircleColor, "transparent")}
               <label>
                 Hintergrund
                 <select

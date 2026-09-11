@@ -193,6 +193,7 @@ class DashboardLayoutCardV2 extends LitElement {
         aria-label="Dashboard pages"
         style=${[
           style.icon_color ? `--dashboard-layout-v2-icon-color: ${style.icon_color}` : "",
+          style.icon_circle_color ? `--dashboard-layout-v2-icon-circle-color: ${style.icon_circle_color}` : "",
           style.active_tab_color ? `--dashboard-layout-v2-active-tab-color: ${style.active_tab_color}` : "",
           style.inactive_tab_color ? `--dashboard-layout-v2-inactive-tab-color: ${style.inactive_tab_color}` : "",
           style.hover_tab_color ? `--dashboard-layout-v2-hover-tab-color: ${style.hover_tab_color}` : "",
@@ -387,6 +388,16 @@ class DashboardLayoutCardV2 extends LitElement {
       }
 
       .menu-pages ha-icon {
+        --mdc-icon-size: 20px;
+        display: inline-grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        padding: 4px;
+        box-sizing: border-box;
+        border-radius: 50%;
+        background: var(--dashboard-layout-v2-icon-circle-color, transparent);
         color: var(--dashboard-layout-v2-icon-color, var(--primary-color));
       }
 

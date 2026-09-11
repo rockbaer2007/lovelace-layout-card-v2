@@ -113,6 +113,7 @@ export interface DashboardLayoutMenuConfig {
   date?: boolean;
   style?: {
     icon_color?: string;
+    icon_circle_color?: string;
     active_tab_color?: string;
     inactive_tab_color?: string;
     hover_tab_color?: string;
