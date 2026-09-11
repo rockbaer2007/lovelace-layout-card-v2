@@ -117,6 +117,15 @@ export interface DashboardLayoutMenuConfig {
   analog_seconds?: boolean;
   date?: boolean;
   weekday?: DashboardLayoutWeekdayMode;
+  status?: {
+    enabled?: boolean;
+    border_color?: string;
+    items?: Array<{
+      entity?: string;
+      label?: string;
+      unit?: string;
+    }>;
+  };
   style?: {
     icon_color?: string;
     icon_active_color?: string;

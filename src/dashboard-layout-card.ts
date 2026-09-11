@@ -225,6 +225,38 @@ class DashboardLayoutCardV2 extends LitElement {
     return html`<span class="menu-date">${date}</span>`;
   }
 
+  _statusBorderColor(menu: DashboardLayoutMenuConfig) {
+    const statusColor = menu.status?.border_color?.trim();
+    if (statusColor) return statusColor;
+    const tabColor = menu.style?.tab_border_color?.trim();
+    if (tabColor && tabColor !== "transparent") return tabColor;
+    return "#ffffff";
+  }
+
+  _renderStatus(menu: DashboardLayoutMenuConfig) {
+    const status = menu.status;
+    if (status?.enabled !== true) return html``;
+    const items = (status.items ?? []).filter((item) => item?.entity);
+    if (!items.length) return html``;
+
+    return html`
+      <div class="menu-status" style=${`--dashboard-layout-v2-status-border-color: ${this._statusBorderColor(menu)}`}>
+        ${items.slice(0, 4).map((item) => {
+          const stateObj = this.hass?.states?.[item.entity ?? ""];
+          const label = item.label || stateObj?.attributes?.friendly_name || item.entity;
+          const unit = stateObj?.attributes?.unit_of_measurement || item.unit || "";
+          const value = stateObj?.state ?? "—";
+          return html`
+            <div class="status-row">
+              <span class="status-label">${label}</span>
+              <span class="status-value">${value}${unit ? ` ${unit}` : ""}</span>
+            </div>
+          `;
+        })}
+      </div>
+    `;
+  }
+
   _renderMenuItem(page: DashboardLayoutPageConfig, index: number) {
     if (page.type === "spacer") {
       return html`<div class="menu-spacer" aria-hidden="true"></div>`;
@@ -296,6 +328,7 @@ class DashboardLayoutCardV2 extends LitElement {
         <div class="menu-pages">
           ${this._pages.map((page, index) => this._renderMenuItem(page, index))}
         </div>
+        ${this._renderStatus(menu)}
       </nav>
     `;
   }
@@ -547,6 +580,37 @@ class DashboardLayoutCardV2 extends LitElement {
         border-radius: var(--dashboard-layout-v2-icon-radius, 50%);
         background: var(--dashboard-layout-v2-icon-background-color, transparent);
         color: var(--dashboard-layout-v2-icon-color, var(--primary-color));
+      }
+
+      .menu-status {
+        display: grid;
+        gap: 4px;
+        margin-top: auto;
+        padding: 8px;
+        border: 1px solid var(--dashboard-layout-v2-status-border-color, #ffffff);
+        border-radius: 8px;
+        font-size: 12px;
+        line-height: 1.25;
+      }
+
+      .status-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .status-label {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .status-value {
+        flex: none;
+        font-weight: 700;
+        white-space: nowrap;
       }
 
       .page {

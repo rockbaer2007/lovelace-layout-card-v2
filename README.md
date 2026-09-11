@@ -14,6 +14,7 @@ layout-card without overwriting it.
 - Adds an optional left or right dashboard tab menu for view navigation.
 - Supports non-clickable menu spacers and rounded divider bars.
 - Divider bars support their own color and optional 3D frame color.
+- Supports an optional bottom menu status list with up to four read-only entity values.
 - Supports Home Assistant-style Sections views through `custom:sections-layout-v2`.
 - Creates new dashboard subviews as Sections V2 by default.
 - Keeps the menu visible while switching between linked dashboard subviews.
@@ -67,6 +68,12 @@ Cards and helpers:
 The home view stores the shared dashboard configuration. Linked subviews only
 reference the home view with `inherits_from`.
 
+The optional `menu.status` block shows up to four read-only Home Assistant
+entity states at the bottom of the side menu. `label` overrides the friendly
+name, and `unit` is used only when the entity does not provide
+`unit_of_measurement`. If `border_color` is empty, the status block uses the
+tab border color; if that is empty or transparent, it falls back to white.
+
 ```yaml
 views:
   - type: custom:sections-layout-v2
@@ -90,6 +97,16 @@ views:
           analog_seconds: false
           date: true
           weekday: long
+          status:
+            enabled: true
+            border_color: ""
+            items:
+              - entity: sensor.outdoor_temperature
+                label: Außen
+                unit: °C
+              - entity: sensor.pv_power
+                label: PV
+                unit: kW
           style:
             icon_color: "#fbff00"
             icon_active_color: "#ffffff"

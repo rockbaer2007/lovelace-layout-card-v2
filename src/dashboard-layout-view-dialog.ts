@@ -21,6 +21,11 @@ const defaultConfig = {
     analog_seconds: false,
     date: true,
     weekday: "none",
+    status: {
+      enabled: false,
+      border_color: "",
+      items: [],
+    },
     style: {
       icon_color: "",
       icon_active_color: "",
@@ -88,6 +93,10 @@ function normalizeConfig(viewConfig: any) {
     menu: {
       ...defaultConfig.menu,
       ...(dashboardLayoutConfig?.menu ?? {}),
+      status: {
+        ...defaultConfig.menu.status,
+        ...(dashboardLayoutConfig?.menu?.status ?? {}),
+      },
       style: {
         ...defaultConfig.menu.style,
         ...(dashboardLayoutConfig?.menu?.style ?? {}),
@@ -317,6 +326,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _analogSeconds = false;
   @state() private _date = true;
   @state() private _weekday = "none";
+  @state() private _statusEnabled = false;
+  @state() private _statusBorderColor = "";
+  @state() private _statusItems: Array<{ entity?: string; label?: string; unit?: string }> = [];
   @state() private _iconColor = "";
   @state() private _iconActiveColor = "";
   @state() private _iconBackgroundColor = "";
@@ -378,6 +390,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._analogSeconds = config.menu.analog_seconds === true;
     this._date = config.menu.date !== false;
     this._weekday = config.menu.weekday ?? "none";
+    this._statusEnabled = config.menu.status?.enabled === true;
+    this._statusBorderColor = config.menu.status?.border_color ?? "";
+    this._statusItems = this._normalizeStatusItems(config.menu.status?.items);
     this._iconColor = config.menu.style?.icon_color ?? "";
     this._iconActiveColor = config.menu.style?.icon_active_color ?? "";
     this._iconBackgroundColor = config.menu.style?.icon_background_color ?? config.menu.style?.icon_circle_color ?? "";
@@ -468,6 +483,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "analogSeconds") this._analogSeconds = value;
     if (key === "date") this._date = value;
     if (key === "weekday") this._weekday = value;
+    if (key === "statusEnabled") this._statusEnabled = value;
+    if (key === "statusBorderColor") this._statusBorderColor = value;
     if (key === "iconColor") this._iconColor = value;
     if (key === "iconActiveColor") this._iconActiveColor = value;
     if (key === "iconBackgroundColor") this._iconBackgroundColor = value;
@@ -493,6 +510,35 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "adminAlwaysVisible") this._adminAlwaysVisible = value;
     if (key === "visibleUsers") this._visibleUsers = value;
     if (key === "pagesText") this._pagesText = value;
+  }
+
+  private _normalizeStatusItems(items: any[] = []) {
+    const sourceItems = Array.isArray(items) ? items : [];
+    const normalized = Array.from({ length: 4 }, (_, index) => ({
+      entity: sourceItems[index]?.entity ?? "",
+      label: sourceItems[index]?.label ?? "",
+      unit: sourceItems[index]?.unit ?? "",
+    }));
+    return normalized;
+  }
+
+  private _updateStatusItem(index: number, key: "entity" | "label" | "unit", value: string) {
+    const items = this._normalizeStatusItems(this._statusItems);
+    items[index] = {
+      ...items[index],
+      [key]: value,
+    };
+    this._statusItems = items;
+  }
+
+  private _statusItemsForSave() {
+    return this._normalizeStatusItems(this._statusItems)
+      .map((item) => ({
+        entity: item.entity?.trim() ?? "",
+        label: item.label?.trim() ?? "",
+        unit: item.unit?.trim() ?? "",
+      }))
+      .filter((item) => item.entity);
   }
 
   private _homeEntryFromView(configHome?: any) {
@@ -876,6 +922,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         analog_seconds: this._analogSeconds,
         date: this._date,
         weekday: this._weekday,
+        status: {
+          enabled: this._statusEnabled,
+          border_color: this._statusBorderColor,
+          items: this._statusItemsForSave(),
+        },
         style: {
           icon_color: this._iconColor,
           icon_active_color: this._iconActiveColor,
@@ -1404,6 +1455,57 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           </details>
 
           <details class="wide collapsible-group">
+            <summary>Statuswerte</summary>
+            <div class="status-editor">
+              <label class="check">
+                <input
+                  type="checkbox"
+                  .checked=${this._statusEnabled}
+                  @change=${(ev: Event) => this._setValue("statusEnabled", (ev.target as HTMLInputElement).checked)}
+                />
+                Statuswerte anzeigen
+              </label>
+              ${this._statusEnabled
+                ? html`
+                    ${this._renderColorField(
+                      "Rahmenfarbe",
+                      "statusBorderColor",
+                      this._statusBorderColor,
+                      "leer = Tabumrandung, sonst #ffffff"
+                    )}
+                    <div class="status-items">
+                      <span>Entity</span>
+                      <span>Label</span>
+                      <span>Einheit</span>
+                      ${this._normalizeStatusItems(this._statusItems).map(
+                        (item, index) => html`
+                          <input
+                            placeholder=${`sensor.status_${index + 1}`}
+                            .value=${item.entity ?? ""}
+                            @input=${(ev: Event) =>
+                              this._updateStatusItem(index, "entity", (ev.target as HTMLInputElement).value)}
+                          />
+                          <input
+                            placeholder="Optional"
+                            .value=${item.label ?? ""}
+                            @input=${(ev: Event) =>
+                              this._updateStatusItem(index, "label", (ev.target as HTMLInputElement).value)}
+                          />
+                          <input
+                            placeholder="Optional"
+                            .value=${item.unit ?? ""}
+                            @input=${(ev: Event) =>
+                              this._updateStatusItem(index, "unit", (ev.target as HTMLInputElement).value)}
+                          />
+                        `
+                      )}
+                    </div>
+                  `
+                : nothing}
+            </div>
+          </details>
+
+          <details class="wide collapsible-group">
             <summary>Style</summary>
             <div class="style-grid">
               <label>
@@ -1832,6 +1934,24 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           display: grid;
           gap: 12px;
           align-content: start;
+        }
+
+        .status-editor {
+          display: grid;
+          gap: 12px;
+        }
+
+        .status-items {
+          display: grid;
+          grid-template-columns: minmax(180px, 1.4fr) minmax(120px, 1fr) minmax(80px, 0.7fr);
+          gap: 8px;
+          align-items: center;
+        }
+
+        .status-items span {
+          color: var(--secondary-text-color);
+          font-size: 12px;
+          font-weight: 800;
         }
 
         .shape-options {

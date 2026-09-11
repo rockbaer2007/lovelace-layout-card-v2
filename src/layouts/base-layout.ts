@@ -119,6 +119,10 @@ export class BaseLayout extends LitElement {
         ...(parentMenu.home ?? {}),
         ...(localMenu.home ?? {}),
       },
+      status: {
+        ...(parentMenu.status ?? {}),
+        ...(localMenu.status ?? {}),
+      },
       style: {
         ...(parentMenu.style ?? {}),
         ...(localMenu.style ?? {}),
@@ -288,6 +292,41 @@ export class BaseLayout extends LitElement {
     return html`<small>${date}</small>`;
   }
 
+  _dashboardLayoutV2StatusBorderColor(menu: DashboardLayoutMenuConfig) {
+    const statusColor = menu.status?.border_color?.trim();
+    if (statusColor) return statusColor;
+    const tabColor = menu.style?.tab_border_color?.trim();
+    if (tabColor && tabColor !== "transparent") return tabColor;
+    return "#ffffff";
+  }
+
+  _renderDashboardLayoutV2Status(menu: DashboardLayoutMenuConfig) {
+    const status = menu.status;
+    if (status?.enabled !== true) return html``;
+    const items = (status.items ?? []).filter((item) => item?.entity);
+    if (!items.length) return html``;
+
+    return html`
+      <div
+        class="dashboard-layout-v2-menu-status"
+        style=${`--dashboard-layout-v2-status-border-color: ${this._dashboardLayoutV2StatusBorderColor(menu)}`}
+      >
+        ${items.slice(0, 4).map((item) => {
+          const stateObj = this.hass?.states?.[item.entity ?? ""];
+          const label = item.label || stateObj?.attributes?.friendly_name || item.entity;
+          const unit = stateObj?.attributes?.unit_of_measurement || item.unit || "";
+          const value = stateObj?.state ?? "—";
+          return html`
+            <div class="dashboard-layout-v2-status-row">
+              <span class="dashboard-layout-v2-status-label">${label}</span>
+              <span class="dashboard-layout-v2-status-value">${value}${unit ? ` ${unit}` : ""}</span>
+            </div>
+          `;
+        })}
+      </div>
+    `;
+  }
+
   _renderDashboardLayoutV2Menu() {
     const menu = this._dashboardLayoutV2Menu();
     if (menu.position === "none") return html``;
@@ -333,6 +372,7 @@ export class BaseLayout extends LitElement {
         <nav>
           ${pages.map((page) => this._renderDashboardLayoutV2MenuItem(page))}
         </nav>
+        ${this._renderDashboardLayoutV2Status(menu)}
       </aside>
     `;
   }
@@ -394,7 +434,8 @@ export class BaseLayout extends LitElement {
 
       .dashboard-layout-v2-menu {
         display: grid;
-        align-content: start;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        align-content: stretch;
         gap: 12px;
         padding: 8px;
         border-radius: 12px;
@@ -498,6 +539,7 @@ export class BaseLayout extends LitElement {
 
       .dashboard-layout-v2-menu nav {
         display: grid;
+        align-content: start;
         gap: 6px;
       }
 
@@ -559,6 +601,37 @@ export class BaseLayout extends LitElement {
         border-radius: var(--dashboard-layout-v2-icon-radius, 50%);
         background: var(--dashboard-layout-v2-icon-background-color, transparent);
         color: var(--dashboard-layout-v2-icon-color, var(--primary-color));
+      }
+
+      .dashboard-layout-v2-menu-status {
+        display: grid;
+        gap: 4px;
+        margin-top: auto;
+        padding: 8px;
+        border: 1px solid var(--dashboard-layout-v2-status-border-color, #ffffff);
+        border-radius: 8px;
+        font-size: 12px;
+        line-height: 1.25;
+      }
+
+      .dashboard-layout-v2-status-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .dashboard-layout-v2-status-label {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .dashboard-layout-v2-status-value {
+        flex: none;
+        font-weight: 700;
+        white-space: nowrap;
       }
     `;
   }
