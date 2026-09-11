@@ -541,6 +541,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       .filter((item) => item.entity);
   }
 
+  private _statusEntityOptions() {
+    return Object.keys(this.hass?.states ?? {}).sort((a, b) => a.localeCompare(b));
+  }
+
   private _homeEntryFromView(configHome?: any) {
     const rawViews = this.lovelace?.rawConfig?.views ?? this.lovelace?.config?.views ?? [];
     const currentView = rawViews?.[this.viewIndex] ?? this.viewConfig ?? {};
@@ -1479,14 +1483,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       <span>Einheit</span>
                       ${this._normalizeStatusItems(this._statusItems).map(
                         (item, index) => html`
-                          <ha-entity-picker
-                            .hass=${this.hass}
-                            .value=${item.entity ?? ""}
+                          <input
+                            class="entity-input"
+                            list="dashboard-layout-v2-status-entities"
                             placeholder=${`sensor.status_${index + 1}`}
-                            allow-custom-entity
-                            @value-changed=${(ev: CustomEvent) =>
-                              this._updateStatusItem(index, "entity", ev.detail?.value ?? "")}
-                          ></ha-entity-picker>
+                            .value=${item.entity ?? ""}
+                            @input=${(ev: Event) =>
+                              this._updateStatusItem(index, "entity", (ev.target as HTMLInputElement).value)}
+                          />
                           <input
                             placeholder="Optional"
                             .value=${item.label ?? ""}
@@ -1502,6 +1506,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         `
                       )}
                     </div>
+                    <datalist id="dashboard-layout-v2-status-entities">
+                      ${this._statusEntityOptions().map((entityId) => {
+                        const friendlyName = this.hass?.states?.[entityId]?.attributes?.friendly_name;
+                        return html`<option value=${entityId} label=${friendlyName ?? entityId}></option>`;
+                      })}
+                    </datalist>
                   `
                 : nothing}
             </div>
@@ -1956,7 +1966,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           font-weight: 800;
         }
 
-        .status-items ha-entity-picker {
+        .status-items .entity-input {
           min-width: 0;
           width: 100%;
         }
