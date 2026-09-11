@@ -212,6 +212,7 @@ function pageNavigationMetadata(page: any) {
     return {
       type: "divider",
       color: page.color || "#ffffff",
+      shadow_frame_color: page.shadow_frame_color || "transparent",
     };
   }
 
@@ -575,6 +576,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       return {
         type: "divider",
         color: page.color || "#ffffff",
+        shadow_frame_color: page.shadow_frame_color || "transparent",
       };
     }
 
@@ -693,7 +695,13 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._pages = this._pages.map((page, pageIndex) => {
       if (pageIndex !== index) return page;
       if (value === "spacer") return { type: "spacer" };
-      if (value === "divider") return { type: "divider", color: page.color || "#ffffff" };
+      if (value === "divider") {
+        return {
+          type: "divider",
+          color: page.color || "#ffffff",
+          shadow_frame_color: page.shadow_frame_color || "transparent",
+        };
+      }
       if (!isMenuOnlyPage(page)) return page;
 
       const nextIndex = index + 1;
@@ -730,7 +738,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   }
 
   private _addDivider() {
-    this._pages = [...this._pages, { type: "divider", color: "#ffffff" }];
+    this._pages = [...this._pages, { type: "divider", color: "#ffffff", shadow_frame_color: "transparent" }];
     this._pageSourcePaths = [...this._pageSourcePaths, undefined];
     this._selectedPageIndex = this._pages.length - 1;
     this._syncJsonFromPages();
@@ -1199,6 +1207,31 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                                   placeholder="#ffffff"
                                   @input=${(ev: Event) =>
                                     this._updatePage(this._selectedPageIndex, "color", (ev.target as HTMLInputElement).value)}
+                                />
+                              </div>
+                            </label>
+                            <label>
+                              3D-Effekt Trenner
+                              <div class="color-row">
+                                <input
+                                  type="color"
+                                  .value=${colorPickerValue(selectedPage.shadow_frame_color ?? "transparent")}
+                                  @input=${(ev: Event) =>
+                                    this._updatePage(
+                                      this._selectedPageIndex,
+                                      "shadow_frame_color",
+                                      (ev.target as HTMLInputElement).value
+                                    )}
+                                />
+                                <input
+                                  .value=${selectedPage.shadow_frame_color ?? "transparent"}
+                                  placeholder="transparent"
+                                  @input=${(ev: Event) =>
+                                    this._updatePage(
+                                      this._selectedPageIndex,
+                                      "shadow_frame_color",
+                                      (ev.target as HTMLInputElement).value
+                                    )}
                                 />
                               </div>
                             </label>

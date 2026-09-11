@@ -146,6 +146,7 @@ export interface DashboardLayoutPageConfig {
   type?: string;
   path?: string;
   color?: string;
+  shadow_frame_color?: string;
   layout_type?: string;
   layout?: any;
   cards?: Array<CardConfig>;

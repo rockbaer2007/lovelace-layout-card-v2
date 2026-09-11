@@ -216,7 +216,10 @@ export class BaseLayout extends LitElement {
       return html`
         <div
           class="dashboard-layout-v2-menu-divider"
-          style=${`--dashboard-layout-v2-divider-color: ${page.color || "#ffffff"}`}
+          style=${[
+            `--dashboard-layout-v2-divider-color: ${page.color || "#ffffff"}`,
+            `--dashboard-layout-v2-divider-shadow-frame-color: ${page.shadow_frame_color || "transparent"}`,
+          ].join(";")}
           aria-hidden="true"
         ></div>
       `;
@@ -483,6 +486,7 @@ export class BaseLayout extends LitElement {
         height: 1px;
         margin: 8px 4px;
         background: var(--dashboard-layout-v2-divider-color, #ffffff);
+        box-shadow: var(--dashboard-layout-v2-shadow-frame-offset, 4px) var(--dashboard-layout-v2-shadow-frame-offset, 4px) 0 0 var(--dashboard-layout-v2-divider-shadow-frame-color, transparent);
       }
 
       .dashboard-layout-v2-menu button {
