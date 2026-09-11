@@ -109,8 +109,42 @@ function patchValueChanged(target: any) {
   target._dashboardLayoutCardV2ValueChangedPatched = true;
 }
 
+function patchRender(target: any) {
+  if (
+    !target ||
+    Object.prototype.hasOwnProperty.call(target, "_dashboardLayoutCardV2RenderPatched") ||
+    typeof target.render !== "function"
+  ) return;
+
+  const originalRender = target.render;
+  target.render = function (...args) {
+    const restoreType = this._config?.type;
+    let restored = false;
+    if (this._config?.type === sectionsLayoutV2Type && this._config.max_columns === undefined) {
+      this._config = {
+        ...this._config,
+        max_columns: 4,
+      };
+      restored = true;
+    }
+    const result = originalRender.apply(this, args);
+    if (restored && this._config) {
+      this._config = {
+        ...this._config,
+        type: restoreType,
+      };
+    }
+    return result;
+  };
+  target._dashboardLayoutCardV2RenderPatched = true;
+}
+
 function patchSchemaProvider(target: any) {
-  if (!target || target[dashboardLayoutCardV2SchemaPatchFlag] || typeof target._schema !== "function") return;
+  if (
+    !target ||
+    Object.prototype.hasOwnProperty.call(target, dashboardLayoutCardV2SchemaPatchFlag) ||
+    typeof target._schema !== "function"
+  ) return;
 
   const originalSchema = target._schema;
   target._schema = function (...args) {
@@ -147,6 +181,7 @@ function appendHelpText(editor: any) {
 function patchViewEditorInstance(editor: any) {
   patchSchemaProvider(editor);
   patchValueChanged(editor);
+  patchRender(editor);
   appendHelpText(editor);
   editor?.requestUpdate?.();
 }
@@ -266,6 +301,7 @@ customElements.whenDefined("hui-view-editor").then(() => {
 
   patchSchemaProvider(HuiViewEditor.prototype);
   patchValueChanged(HuiViewEditor.prototype);
+  patchRender(HuiViewEditor.prototype);
 
   if (HuiViewEditor.prototype[dashboardLayoutCardV2PatchFlag]) {
     patchExistingViewEditors();
