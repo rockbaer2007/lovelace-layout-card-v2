@@ -453,8 +453,8 @@ export class BaseLayout extends LitElement {
         width: 1px;
         height: 3px;
         transform-origin: 0.5px calc((var(--dashboard-layout-v2-clock-size, 44px) / 2) - 5px);
-        background: var(--secondary-text-color);
-        opacity: 0.72;
+        background: var(--primary-text-color);
+        opacity: 0.55;
         z-index: 0;
       }
 
