@@ -21,8 +21,8 @@ layout-card without overwriting it.
 - Supports configurable tab colors, text colors, hover colors, icon color, icon
   background color, icon shape, tab border, view card border, separate tab and
   view 3D frames, menu background, digital or analog clock, optional analog
-  hour marks and seconds hand, date display, weekday display, clock size and
-  date text size.
+  hour marks, minute marks and seconds hand, date display, weekday display,
+  clock size and date text size.
 - Can optionally hide the Home Assistant sidebar/header for selected dashboard
   users while keeping it visible for admins.
 
@@ -83,6 +83,7 @@ views:
             icon: mdi:home
           clock: analog
           analog_hour_marks: false
+          analog_minute_marks: false
           analog_seconds: false
           date: true
           weekday: long
@@ -171,7 +172,7 @@ dashboard settings are available from the view editor and allow editing:
 - tab/view borders and separate 3D frame colors
 - shared 3D frame offset from `3px` to `10px`
 - digital or analog clock
-- analog hour marks and seconds hand
+- analog hour marks, minute marks and seconds hand
 - weekday display: none, short or long
 - clock size from `24px` to `128px`
 - date text size from `8px` to `48px`

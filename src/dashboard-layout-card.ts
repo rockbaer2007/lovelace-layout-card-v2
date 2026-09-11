@@ -180,6 +180,13 @@ class DashboardLayoutCardV2 extends LitElement {
       const hours = (this._now.getHours() % 12) + minutes / 60;
       return html`
         <div class="analog-clock" aria-label="Analog clock">
+          ${menu.analog_minute_marks
+            ? Array.from({ length: 60 }, (_, index) =>
+                index % 5 === 0
+                  ? ""
+                  : html`<span class="minute-mark" style=${`transform: rotate(${index * 6}deg)`}></span>`
+              )
+            : ""}
           ${menu.analog_hour_marks
             ? Array.from({ length: 12 }, (_, index) => html`
                 <span class="mark" style=${`transform: rotate(${index * 30}deg)`}></span>
@@ -435,6 +442,19 @@ class DashboardLayoutCardV2 extends LitElement {
         height: 6px;
         transform-origin: 1px calc((var(--dashboard-layout-v2-clock-size, 42px) / 2) - 4px);
         background: var(--primary-text-color);
+        z-index: 1;
+      }
+
+      .analog-clock .minute-mark {
+        position: absolute;
+        top: 5px;
+        left: calc(50% - 0.5px);
+        width: 1px;
+        height: 3px;
+        transform-origin: 0.5px calc((var(--dashboard-layout-v2-clock-size, 42px) / 2) - 5px);
+        background: var(--secondary-text-color);
+        opacity: 0.72;
+        z-index: 0;
       }
 
       .hand {
@@ -444,6 +464,7 @@ class DashboardLayoutCardV2 extends LitElement {
         width: 2px;
         transform-origin: bottom center;
         background: var(--primary-text-color);
+        z-index: 2;
       }
 
       .hand.hour {

@@ -112,6 +112,7 @@ export interface DashboardLayoutMenuConfig {
   };
   clock?: DashboardLayoutClockMode;
   analog_hour_marks?: boolean;
+  analog_minute_marks?: boolean;
   analog_seconds?: boolean;
   date?: boolean;
   weekday?: DashboardLayoutWeekdayMode;

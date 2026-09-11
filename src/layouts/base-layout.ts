@@ -245,6 +245,13 @@ export class BaseLayout extends LitElement {
       const hours = (now.getHours() % 12) + minutes / 60;
       return html`
         <div class="dashboard-layout-v2-analog-clock" aria-label="Analoge Uhr">
+          ${menu.analog_minute_marks
+            ? Array.from({ length: 60 }, (_, index) =>
+                index % 5 === 0
+                  ? ""
+                  : html`<span class="minute-mark" style=${`transform: rotate(${index * 6}deg)`}></span>`
+              )
+            : ""}
           ${menu.analog_hour_marks
             ? Array.from({ length: 12 }, (_, index) => html`
                 <span class="mark" style=${`transform: rotate(${index * 30}deg)`}></span>
@@ -436,6 +443,19 @@ export class BaseLayout extends LitElement {
         height: 6px;
         transform-origin: 1px calc((var(--dashboard-layout-v2-clock-size, 44px) / 2) - 4px);
         background: var(--primary-text-color);
+        z-index: 1;
+      }
+
+      .dashboard-layout-v2-analog-clock .minute-mark {
+        position: absolute;
+        top: 5px;
+        left: calc(50% - 0.5px);
+        width: 1px;
+        height: 3px;
+        transform-origin: 0.5px calc((var(--dashboard-layout-v2-clock-size, 44px) / 2) - 5px);
+        background: var(--secondary-text-color);
+        opacity: 0.72;
+        z-index: 0;
       }
 
       .dashboard-layout-v2-analog-clock::after {
@@ -447,6 +467,7 @@ export class BaseLayout extends LitElement {
         left: calc(50% - (var(--dashboard-layout-v2-clock-size, 44px) * 0.07));
         border-radius: 50%;
         background: var(--primary-text-color);
+        z-index: 3;
       }
 
       .dashboard-layout-v2-analog-clock .hand {
@@ -456,6 +477,7 @@ export class BaseLayout extends LitElement {
         width: 2px;
         transform-origin: bottom center;
         background: var(--primary-text-color);
+        z-index: 2;
       }
 
       .dashboard-layout-v2-analog-clock .hand.hour {

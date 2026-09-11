@@ -16,6 +16,7 @@ const defaultConfig = {
     home: {},
     clock: "digital",
     analog_hour_marks: false,
+    analog_minute_marks: false,
     analog_seconds: false,
     date: true,
     weekday: "none",
@@ -309,6 +310,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _homeIcon = "mdi:home";
   @state() private _clock = "digital";
   @state() private _analogHourMarks = false;
+  @state() private _analogMinuteMarks = false;
   @state() private _analogSeconds = false;
   @state() private _date = true;
   @state() private _weekday = "none";
@@ -367,6 +369,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._homeIcon = homeEntry.icon;
     this._clock = config.menu.clock ?? "digital";
     this._analogHourMarks = config.menu.analog_hour_marks === true;
+    this._analogMinuteMarks = config.menu.analog_minute_marks === true;
     this._analogSeconds = config.menu.analog_seconds === true;
     this._date = config.menu.date !== false;
     this._weekday = config.menu.weekday ?? "none";
@@ -454,6 +457,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "showHome") this._showHome = value;
     if (key === "clock") this._clock = value;
     if (key === "analogHourMarks") this._analogHourMarks = value;
+    if (key === "analogMinuteMarks") this._analogMinuteMarks = value;
     if (key === "analogSeconds") this._analogSeconds = value;
     if (key === "date") this._date = value;
     if (key === "weekday") this._weekday = value;
@@ -842,6 +846,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         home: homeEntry,
         clock: this._clock,
         analog_hour_marks: this._analogHourMarks,
+        analog_minute_marks: this._analogMinuteMarks,
         analog_seconds: this._analogSeconds,
         date: this._date,
         weekday: this._weekday,
@@ -1060,6 +1065,15 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       this._setValue("analogHourMarks", (ev.target as HTMLInputElement).checked)}
                   />
                   Stundenteilung anzeigen
+                </label>
+                <label class="check">
+                  <input
+                    type="checkbox"
+                    .checked=${this._analogMinuteMarks}
+                    @change=${(ev: Event) =>
+                      this._setValue("analogMinuteMarks", (ev.target as HTMLInputElement).checked)}
+                  />
+                  Minutenteilung anzeigen
                 </label>
                 <label class="check">
                   <input
