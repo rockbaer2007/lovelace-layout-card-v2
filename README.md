@@ -168,6 +168,8 @@ views:
 Open the normal Home Assistant view editor and choose a V2 layout type. The V2
 dashboard settings are available from the view editor and allow editing:
 
+![Dashboard Layout Card V2 view layout selection](docs/view-layout-selection.png)
+
 - menu position: left, none or right
 - home entry
 - whether linked subviews should inherit the home view theme
