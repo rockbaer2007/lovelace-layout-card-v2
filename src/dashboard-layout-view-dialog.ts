@@ -1039,7 +1039,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         </header>
 
         <div class="content">
-          <details class="wide collapsible-group" open>
+          <details class="wide collapsible-group">
             <summary>Menü</summary>
             <div class="section-grid">
               <label>
@@ -1064,7 +1064,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             </div>
           </details>
 
-          <details class="wide collapsible-group" open>
+          <details class="wide collapsible-group">
             <summary>Hauptseite</summary>
             <div class="section-grid">
               <label class="check">
@@ -1096,7 +1096,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             </div>
           </details>
 
-          <details class="wide collapsible-group" open>
+          <details class="wide collapsible-group">
             <summary>Uhr</summary>
             <div class="section-grid">
               <label>
@@ -1191,7 +1191,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             </div>
           </details>
 
-          <details class="wide collapsible-group" open>
+          <details class="wide collapsible-group">
             <summary>HA Setting</summary>
             <div class="section-grid">
               <label class="check">
