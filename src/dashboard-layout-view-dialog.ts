@@ -155,7 +155,7 @@ function isDashboardLayoutV2View(viewConfig: any) {
 
 function pageLayoutType(page: any) {
   if (MENU_ONLY_PAGE_TYPES.has(page?.type)) return page.type;
-  const type = page.type ?? page.layout_type ?? "custom:masonry-layout-v2";
+  const type = page.type ?? page.layout_type ?? SECTIONS_LAYOUT_V2;
   return type === "sections" ? SECTIONS_LAYOUT_V2 : type;
 }
 
@@ -717,8 +717,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         title: `Unterseite ${nextIndex}`,
         path: `unterseite-${nextIndex}`,
         icon: "mdi:view-dashboard",
-        type: "custom:masonry-layout-v2",
-        layout_type: "custom:masonry-layout-v2",
+        type: SECTIONS_LAYOUT_V2,
+        layout_type: SECTIONS_LAYOUT_V2,
+        max_columns: 4,
+        sections: defaultSections(),
       };
     });
     this._syncJsonFromPages();
@@ -730,7 +732,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       title: `Unterseite ${nextIndex}`,
       path: `unterseite-${nextIndex}`,
       icon: "mdi:view-dashboard",
-      layout_type: "custom:masonry-layout-v2",
+      type: SECTIONS_LAYOUT_V2,
+      layout_type: SECTIONS_LAYOUT_V2,
+      max_columns: 4,
+      sections: defaultSections(),
     };
     this._pages = [...this._pages, page];
     this._pageSourcePaths = [...this._pageSourcePaths, undefined];

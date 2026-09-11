@@ -170,7 +170,7 @@ dashboard settings are available from the view editor and allow editing:
 - menu position: left, none or right
 - home entry
 - whether linked subviews should inherit the home view theme
-- tab pages and their layouts
+- tab pages and their layouts; new pages default to Sections V2
 - tab, text, hover, icon and background colors
 - tab/view borders and separate 3D frame colors
 - shared 3D frame offset from `3px` to `10px`
