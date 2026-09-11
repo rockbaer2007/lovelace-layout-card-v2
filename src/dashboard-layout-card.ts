@@ -222,6 +222,9 @@ class DashboardLayoutCardV2 extends LitElement {
           style.active_tab_text_color ? `--dashboard-layout-v2-active-tab-text-color: ${style.active_tab_text_color}` : "",
           style.inactive_tab_text_color ? `--dashboard-layout-v2-inactive-tab-text-color: ${style.inactive_tab_text_color}` : "",
           style.hover_tab_text_color ? `--dashboard-layout-v2-hover-tab-text-color: ${style.hover_tab_text_color}` : "",
+          style.tab_border_color ? `--dashboard-layout-v2-tab-border-color: ${style.tab_border_color}` : "",
+          style.card_border_color ? `--dashboard-layout-v2-card-border-color: ${style.card_border_color}` : "",
+          style.shadow_frame_color ? `--dashboard-layout-v2-shadow-frame-color: ${style.shadow_frame_color}` : "",
           style.clock_size ? `--dashboard-layout-v2-clock-size: ${style.clock_size}` : "",
           style.date_size ? `--dashboard-layout-v2-date-size: ${style.date_size}` : "",
           background ? `--dashboard-layout-v2-menu-background: ${background}` : "",
@@ -316,7 +319,10 @@ class DashboardLayoutCardV2 extends LitElement {
         flex-direction: column;
         gap: 12px;
         padding: 12px;
-        border-right: 1px solid var(--divider-color);
+        border: 1px solid var(--dashboard-layout-v2-card-border-color, transparent);
+        border-right-color: var(--dashboard-layout-v2-card-border-color, var(--divider-color));
+        box-shadow: 3px 3px 0 0 var(--dashboard-layout-v2-shadow-frame-color, transparent);
+        box-sizing: border-box;
         background: var(
           --dashboard-layout-v2-menu-background,
           color-mix(in srgb, var(--card-background-color) 92%, var(--primary-color))
@@ -324,8 +330,8 @@ class DashboardLayoutCardV2 extends LitElement {
       }
 
       ha-card.menu-right .menu {
-        border-right: 0;
-        border-left: 1px solid var(--divider-color);
+        border-right-color: var(--dashboard-layout-v2-card-border-color, transparent);
+        border-left-color: var(--dashboard-layout-v2-card-border-color, var(--divider-color));
       }
 
       .menu-header {
@@ -397,8 +403,9 @@ class DashboardLayoutCardV2 extends LitElement {
         gap: 8px;
         width: 100%;
         min-height: 40px;
-        border: 0;
+        border: 1px solid var(--dashboard-layout-v2-tab-border-color, transparent);
         border-radius: 8px;
+        box-sizing: border-box;
         padding: 8px 10px;
         color: var(--dashboard-layout-v2-inactive-tab-text-color, var(--primary-text-color));
         background: var(--dashboard-layout-v2-inactive-tab-color, transparent);

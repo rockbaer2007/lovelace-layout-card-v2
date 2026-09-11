@@ -124,6 +124,9 @@ export interface DashboardLayoutMenuConfig {
     active_tab_text_color?: string;
     inactive_tab_text_color?: string;
     hover_tab_text_color?: string;
+    tab_border_color?: string;
+    card_border_color?: string;
+    shadow_frame_color?: string;
     clock_size?: string;
     date_size?: string;
     weekday_wrap_size?: string;

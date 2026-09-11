@@ -27,6 +27,9 @@ const defaultConfig = {
       active_tab_text_color: "",
       inactive_tab_text_color: "",
       hover_tab_text_color: "",
+      tab_border_color: "",
+      card_border_color: "",
+      shadow_frame_color: "",
       clock_size: "44px",
       date_size: "12px",
       weekday_wrap_size: "21px",
@@ -283,6 +286,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _activeTabTextColor = "";
   @state() private _inactiveTabTextColor = "";
   @state() private _hoverTabTextColor = "";
+  @state() private _tabBorderColor = "";
+  @state() private _cardBorderColor = "";
+  @state() private _shadowFrameColor = "";
   @state() private _clockSize = "44";
   @state() private _dateSize = "12";
   @state() private _weekdayWrapSize = "21";
@@ -334,6 +340,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._activeTabTextColor = config.menu.style?.active_tab_text_color ?? "";
     this._inactiveTabTextColor = config.menu.style?.inactive_tab_text_color ?? "";
     this._hoverTabTextColor = config.menu.style?.hover_tab_text_color ?? "";
+    this._tabBorderColor = config.menu.style?.tab_border_color ?? "";
+    this._cardBorderColor = config.menu.style?.card_border_color ?? "";
+    this._shadowFrameColor = config.menu.style?.shadow_frame_color ?? "";
     this._clockSize = clockSizeInputValue(config.menu.style?.clock_size ?? "44px");
     this._dateSize = clockSizeInputValue(config.menu.style?.date_size ?? "12px");
     this._weekdayWrapSize = clockSizeInputValue(config.menu.style?.weekday_wrap_size ?? "21px");
@@ -410,6 +419,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "activeTabTextColor") this._activeTabTextColor = value;
     if (key === "inactiveTabTextColor") this._inactiveTabTextColor = value;
     if (key === "hoverTabTextColor") this._hoverTabTextColor = value;
+    if (key === "tabBorderColor") this._tabBorderColor = value;
+    if (key === "cardBorderColor") this._cardBorderColor = value;
+    if (key === "shadowFrameColor") this._shadowFrameColor = value;
     if (key === "clockSize") this._clockSize = value;
     if (key === "dateSize") this._dateSize = value;
     if (key === "weekdayWrapSize") this._weekdayWrapSize = value;
@@ -740,6 +752,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           active_tab_text_color: this._activeTabTextColor,
           inactive_tab_text_color: this._inactiveTabTextColor,
           hover_tab_text_color: this._hoverTabTextColor,
+          tab_border_color: this._tabBorderColor,
+          card_border_color: this._cardBorderColor,
+          shadow_frame_color: this._shadowFrameColor,
           clock_size: normalizedClockSize(this._clockSize),
           date_size: normalizedDateSize(this._dateSize),
           weekday_wrap_size: normalizedDateSize(this._weekdayWrapSize),
@@ -1150,6 +1165,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               ${this._renderColorField("Text inaktiv", "inactiveTabTextColor", this._inactiveTabTextColor, "var(--primary-text-color)")}
               ${this._renderColorField("Hover Farbe", "hoverTabColor", this._hoverTabColor, "var(--secondary-background-color)")}
               ${this._renderColorField("Hover Text", "hoverTabTextColor", this._hoverTabTextColor, "var(--primary-text-color)")}
+              ${this._renderColorField("Tabumrandung", "tabBorderColor", this._tabBorderColor, "transparent")}
+              ${this._renderColorField("Cardumrandung", "cardBorderColor", this._cardBorderColor, "transparent")}
+              ${this._renderColorField("3D-Effekt Farbe", "shadowFrameColor", this._shadowFrameColor, "transparent")}
+              <span class="style-empty" aria-hidden="true"></span>
               ${this._renderColorField("Icon Farbe", "iconColor", this._iconColor, "var(--primary-color)")}
               ${this._renderColorField("Icon-Feld Farbe", "iconBackgroundColor", this._iconBackgroundColor, "transparent")}
               <label>

@@ -265,6 +265,9 @@ export class BaseLayout extends LitElement {
           style.active_tab_text_color ? `--dashboard-layout-v2-active-tab-text-color: ${style.active_tab_text_color}` : "",
           style.inactive_tab_text_color ? `--dashboard-layout-v2-inactive-tab-text-color: ${style.inactive_tab_text_color}` : "",
           style.hover_tab_text_color ? `--dashboard-layout-v2-hover-tab-text-color: ${style.hover_tab_text_color}` : "",
+          style.tab_border_color ? `--dashboard-layout-v2-tab-border-color: ${style.tab_border_color}` : "",
+          style.card_border_color ? `--dashboard-layout-v2-card-border-color: ${style.card_border_color}` : "",
+          style.shadow_frame_color ? `--dashboard-layout-v2-shadow-frame-color: ${style.shadow_frame_color}` : "",
           style.clock_size ? `--dashboard-layout-v2-clock-size: ${style.clock_size}` : "",
           style.date_size ? `--dashboard-layout-v2-date-size: ${style.date_size}` : "",
           background ? `--dashboard-layout-v2-menu-background: ${background}` : "",
@@ -334,7 +337,10 @@ export class BaseLayout extends LitElement {
         align-content: start;
         gap: 12px;
         padding: 8px;
+        border: 1px solid var(--dashboard-layout-v2-card-border-color, transparent);
         border-radius: 12px;
+        box-shadow: 3px 3px 0 0 var(--dashboard-layout-v2-shadow-frame-color, transparent);
+        box-sizing: border-box;
         background: var(
           --dashboard-layout-v2-menu-background,
           var(--card-background-color, rgba(0, 0, 0, 0.18))
@@ -412,8 +418,9 @@ export class BaseLayout extends LitElement {
         gap: 8px;
         min-height: 40px;
         padding: 8px 10px;
-        border: 0;
+        border: 1px solid var(--dashboard-layout-v2-tab-border-color, transparent);
         border-radius: 8px;
+        box-sizing: border-box;
         color: var(--primary-text-color);
         background: var(--dashboard-layout-v2-inactive-tab-color, transparent);
         text-align: left;
