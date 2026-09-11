@@ -1081,46 +1081,49 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             </select>
           </label>
 
-          ${this._clock === "analog"
-            ? html`
-                <label class="check">
+          <fieldset class="display-options group">
+            <legend>Anzeigeauswahl</legend>
+            ${this._clock === "analog"
+              ? html`
+                <label class="check compact-check">
                   <input
                     type="checkbox"
                     .checked=${this._analogHourMarks}
                     @change=${(ev: Event) =>
                       this._setValue("analogHourMarks", (ev.target as HTMLInputElement).checked)}
                   />
-                  Stundenteilung anzeigen
+                  Stunden
                 </label>
-                <label class="check">
+                <label class="check compact-check">
                   <input
                     type="checkbox"
                     .checked=${this._analogMinuteMarks}
                     @change=${(ev: Event) =>
                       this._setValue("analogMinuteMarks", (ev.target as HTMLInputElement).checked)}
                   />
-                  Minutenteilung anzeigen
+                  Minuten
                 </label>
-                <label class="check">
+                <label class="check compact-check">
                   <input
                     type="checkbox"
                     .checked=${this._analogSeconds}
                     @change=${(ev: Event) =>
                       this._setValue("analogSeconds", (ev.target as HTMLInputElement).checked)}
                   />
-                  Sekundenzeiger anzeigen
+                  Sekundenzeiger
                 </label>
               `
-            : nothing}
+              : nothing}
 
-          <label class="check">
-            <input
-              type="checkbox"
-              .checked=${this._date}
-              @change=${(ev: Event) => this._setValue("date", (ev.target as HTMLInputElement).checked)}
-            />
-            Datum anzeigen
-          </label>
+            <label class="check compact-check">
+              <input
+                type="checkbox"
+                .checked=${this._date}
+                @change=${(ev: Event) => this._setValue("date", (ev.target as HTMLInputElement).checked)}
+              />
+              Datum
+            </label>
+          </fieldset>
 
           <fieldset class="weekday-options group">
             <legend>Wochentag</legend>
@@ -1684,12 +1687,27 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           gap: 6px;
         }
 
-        .weekday-options {
+        .weekday-options,
+        .display-options {
           grid-template-columns: repeat(3, minmax(0, 1fr));
         }
 
-        .weekday-options .check {
+        .weekday-options .check,
+        .display-options .check {
           grid-column: auto;
+        }
+
+        .display-options {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 12px 18px;
+        }
+
+        .compact-check {
+          min-height: 24px;
+          gap: 6px;
+          white-space: nowrap;
         }
 
         .home-entry span {
