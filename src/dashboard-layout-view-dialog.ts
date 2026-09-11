@@ -1197,14 +1197,17 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                               Trennerfarbe
                               <div class="color-row">
                                 <input
-                                  type="color"
-                                  .value=${colorPickerValue(selectedPage.color ?? "#ffffff")}
+                                  class="text"
+                                  .value=${selectedPage.color ?? "#ffffff"}
+                                  placeholder="#ffffff"
                                   @input=${(ev: Event) =>
                                     this._updatePage(this._selectedPageIndex, "color", (ev.target as HTMLInputElement).value)}
                                 />
                                 <input
-                                  .value=${selectedPage.color ?? "#ffffff"}
-                                  placeholder="#ffffff"
+                                  class="color"
+                                  type="color"
+                                  .value=${colorPickerValue(selectedPage.color ?? "#ffffff")}
+                                  title="Trennerfarbe auswählen"
                                   @input=${(ev: Event) =>
                                     this._updatePage(this._selectedPageIndex, "color", (ev.target as HTMLInputElement).value)}
                                 />
@@ -1214,8 +1217,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                               3D-Effekt Trenner
                               <div class="color-row">
                                 <input
-                                  type="color"
-                                  .value=${colorPickerValue(selectedPage.shadow_frame_color ?? "transparent")}
+                                  class="text"
+                                  .value=${selectedPage.shadow_frame_color ?? "transparent"}
+                                  placeholder="transparent"
                                   @input=${(ev: Event) =>
                                     this._updatePage(
                                       this._selectedPageIndex,
@@ -1224,8 +1228,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                                     )}
                                 />
                                 <input
-                                  .value=${selectedPage.shadow_frame_color ?? "transparent"}
-                                  placeholder="transparent"
+                                  class="color"
+                                  type="color"
+                                  .value=${colorPickerValue(selectedPage.shadow_frame_color ?? "transparent")}
+                                  title="3D-Effekt Trenner auswählen"
                                   @input=${(ev: Event) =>
                                     this._updatePage(
                                       this._selectedPageIndex,
