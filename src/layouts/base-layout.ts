@@ -607,9 +607,12 @@ export class BaseLayout extends LitElement {
         display: grid;
         gap: 4px;
         margin-top: auto;
+        min-width: 0;
+        max-width: 100%;
         padding: 8px;
         border: 1px solid var(--dashboard-layout-v2-status-border-color, #ffffff);
         border-radius: 8px;
+        box-sizing: border-box;
         font-size: 12px;
         line-height: 1.25;
       }

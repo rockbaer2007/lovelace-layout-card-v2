@@ -2064,6 +2064,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           padding: 6px 8px;
           border: 0;
           background: transparent;
+          font-weight: 400;
           text-align: left;
         }
 
