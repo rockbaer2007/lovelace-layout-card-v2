@@ -355,6 +355,12 @@ class DashboardLayoutCardV2 extends LitElement {
           style.shadow_frame_offset ? `--dashboard-layout-v2-shadow-frame-offset: ${style.shadow_frame_offset}` : "",
           style.clock_size ? `--dashboard-layout-v2-clock-size: ${style.clock_size}` : "",
           style.date_size ? `--dashboard-layout-v2-date-size: ${style.date_size}` : "",
+          style.clock_color ? `--dashboard-layout-v2-clock-color: ${style.clock_color}` : "",
+          style.analog_minute_mark_color ? `--dashboard-layout-v2-analog-minute-mark-color: ${style.analog_minute_mark_color}` : "",
+          style.analog_hour_mark_color ? `--dashboard-layout-v2-analog-hour-mark-color: ${style.analog_hour_mark_color}` : "",
+          style.analog_hour_hand_color ? `--dashboard-layout-v2-analog-hour-hand-color: ${style.analog_hour_hand_color}` : "",
+          style.analog_minute_hand_color ? `--dashboard-layout-v2-analog-minute-hand-color: ${style.analog_minute_hand_color}` : "",
+          style.analog_second_hand_color ? `--dashboard-layout-v2-analog-second-hand-color: ${style.analog_second_hand_color}` : "",
           background ? `--dashboard-layout-v2-menu-background: ${background}` : "",
         ].filter(Boolean).join(";")}
       >
@@ -484,7 +490,7 @@ class DashboardLayoutCardV2 extends LitElement {
       }
 
       .digital-clock {
-        color: var(--primary-text-color);
+        color: var(--dashboard-layout-v2-clock-color, var(--primary-text-color));
         font-size: 28px;
         line-height: 1;
       }
@@ -505,7 +511,7 @@ class DashboardLayoutCardV2 extends LitElement {
         position: relative;
         width: var(--dashboard-layout-v2-clock-size, 42px);
         height: var(--dashboard-layout-v2-clock-size, 42px);
-        border: 2px solid var(--dashboard-layout-v2-icon-color, var(--primary-color));
+        border: 2px solid var(--dashboard-layout-v2-clock-color, var(--dashboard-layout-v2-icon-color, var(--primary-color)));
         border-radius: 50%;
       }
 
@@ -516,7 +522,7 @@ class DashboardLayoutCardV2 extends LitElement {
         width: 2px;
         height: 6px;
         transform-origin: 1px calc((var(--dashboard-layout-v2-clock-size, 42px) / 2) - 4px);
-        background: var(--primary-text-color);
+        background: var(--dashboard-layout-v2-analog-hour-mark-color, var(--primary-text-color));
         z-index: 1;
       }
 
@@ -527,7 +533,7 @@ class DashboardLayoutCardV2 extends LitElement {
         width: 1px;
         height: 3px;
         transform-origin: 0.5px calc((var(--dashboard-layout-v2-clock-size, 42px) / 2) - 5px);
-        background: var(--primary-text-color);
+        background: var(--dashboard-layout-v2-analog-minute-mark-color, var(--primary-text-color));
         opacity: 0.55;
         z-index: 0;
       }
@@ -544,17 +550,19 @@ class DashboardLayoutCardV2 extends LitElement {
 
       .hand.hour {
         height: calc(var(--dashboard-layout-v2-clock-size, 42px) * 0.29);
+        background: var(--dashboard-layout-v2-analog-hour-hand-color, var(--primary-text-color));
       }
 
       .hand.minute {
         height: calc(var(--dashboard-layout-v2-clock-size, 42px) * 0.4);
+        background: var(--dashboard-layout-v2-analog-minute-hand-color, var(--primary-text-color));
       }
 
       .hand.second {
         left: calc(50% - 0.5px);
         width: 1px;
         height: calc(var(--dashboard-layout-v2-clock-size, 42px) * 0.43);
-        background: var(--dashboard-layout-v2-icon-color, var(--primary-color));
+        background: var(--dashboard-layout-v2-analog-second-hand-color, var(--dashboard-layout-v2-icon-color, var(--primary-color)));
       }
 
       .menu-pages {

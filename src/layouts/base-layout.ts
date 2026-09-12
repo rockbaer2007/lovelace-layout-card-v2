@@ -406,6 +406,12 @@ export class BaseLayout extends LitElement {
           style.shadow_frame_offset ? `--dashboard-layout-v2-shadow-frame-offset: ${style.shadow_frame_offset}` : "",
           style.clock_size ? `--dashboard-layout-v2-clock-size: ${style.clock_size}` : "",
           style.date_size ? `--dashboard-layout-v2-date-size: ${style.date_size}` : "",
+          style.clock_color ? `--dashboard-layout-v2-clock-color: ${style.clock_color}` : "",
+          style.analog_minute_mark_color ? `--dashboard-layout-v2-analog-minute-mark-color: ${style.analog_minute_mark_color}` : "",
+          style.analog_hour_mark_color ? `--dashboard-layout-v2-analog-hour-mark-color: ${style.analog_hour_mark_color}` : "",
+          style.analog_hour_hand_color ? `--dashboard-layout-v2-analog-hour-hand-color: ${style.analog_hour_hand_color}` : "",
+          style.analog_minute_hand_color ? `--dashboard-layout-v2-analog-minute-hand-color: ${style.analog_minute_hand_color}` : "",
+          style.analog_second_hand_color ? `--dashboard-layout-v2-analog-second-hand-color: ${style.analog_second_hand_color}` : "",
           background ? `--dashboard-layout-v2-menu-background: ${background}` : "",
         ].filter(Boolean).join(";")}
       >
@@ -504,7 +510,7 @@ export class BaseLayout extends LitElement {
       }
 
       .dashboard-layout-v2-menu header strong {
-        color: var(--dashboard-layout-v2-inactive-tab-text-color, var(--primary-text-color));
+        color: var(--dashboard-layout-v2-clock-color, var(--dashboard-layout-v2-inactive-tab-text-color, var(--primary-text-color)));
       }
 
       .dashboard-layout-v2-menu small {
@@ -523,7 +529,7 @@ export class BaseLayout extends LitElement {
         position: relative;
         width: var(--dashboard-layout-v2-clock-size, 44px);
         height: var(--dashboard-layout-v2-clock-size, 44px);
-        border: 2px solid var(--dashboard-layout-v2-icon-color, var(--primary-color));
+        border: 2px solid var(--dashboard-layout-v2-clock-color, var(--dashboard-layout-v2-icon-color, var(--primary-color)));
         border-radius: 50%;
       }
 
@@ -534,7 +540,7 @@ export class BaseLayout extends LitElement {
         width: 2px;
         height: 6px;
         transform-origin: 1px calc((var(--dashboard-layout-v2-clock-size, 44px) / 2) - 4px);
-        background: var(--primary-text-color);
+        background: var(--dashboard-layout-v2-analog-hour-mark-color, var(--primary-text-color));
         z-index: 1;
       }
 
@@ -545,7 +551,7 @@ export class BaseLayout extends LitElement {
         width: 1px;
         height: 3px;
         transform-origin: 0.5px calc((var(--dashboard-layout-v2-clock-size, 44px) / 2) - 5px);
-        background: var(--primary-text-color);
+        background: var(--dashboard-layout-v2-analog-minute-mark-color, var(--primary-text-color));
         opacity: 0.55;
         z-index: 0;
       }
@@ -558,7 +564,7 @@ export class BaseLayout extends LitElement {
         top: calc(50% - (var(--dashboard-layout-v2-clock-size, 44px) * 0.07));
         left: calc(50% - (var(--dashboard-layout-v2-clock-size, 44px) * 0.07));
         border-radius: 50%;
-        background: var(--primary-text-color);
+        background: var(--dashboard-layout-v2-analog-hour-hand-color, var(--primary-text-color));
         z-index: 3;
       }
 
@@ -574,17 +580,19 @@ export class BaseLayout extends LitElement {
 
       .dashboard-layout-v2-analog-clock .hand.hour {
         height: calc(var(--dashboard-layout-v2-clock-size, 44px) * 0.3);
+        background: var(--dashboard-layout-v2-analog-hour-hand-color, var(--primary-text-color));
       }
 
       .dashboard-layout-v2-analog-clock .hand.minute {
         height: calc(var(--dashboard-layout-v2-clock-size, 44px) * 0.41);
+        background: var(--dashboard-layout-v2-analog-minute-hand-color, var(--primary-text-color));
       }
 
       .dashboard-layout-v2-analog-clock .hand.second {
         left: calc(50% - 0.5px);
         width: 1px;
         height: calc(var(--dashboard-layout-v2-clock-size, 44px) * 0.43);
-        background: var(--dashboard-layout-v2-icon-color, var(--primary-color));
+        background: var(--dashboard-layout-v2-analog-second-hand-color, var(--dashboard-layout-v2-icon-color, var(--primary-color)));
       }
 
       .dashboard-layout-v2-menu nav {

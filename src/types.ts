@@ -151,6 +151,12 @@ export interface DashboardLayoutMenuConfig {
     clock_size?: string;
     date_size?: string;
     weekday_wrap_size?: string;
+    clock_color?: string;
+    analog_minute_mark_color?: string;
+    analog_hour_mark_color?: string;
+    analog_hour_hand_color?: string;
+    analog_minute_hand_color?: string;
+    analog_second_hand_color?: string;
     background_mode?: "none" | "color" | "image";
     background_color?: string;
     background_image?: string;

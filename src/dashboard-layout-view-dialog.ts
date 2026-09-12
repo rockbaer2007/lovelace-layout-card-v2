@@ -52,6 +52,12 @@ const defaultConfig = {
       clock_size: "44px",
       date_size: "12px",
       weekday_wrap_size: "21px",
+      clock_color: "",
+      analog_minute_mark_color: "",
+      analog_hour_mark_color: "",
+      analog_hour_hand_color: "",
+      analog_minute_hand_color: "",
+      analog_second_hand_color: "",
       background_mode: "none",
       background_color: "",
       background_image: "",
@@ -372,6 +378,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _clockSize = "44";
   @state() private _dateSize = "12";
   @state() private _weekdayWrapSize = "21";
+  @state() private _clockColor = "";
+  @state() private _analogMinuteMarkColor = "";
+  @state() private _analogHourMarkColor = "";
+  @state() private _analogHourHandColor = "";
+  @state() private _analogMinuteHandColor = "";
+  @state() private _analogSecondHandColor = "";
   @state() private _backgroundMode = "none";
   @state() private _backgroundColor = "";
   @state() private _backgroundImage = "";
@@ -446,6 +458,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._clockSize = clockSizeInputValue(config.menu.style?.clock_size ?? "44px");
     this._dateSize = clockSizeInputValue(config.menu.style?.date_size ?? "12px");
     this._weekdayWrapSize = clockSizeInputValue(config.menu.style?.weekday_wrap_size ?? "21px");
+    this._clockColor = config.menu.style?.clock_color ?? "";
+    this._analogMinuteMarkColor = config.menu.style?.analog_minute_mark_color ?? "";
+    this._analogHourMarkColor = config.menu.style?.analog_hour_mark_color ?? "";
+    this._analogHourHandColor = config.menu.style?.analog_hour_hand_color ?? "";
+    this._analogMinuteHandColor = config.menu.style?.analog_minute_hand_color ?? "";
+    this._analogSecondHandColor = config.menu.style?.analog_second_hand_color ?? "";
     this._backgroundMode = config.menu.style?.background_mode ?? "none";
     this._backgroundColor = config.menu.style?.background_color ?? "";
     this._backgroundImage = config.menu.style?.background_image ?? "";
@@ -547,6 +565,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "clockSize") this._clockSize = value;
     if (key === "dateSize") this._dateSize = value;
     if (key === "weekdayWrapSize") this._weekdayWrapSize = value;
+    if (key === "clockColor") this._clockColor = value;
+    if (key === "analogMinuteMarkColor") this._analogMinuteMarkColor = value;
+    if (key === "analogHourMarkColor") this._analogHourMarkColor = value;
+    if (key === "analogHourHandColor") this._analogHourHandColor = value;
+    if (key === "analogMinuteHandColor") this._analogMinuteHandColor = value;
+    if (key === "analogSecondHandColor") this._analogSecondHandColor = value;
     if (key === "backgroundMode") this._backgroundMode = value;
     if (key === "backgroundColor") this._backgroundColor = value;
     if (key === "backgroundImage") this._backgroundImage = value;
@@ -1179,6 +1203,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           clock_size: normalizedClockSize(this._clockSize),
           date_size: normalizedDateSize(this._dateSize),
           weekday_wrap_size: normalizedDateSize(this._weekdayWrapSize),
+          clock_color: this._clockColor,
+          analog_minute_mark_color: this._analogMinuteMarkColor,
+          analog_hour_mark_color: this._analogHourMarkColor,
+          analog_hour_hand_color: this._analogHourHandColor,
+          analog_minute_hand_color: this._analogMinuteHandColor,
+          analog_second_hand_color: this._analogSecondHandColor,
           background_mode: this._backgroundMode,
           background_color: this._backgroundColor,
           background_image: this._backgroundImage,
@@ -1539,6 +1569,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   Ausgeschrieben
                 </label>
               </fieldset>
+              ${this._renderColorField("Uhr-/Ringfarbe", "clockColor", this._clockColor, "Standard")}
+              ${this._renderColorField("Minutenteilung Farbe", "analogMinuteMarkColor", this._analogMinuteMarkColor, "Standard")}
+              ${this._renderColorField("Stundenteilung Farbe", "analogHourMarkColor", this._analogHourMarkColor, "Standard")}
+              ${this._renderColorField("Stundenzeiger Farbe", "analogHourHandColor", this._analogHourHandColor, "Standard")}
+              ${this._renderColorField("Minutenzeiger Farbe", "analogMinuteHandColor", this._analogMinuteHandColor, "Standard")}
+              ${this._renderColorField("Sekundenzeiger Farbe", "analogSecondHandColor", this._analogSecondHandColor, "Standard")}
             </div>
           </details>
 
