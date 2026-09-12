@@ -136,6 +136,7 @@ class SectionsLayout extends BaseLayout {
       "hui-card-edit-mode",
       "hui-section",
       "hui-section-edit-mode",
+      "ha-sortable",
     ];
     await Promise.race([
       Promise.all(names.map((name) => customElements.whenDefined(name))),
@@ -522,6 +523,28 @@ class SectionsLayout extends BaseLayout {
     this.requestUpdate();
   }
 
+  private async _sectionMoved(ev: CustomEvent<{ oldIndex: number; newIndex: number }>) {
+    ev.stopPropagation();
+    const { oldIndex, newIndex } = ev.detail ?? {};
+    const viewConfig = this._currentViewConfig();
+    const sections = JSON.parse(JSON.stringify(sectionsFromConfig(viewConfig)));
+    if (
+      !Number.isInteger(oldIndex)
+      || !Number.isInteger(newIndex)
+      || oldIndex === newIndex
+      || oldIndex < 0
+      || newIndex < 0
+      || oldIndex >= sections.length
+      || newIndex >= sections.length
+    ) {
+      return;
+    }
+
+    const [movedSection] = sections.splice(oldIndex, 1);
+    sections.splice(newIndex, 0, movedSection);
+    await this._saveViewPatch({ sections });
+  }
+
   private _patchNativeEditorSaves() {
     const header = this._nativeHeaderEditor();
     if (header && !header.__dashboardLayoutV2SavePatched) {
@@ -559,54 +582,19 @@ class SectionsLayout extends BaseLayout {
               ${this._showHeaderCardFallback ? this._renderHeaderCardFallback(this._headerCard) : ""}
             `
           : this._renderDirectHeaderChrome(this._headerCard)}
-        <div class="sections-view">
-          ${sections.map((sectionConfig, index) => html`
-            <div
-              class=${editMode ? "section edit-mode" : "section"}
-              style=${[
-                sectionConfig.column_span
-                  ? `--column-span: ${Math.min(Number(sectionConfig.column_span), maxColumns)}`
-                  : "",
-                sectionConfig.row_span ? `--row-span: ${sectionConfig.row_span}` : "",
-              ].filter(Boolean).join(";")}
-            >
-              ${editMode
-                ? html`
-                    <hui-section-edit-mode
-                      .hass=${this.hass}
-                      .lovelace=${this.lovelace}
-                      .index=${index}
-                      .viewIndex=${this._resolvedViewIndex()}
-                    >
-                      <hui-section
-                        .hass=${this.hass}
-                        .lovelace=${this.lovelace}
-                        .config=${sectionConfig}
-                        .viewIndex=${this._resolvedViewIndex()}
-                        .index=${index}
-                        ?preview=${editMode}
-                      ></hui-section>
-                    </hui-section-edit-mode>
-                  `
-                : html`
-                    <hui-section
-                      .hass=${this.hass}
-                      .lovelace=${this.lovelace}
-                      .config=${sectionConfig}
-                      .viewIndex=${this._resolvedViewIndex()}
-                      .index=${index}
-                    ></hui-section>
-                  `}
-            </div>
-          `)}
-          ${editMode
-            ? html`
-                <button class="create-section" @click=${this._addSection} title="Abschnitt hinzufügen">
-                  <ha-icon .icon=${"mdi:view-grid-plus"}></ha-icon>
-                </button>
-              `
-            : ""}
-        </div>
+        ${editMode
+          ? html`
+              <ha-sortable
+                .disabled=${!editMode}
+                @item-moved=${this._sectionMoved}
+                group="section"
+                handle-selector=".handle"
+                draggable-selector=".section"
+              >
+                ${this._renderSectionsView(sections, maxColumns, editMode)}
+              </ha-sortable>
+            `
+          : this._renderSectionsView(sections, maxColumns, editMode)}
         ${this._nativeChromeReady
           ? html`
               <hui-view-footer
@@ -622,6 +610,59 @@ class SectionsLayout extends BaseLayout {
       </div>
       ${this._render_fab()}
     `);
+  }
+
+  private _renderSectionsView(sections: Array<Record<string, any>>, maxColumns: number, editMode: boolean) {
+    return html`
+      <div class="sections-view">
+        ${sections.map((sectionConfig, index) => html`
+          <div
+            class=${editMode ? "section edit-mode" : "section"}
+            style=${[
+              sectionConfig.column_span
+                ? `--column-span: ${Math.min(Number(sectionConfig.column_span), maxColumns)}`
+                : "",
+              sectionConfig.row_span ? `--row-span: ${sectionConfig.row_span}` : "",
+            ].filter(Boolean).join(";")}
+          >
+            ${editMode
+              ? html`
+                  <hui-section-edit-mode
+                    .hass=${this.hass}
+                    .lovelace=${this.lovelace}
+                    .index=${index}
+                    .viewIndex=${this._resolvedViewIndex()}
+                  >
+                    <hui-section
+                      .hass=${this.hass}
+                      .lovelace=${this.lovelace}
+                      .config=${sectionConfig}
+                      .viewIndex=${this._resolvedViewIndex()}
+                      .index=${index}
+                      ?preview=${editMode}
+                    ></hui-section>
+                  </hui-section-edit-mode>
+                `
+              : html`
+                  <hui-section
+                    .hass=${this.hass}
+                    .lovelace=${this.lovelace}
+                    .config=${sectionConfig}
+                    .viewIndex=${this._resolvedViewIndex()}
+                    .index=${index}
+                  ></hui-section>
+                `}
+          </div>
+        `)}
+        ${editMode
+          ? html`
+              <button class="create-section" @click=${this._addSection} title="Abschnitt hinzufügen">
+                <ha-icon .icon=${"mdi:view-grid-plus"}></ha-icon>
+              </button>
+            `
+          : ""}
+      </div>
+    `;
   }
 
   static get styles() {
@@ -663,6 +704,10 @@ class SectionsLayout extends BaseLayout {
           align-items: start;
           width: 100%;
           min-width: 0;
+        }
+
+        ha-sortable {
+          display: contents;
         }
 
         .section {
