@@ -237,6 +237,7 @@ function pageNavigationMetadata(page: any) {
       type: "divider",
       color: page.color || "#ffffff",
       shadow_frame_color: page.shadow_frame_color || "transparent",
+      height: normalizedDividerHeight(page.height ?? "4px"),
     };
   }
 
@@ -282,6 +283,12 @@ function normalizedShadowFrameOffset(value: string) {
   const size = Number(clockSizeInputValue(value));
   if (!Number.isFinite(size) || size <= 0) return "4px";
   return `${Math.max(3, Math.min(10, size))}px`;
+}
+
+function normalizedDividerHeight(value: string) {
+  const size = Number(clockSizeInputValue(value));
+  if (!Number.isFinite(size) || size <= 0) return "4px";
+  return `${Math.max(1, Math.min(4, size))}px`;
 }
 
 function sectionsFromExistingData(page: any, existingView: any) {
@@ -853,6 +860,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         type: "divider",
         color: page.color || "#ffffff",
         shadow_frame_color: page.shadow_frame_color || "transparent",
+        height: normalizedDividerHeight(page.height ?? "4px"),
       };
     }
 
@@ -977,6 +985,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           type: "divider",
           color: page.color || colors.color,
           shadow_frame_color: page.shadow_frame_color || colors.shadow_frame_color,
+          height: normalizedDividerHeight(page.height ?? colors.height),
         };
       }
       if (!isMenuOnlyPage(page)) return page;
@@ -1027,6 +1036,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     return {
       color: source?.page?.color || "#ffffff",
       shadow_frame_color: source?.page?.shadow_frame_color || "transparent",
+      height: normalizedDividerHeight(source?.page?.height ?? "4px"),
     };
   }
 
@@ -1653,6 +1663,25 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                                       (ev.target as HTMLInputElement).value
                                     )}
                                 />
+                              </div>
+                            </label>
+                            <label class="wide-style">
+                              Trennerhöhe
+                              <div class="range-row">
+                                <input
+                                  type="range"
+                                  min="1"
+                                  max="4"
+                                  step="1"
+                                  .value=${clockSizeInputValue(selectedPage.height ?? "4px")}
+                                  @input=${(ev: Event) =>
+                                    this._updatePage(
+                                      this._selectedPageIndex,
+                                      "height",
+                                      normalizedDividerHeight(`${(ev.target as HTMLInputElement).value}px`)
+                                    )}
+                                />
+                                <span>${normalizedDividerHeight(selectedPage.height ?? "4px")}</span>
                               </div>
                             </label>
                           `

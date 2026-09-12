@@ -245,6 +245,7 @@ export class BaseLayout extends LitElement {
           style=${[
             `--dashboard-layout-v2-divider-color: ${page.color || "#ffffff"}`,
             `--dashboard-layout-v2-divider-shadow-frame-color: ${page.shadow_frame_color || "transparent"}`,
+            `--dashboard-layout-v2-divider-height: ${page.height || "4px"}`,
           ].join(";")}
           aria-hidden="true"
         ></div>
@@ -597,11 +598,11 @@ export class BaseLayout extends LitElement {
       }
 
       .dashboard-layout-v2-menu-divider {
-        height: 4px;
+        height: var(--dashboard-layout-v2-divider-height, 4px);
         margin: 10px 4px;
         border-radius: 999px;
         background: var(--dashboard-layout-v2-divider-color, #ffffff);
-        box-shadow: var(--dashboard-layout-v2-shadow-frame-offset, 4px) var(--dashboard-layout-v2-shadow-frame-offset, 4px) 0 0 var(--dashboard-layout-v2-divider-shadow-frame-color, transparent);
+        box-shadow: var(--dashboard-layout-v2-divider-height, 4px) var(--dashboard-layout-v2-divider-height, 4px) 0 0 var(--dashboard-layout-v2-divider-shadow-frame-color, transparent);
       }
 
       .dashboard-layout-v2-menu button {
