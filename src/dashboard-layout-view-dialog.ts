@@ -61,6 +61,7 @@ const defaultConfig = {
       clock_size: "44px",
       date_size: "12px",
       weekday_wrap_size: "21px",
+      weekend_color: "",
       clock_color: "",
       analog_minute_mark_color: "",
       analog_hour_mark_color: "",
@@ -397,6 +398,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _clockSize = "44";
   @state() private _dateSize = "12";
   @state() private _weekdayWrapSize = "21";
+  @state() private _weekendColor = "";
   @state() private _clockColor = "";
   @state() private _analogMinuteMarkColor = "";
   @state() private _analogHourMarkColor = "";
@@ -483,6 +485,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._clockSize = clockSizeInputValue(config.menu.style?.clock_size ?? "44px");
     this._dateSize = clockSizeInputValue(config.menu.style?.date_size ?? "12px");
     this._weekdayWrapSize = clockSizeInputValue(config.menu.style?.weekday_wrap_size ?? "21px");
+    this._weekendColor = config.menu.style?.weekend_color ?? "";
     this._clockColor = config.menu.style?.clock_color ?? "";
     this._analogMinuteMarkColor = config.menu.style?.analog_minute_mark_color ?? "";
     this._analogHourMarkColor = config.menu.style?.analog_hour_mark_color ?? "";
@@ -594,6 +597,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "clockSize") this._clockSize = value;
     if (key === "dateSize") this._dateSize = value;
     if (key === "weekdayWrapSize") this._weekdayWrapSize = value;
+    if (key === "weekendColor") this._weekendColor = value;
     if (key === "clockColor") this._clockColor = value;
     if (key === "analogMinuteMarkColor") this._analogMinuteMarkColor = value;
     if (key === "analogHourMarkColor") this._analogHourMarkColor = value;
@@ -1336,6 +1340,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           clock_size: normalizedClockSize(this._clockSize),
           date_size: normalizedDateSize(this._dateSize),
           weekday_wrap_size: normalizedDateSize(this._weekdayWrapSize),
+          weekend_color: this._weekendColor,
           clock_color: this._clockColor,
           analog_minute_mark_color: this._analogMinuteMarkColor,
           analog_hour_mark_color: this._analogHourMarkColor,
@@ -1701,6 +1706,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   />
                   Ausgeschrieben
                 </label>
+                ${this._renderColorField("Sa / So Farbe", "weekendColor", this._weekendColor, "Standard")}
               </fieldset>
               ${this._renderColorField("Uhr-/Ringfarbe", "clockColor", this._clockColor, "Standard")}
               ${this._renderColorField("Minutenteilung Farbe", "analogMinuteMarkColor", this._analogMinuteMarkColor, "Standard")}
@@ -2413,6 +2419,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         .weekday-options,
         .display-options {
           grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .weekday-options {
+          grid-template-columns: repeat(3, minmax(120px, 1fr)) minmax(220px, 1.1fr);
         }
 
         .weekday-options .check,

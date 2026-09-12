@@ -336,16 +336,19 @@ export class BaseLayout extends LitElement {
     const dateSize = Number(String(style.date_size ?? "12px").replace(/[^\d.]/g, "")) || 12;
     const wrapSize = Number(String(style.weekday_wrap_size ?? "21px").replace(/[^\d.]/g, "")) || 21;
     const now = new Date();
+    const isWeekend = [0, 6].includes(now.getDay());
+    const weekendColor = isWeekend && menu.weekday !== "none" ? style.weekend_color?.trim() : "";
+    const dateStyle = weekendColor ? `color: ${weekendColor}` : "";
     const date = now.toLocaleDateString();
     if (menu.weekday === "short") {
       const weekday = now.toLocaleDateString([], { weekday: "short" }).replace(/\.$/, "");
-      return html`<small>${weekday}. ${date}</small>`;
+      return html`<small style=${dateStyle}>${weekday}. ${date}</small>`;
     }
     if (menu.weekday === "long") {
       const weekday = now.toLocaleDateString([], { weekday: "long" });
       return dateSize >= wrapSize
-        ? html`<small class="two-line"><span>${weekday}</span><span>${date}</span></small>`
-        : html`<small>${weekday} ${date}</small>`;
+        ? html`<small class="two-line" style=${dateStyle}><span>${weekday}</span><span>${date}</span></small>`
+        : html`<small style=${dateStyle}>${weekday} ${date}</small>`;
     }
     return html`<small>${date}</small>`;
   }

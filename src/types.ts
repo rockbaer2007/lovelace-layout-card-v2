@@ -157,6 +157,7 @@ export interface DashboardLayoutMenuConfig {
     clock_size?: string;
     date_size?: string;
     weekday_wrap_size?: string;
+    weekend_color?: string;
     clock_color?: string;
     analog_minute_mark_color?: string;
     analog_hour_mark_color?: string;

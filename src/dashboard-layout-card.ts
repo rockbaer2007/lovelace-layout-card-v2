@@ -264,16 +264,19 @@ class DashboardLayoutCardV2 extends LitElement {
     const style = menu.style ?? {};
     const dateSize = Number(String(style.date_size ?? "12px").replace(/[^\d.]/g, "")) || 12;
     const wrapSize = Number(String(style.weekday_wrap_size ?? "21px").replace(/[^\d.]/g, "")) || 21;
+    const isWeekend = [0, 6].includes(this._now.getDay());
+    const weekendColor = isWeekend && menu.weekday !== "none" ? style.weekend_color?.trim() : "";
+    const dateStyle = weekendColor ? `color: ${weekendColor}` : "";
     const date = this._now.toLocaleDateString();
     if (menu.weekday === "short") {
       const weekday = this._now.toLocaleDateString([], { weekday: "short" }).replace(/\.$/, "");
-      return html`<span class="menu-date">${weekday}. ${date}</span>`;
+      return html`<span class="menu-date" style=${dateStyle}>${weekday}. ${date}</span>`;
     }
     if (menu.weekday === "long") {
       const weekday = this._now.toLocaleDateString([], { weekday: "long" });
       return dateSize >= wrapSize
-        ? html`<span class="menu-date two-line"><span>${weekday}</span><span>${date}</span></span>`
-        : html`<span class="menu-date">${weekday} ${date}</span>`;
+        ? html`<span class="menu-date two-line" style=${dateStyle}><span>${weekday}</span><span>${date}</span></span>`
+        : html`<span class="menu-date" style=${dateStyle}>${weekday} ${date}</span>`;
     }
     return html`<span class="menu-date">${date}</span>`;
   }
