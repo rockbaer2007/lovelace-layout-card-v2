@@ -1536,7 +1536,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                 </label>
               </fieldset>
 
-              <fieldset class="weekday-options group">
+              <fieldset class="weekday-options group wide">
                 <legend>Wochentag</legend>
                 <label class="check">
                   <input
