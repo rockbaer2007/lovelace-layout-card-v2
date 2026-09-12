@@ -338,17 +338,17 @@ export class BaseLayout extends LitElement {
     const now = new Date();
     const isWeekend = [0, 6].includes(now.getDay());
     const weekendColor = isWeekend && menu.weekday !== "none" ? style.weekend_color?.trim() : "";
-    const dateStyle = weekendColor ? `color: ${weekendColor}` : "";
+    const weekdayStyle = weekendColor ? `color: ${weekendColor}` : "";
     const date = now.toLocaleDateString();
     if (menu.weekday === "short") {
       const weekday = now.toLocaleDateString([], { weekday: "short" }).replace(/\.$/, "");
-      return html`<small style=${dateStyle}>${weekday}. ${date}</small>`;
+      return html`<small><span style=${weekdayStyle}>${weekday}.</span> ${date}</small>`;
     }
     if (menu.weekday === "long") {
       const weekday = now.toLocaleDateString([], { weekday: "long" });
       return dateSize >= wrapSize
-        ? html`<small class="two-line" style=${dateStyle}><span>${weekday}</span><span>${date}</span></small>`
-        : html`<small style=${dateStyle}>${weekday} ${date}</small>`;
+        ? html`<small class="two-line"><span style=${weekdayStyle}>${weekday}</span><span>${date}</span></small>`
+        : html`<small><span style=${weekdayStyle}>${weekday}</span> ${date}</small>`;
     }
     return html`<small>${date}</small>`;
   }
