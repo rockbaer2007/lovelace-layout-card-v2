@@ -17,6 +17,8 @@ layout-card without overwriting it.
 - Supports an optional notification box above the side-menu status values.
 - Supports an optional bottom menu status list with up to four read-only entity values.
 - Supports Home Assistant-style Sections views through `custom:sections-layout-v2`.
+- Supports moving Sections V2 sections in edit mode with the Home Assistant-style
+  three-line drag handle.
 - Creates new dashboard subviews as Sections V2 by default.
 - Keeps the menu visible while switching between linked dashboard subviews.
 - Stores shared dashboard menu settings once on the home view.
@@ -219,6 +221,7 @@ dashboard settings are available from the view editor and allow editing:
 - home entry
 - whether linked subviews should inherit the home view theme
 - tab pages and their layouts; new pages default to Sections V2
+- moving Sections V2 sections with the three-line handle in edit mode
 - new divider entries inherit colors from the previous divider
 - tab, text, hover, icon and background colors
 - tab/view borders and separate 3D frame colors
