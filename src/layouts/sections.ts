@@ -561,14 +561,29 @@ class SectionsLayout extends BaseLayout {
     }
   }
 
+  private _sectionsColumnCount(sections: Array<Record<string, any>>, maxColumns: number, editMode: boolean) {
+    const configuredMaxColumns = Math.max(1, Number(maxColumns) || 4);
+    const sectionColumnCount = sections
+      .filter((section) => !section.hidden)
+      .map((section) => Math.max(1, Math.min(Number(section.column_span) || 1, configuredMaxColumns)))
+      .reduce((total, columnSpan) => total + columnSpan, 0);
+    const totalColumnCount = sectionColumnCount + (editMode ? 1 : 0);
+
+    return Math.max(1, Math.min(configuredMaxColumns, Math.max(totalColumnCount, 1)));
+  }
+
   render() {
     const viewConfig = this._currentViewConfig();
     const sections = sectionsFromConfig(viewConfig);
     const maxColumns = viewConfig?.max_columns ?? 4;
+    const columnCount = this._sectionsColumnCount(sections, maxColumns, Boolean(this.lovelace?.editMode));
     const editMode = Boolean(this.lovelace?.editMode);
     const badges = this.badges ?? [];
     return this._renderDashboardLayoutV2Shell(html`
-      <div class="sections-wrapper" style=${`--sections-max-columns: ${maxColumns}`}>
+      <div
+        class="sections-wrapper"
+        style=${`--sections-max-columns: ${maxColumns}; --sections-column-count: ${columnCount}`}
+      >
         ${this._nativeChromeReady
           ? html`
               <hui-view-header
@@ -683,8 +698,8 @@ class SectionsLayout extends BaseLayout {
           gap: 32px;
           width: 100%;
           max-width: calc(
-            var(--sections-max-columns) * var(--column-max-width) +
-              (var(--sections-max-columns) - 1) * var(--column-gap)
+            var(--sections-column-count) * var(--column-max-width) +
+              (var(--sections-column-count) - 1) * var(--column-gap)
           );
           min-width: 0;
           margin: 0 auto;
@@ -696,10 +711,7 @@ class SectionsLayout extends BaseLayout {
 
         .sections-view {
           display: grid;
-          grid-template-columns: repeat(
-            auto-fit,
-            minmax(min(100%, var(--column-min-width)), 1fr)
-          );
+          grid-template-columns: repeat(var(--sections-column-count), minmax(0, 1fr));
           gap: var(--column-gap);
           align-items: start;
           width: 100%;
