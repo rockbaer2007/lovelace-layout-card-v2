@@ -264,7 +264,9 @@ export class BaseLayout extends LitElement {
         class=${location.pathname.endsWith(`/${page.path}`) ? "active" : ""}
         @click=${() => this._navigateDashboardLayoutV2Page(page.path)}
       >
-        ${page.icon ? html`<ha-icon .icon=${page.icon}></ha-icon>` : ""}
+        ${page.icon
+          ? html`<span class="dashboard-layout-v2-menu-icon-field"><ha-icon class="dashboard-layout-v2-menu-icon" .icon=${page.icon}></ha-icon></span>`
+          : ""}
         <span>${dashboardLayoutV2PageTitle(page)}</span>
       </button>
     `;
@@ -687,15 +689,14 @@ export class BaseLayout extends LitElement {
         background: var(--dashboard-layout-v2-active-tab-color, var(--primary-color));
       }
 
-      .dashboard-layout-v2-menu button.active ha-icon {
+      .dashboard-layout-v2-menu button.active .dashboard-layout-v2-menu-icon-field {
         color: var(
           --dashboard-layout-v2-icon-active-color,
           var(--dashboard-layout-v2-icon-color, var(--primary-color))
         );
       }
 
-      .dashboard-layout-v2-menu ha-icon {
-        --mdc-icon-size: var(--dashboard-layout-v2-icon-size, 20px);
+      .dashboard-layout-v2-menu-icon-field {
         display: inline-grid;
         place-items: center;
         width: calc(var(--dashboard-layout-v2-icon-size, 20px) + 10px);
@@ -706,6 +707,13 @@ export class BaseLayout extends LitElement {
         border-radius: var(--dashboard-layout-v2-icon-radius, 8px);
         background: var(--dashboard-layout-v2-icon-background-color, transparent);
         color: var(--dashboard-layout-v2-icon-color, var(--primary-color));
+      }
+
+      .dashboard-layout-v2-menu-icon {
+        --mdc-icon-size: var(--dashboard-layout-v2-icon-size, 20px);
+        width: var(--dashboard-layout-v2-icon-size, 20px);
+        height: var(--dashboard-layout-v2-icon-size, 20px);
+        color: currentColor;
       }
 
       .dashboard-layout-v2-menu-bottom {

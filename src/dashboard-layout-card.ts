@@ -356,7 +356,9 @@ class DashboardLayoutCardV2 extends LitElement {
         type="button"
         @click=${() => this._selectPage(index)}
       >
-        ${page.icon ? html`<ha-icon .icon=${page.icon}></ha-icon>` : ""}
+        ${page.icon
+          ? html`<span class="menu-icon-field"><ha-icon class="menu-icon" .icon=${page.icon}></ha-icon></span>`
+          : ""}
         <span>${pageTitle(page)}</span>
       </button>
     `;
@@ -657,15 +659,14 @@ class DashboardLayoutCardV2 extends LitElement {
         background: var(--dashboard-layout-v2-active-tab-color, var(--primary-color));
       }
 
-      .menu-pages button.active ha-icon {
+      .menu-pages button.active .menu-icon-field {
         color: var(
           --dashboard-layout-v2-icon-active-color,
           var(--dashboard-layout-v2-icon-color, var(--primary-color))
         );
       }
 
-      .menu-pages ha-icon {
-        --mdc-icon-size: var(--dashboard-layout-v2-icon-size, 20px);
+      .menu-icon-field {
         display: inline-grid;
         place-items: center;
         width: calc(var(--dashboard-layout-v2-icon-size, 20px) + 10px);
@@ -676,6 +677,13 @@ class DashboardLayoutCardV2 extends LitElement {
         border-radius: var(--dashboard-layout-v2-icon-radius, 8px);
         background: var(--dashboard-layout-v2-icon-background-color, transparent);
         color: var(--dashboard-layout-v2-icon-color, var(--primary-color));
+      }
+
+      .menu-icon {
+        --mdc-icon-size: var(--dashboard-layout-v2-icon-size, 20px);
+        width: var(--dashboard-layout-v2-icon-size, 20px);
+        height: var(--dashboard-layout-v2-icon-size, 20px);
+        color: currentColor;
       }
 
       .menu-bottom {
