@@ -37,6 +37,13 @@ function dashboardLayoutV2NotifyMessage(value?: string) {
   return message;
 }
 
+function dashboardLayoutV2HelperActive(hass: any, entityId?: string) {
+  const id = String(entityId ?? "").trim();
+  if (!id) return false;
+  const value = String(hass?.states?.[id]?.state ?? "").trim().toLowerCase();
+  return Boolean(value) && !["off", "false", "0", "unknown", "unavailable", "none"].includes(value);
+}
+
 export class BaseLayout extends LitElement {
   @property() cards: Array<LovelaceCard | HuiCard> = [];
   @property() index: number;
@@ -295,6 +302,34 @@ export class BaseLayout extends LitElement {
     return html`<span>${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>`;
   }
 
+  _activeDashboardLayoutV2DaySymbol(menu: DashboardLayoutMenuConfig) {
+    const config = menu.day_symbol ?? {};
+    if (dashboardLayoutV2HelperActive(this.hass, config.birthday_entity)) {
+      return { icon: "mdi:cake-variant", color: "#ff80ab", label: "Geburtstag" };
+    }
+    if (dashboardLayoutV2HelperActive(this.hass, config.christmas_entity)) {
+      return { icon: "mdi:pine-tree", color: "#1faa59", label: "Weihnachten/Advent" };
+    }
+    if (dashboardLayoutV2HelperActive(this.hass, config.holiday_entity)) {
+      return { icon: "mdi:calendar-star", color: "#ffd600", label: "Feiertag" };
+    }
+    return undefined;
+  }
+
+  _renderDashboardLayoutV2DaySymbol(menu: DashboardLayoutMenuConfig) {
+    const symbol = this._activeDashboardLayoutV2DaySymbol(menu);
+    if (!symbol) return html``;
+    const size = menu.day_symbol?.size ?? "32px";
+    return html`
+      <ha-icon
+        class="dashboard-layout-v2-day-symbol"
+        .icon=${symbol.icon}
+        style=${`--dashboard-layout-v2-day-symbol-size: ${size}; --dashboard-layout-v2-day-symbol-color: ${symbol.color}`}
+        title=${symbol.label}
+      ></ha-icon>
+    `;
+  }
+
   _renderDashboardLayoutV2Date(menu: DashboardLayoutMenuConfig) {
     if (menu.date === false) return html``;
     const style = menu.style ?? {};
@@ -418,6 +453,7 @@ export class BaseLayout extends LitElement {
         <header>
           ${menu.title ? html`<strong>${menu.title}</strong>` : ""}
           ${this._renderDashboardLayoutV2Clock(menu)}
+          ${this._renderDashboardLayoutV2DaySymbol(menu)}
           ${this._renderDashboardLayoutV2Date(menu)}
         </header>
         <nav>
@@ -516,6 +552,13 @@ export class BaseLayout extends LitElement {
       .dashboard-layout-v2-menu small {
         color: var(--secondary-text-color);
         font-size: var(--dashboard-layout-v2-date-size, 12px);
+      }
+
+      .dashboard-layout-v2-day-symbol {
+        color: var(--dashboard-layout-v2-day-symbol-color, var(--primary-color));
+        width: var(--dashboard-layout-v2-day-symbol-size, 32px);
+        height: var(--dashboard-layout-v2-day-symbol-size, 32px);
+        --mdc-icon-size: var(--dashboard-layout-v2-day-symbol-size, 32px);
       }
 
       .dashboard-layout-v2-menu small.two-line {

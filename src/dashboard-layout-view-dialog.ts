@@ -9,6 +9,9 @@ type DashboardLayoutV2DialogParams = {
 };
 
 const DEFAULT_NOTIFY_ENTITY = "input_text.dashboard_notification";
+const DEFAULT_HOLIDAY_ENTITY = "input_boolean.dashboard_holiday";
+const DEFAULT_BIRTHDAY_ENTITY = "input_boolean.dashboard_birthday";
+const DEFAULT_CHRISTMAS_ENTITY = "input_boolean.dashboard_christmas";
 
 const defaultConfig = {
   inherit_theme: true,
@@ -23,6 +26,12 @@ const defaultConfig = {
     analog_seconds: false,
     date: true,
     weekday: "none",
+    day_symbol: {
+      holiday_entity: DEFAULT_HOLIDAY_ENTITY,
+      birthday_entity: DEFAULT_BIRTHDAY_ENTITY,
+      christmas_entity: DEFAULT_CHRISTMAS_ENTITY,
+      size: "32px",
+    },
     notify: {
       enabled: false,
       entity: DEFAULT_NOTIFY_ENTITY,
@@ -285,6 +294,12 @@ function normalizedDateSize(value: string) {
   return `${Math.max(8, Math.min(48, size))}px`;
 }
 
+function normalizedDaySymbolSize(value: string) {
+  const size = Number(clockSizeInputValue(value));
+  if (!Number.isFinite(size) || size <= 0) return "32px";
+  return `${Math.max(24, Math.min(64, size))}px`;
+}
+
 function normalizedShadowFrameOffset(value: string) {
   const size = Number(clockSizeInputValue(value));
   if (!Number.isFinite(size) || size <= 0) return "4px";
@@ -354,6 +369,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _analogSeconds = false;
   @state() private _date = true;
   @state() private _weekday = "none";
+  @state() private _holidayEntity = DEFAULT_HOLIDAY_ENTITY;
+  @state() private _birthdayEntity = DEFAULT_BIRTHDAY_ENTITY;
+  @state() private _christmasEntity = DEFAULT_CHRISTMAS_ENTITY;
+  @state() private _daySymbolSize = "32";
   @state() private _notifyEnabled = false;
   @state() private _notifyEntity = DEFAULT_NOTIFY_ENTITY;
   @state() private _notifyBorderColor = "";
@@ -397,6 +416,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _notifyEntitySearch = "";
   @state() private _openStatusEntityIndex = -1;
   @state() private _statusEntitySearch: Record<number, string> = {};
+  @state() private _openDaySymbolEntity = "";
+  @state() private _daySymbolEntitySearch: Record<string, string> = {};
   @state() private _jsonExpanded = false;
   @state() private _pagesText = "[]";
   @state() private _error = "";
@@ -434,6 +455,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._analogSeconds = config.menu.analog_seconds === true;
     this._date = config.menu.date !== false;
     this._weekday = config.menu.weekday ?? "none";
+    this._holidayEntity = config.menu.day_symbol?.holiday_entity ?? DEFAULT_HOLIDAY_ENTITY;
+    this._birthdayEntity = config.menu.day_symbol?.birthday_entity ?? DEFAULT_BIRTHDAY_ENTITY;
+    this._christmasEntity = config.menu.day_symbol?.christmas_entity ?? DEFAULT_CHRISTMAS_ENTITY;
+    this._daySymbolSize = clockSizeInputValue(config.menu.day_symbol?.size ?? "32px");
     this._notifyEnabled = config.menu.notify?.enabled === true;
     this._notifyEntity = config.menu.notify?.entity ?? DEFAULT_NOTIFY_ENTITY;
     this._notifyBorderColor = config.menu.notify?.border_color ?? "";
@@ -542,6 +567,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "analogSeconds") this._analogSeconds = value;
     if (key === "date") this._date = value;
     if (key === "weekday") this._weekday = value;
+    if (key === "holidayEntity") this._holidayEntity = value;
+    if (key === "birthdayEntity") this._birthdayEntity = value;
+    if (key === "christmasEntity") this._christmasEntity = value;
+    if (key === "daySymbolSize") this._daySymbolSize = value;
     if (key === "notifyEnabled") this._notifyEnabled = value;
     if (key === "notifyEntity") this._notifyEntity = value;
     if (key === "notifyBorderColor") this._notifyBorderColor = value;
@@ -671,6 +700,104 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     window.setTimeout(() => {
       this._openNotifyEntityPicker = false;
     }, 150);
+  }
+
+  private _daySymbolEntityValue(key: string) {
+    if (key === "holiday") return this._holidayEntity;
+    if (key === "birthday") return this._birthdayEntity;
+    return this._christmasEntity;
+  }
+
+  private _defaultDaySymbolEntity(key: string) {
+    if (key === "holiday") return DEFAULT_HOLIDAY_ENTITY;
+    if (key === "birthday") return DEFAULT_BIRTHDAY_ENTITY;
+    return DEFAULT_CHRISTMAS_ENTITY;
+  }
+
+  private _setDaySymbolEntity(key: string, value: string) {
+    if (key === "holiday") this._holidayEntity = value;
+    if (key === "birthday") this._birthdayEntity = value;
+    if (key === "christmas") this._christmasEntity = value;
+  }
+
+  private _selectDaySymbolEntity(key: string, entityId: string) {
+    this._setDaySymbolEntity(key, entityId);
+    this._daySymbolEntitySearch = {
+      ...this._daySymbolEntitySearch,
+      [key]: "",
+    };
+    this._openDaySymbolEntity = "";
+  }
+
+  private _closeDaySymbolEntityPicker(key: string) {
+    window.setTimeout(() => {
+      if (this._openDaySymbolEntity === key) {
+        this._openDaySymbolEntity = "";
+      }
+    }, 150);
+  }
+
+  private _renderDaySymbolEntityPicker(key: string) {
+    const value = this._daySymbolEntityValue(key);
+    const searchValue = this._openDaySymbolEntity === key ? this._daySymbolEntitySearch[key] ?? "" : value;
+    const matches = this._statusEntityMatches(searchValue);
+
+    return html`
+      <div class="entity-picker">
+        <input
+          class="entity-input"
+          placeholder=${this._defaultDaySymbolEntity(key)}
+          .value=${searchValue}
+          @focus=${() => {
+            this._openDaySymbolEntity = key;
+            this._daySymbolEntitySearch = {
+              ...this._daySymbolEntitySearch,
+              [key]: "",
+            };
+          }}
+          @blur=${() => {
+            if (this._daySymbolEntitySearch[key]?.trim()) {
+              this._setDaySymbolEntity(key, this._daySymbolEntitySearch[key].trim());
+            }
+            this._closeDaySymbolEntityPicker(key);
+          }}
+          @input=${(ev: Event) => {
+            this._openDaySymbolEntity = key;
+            const nextValue = (ev.target as HTMLInputElement).value;
+            this._daySymbolEntitySearch = {
+              ...this._daySymbolEntitySearch,
+              [key]: nextValue,
+            };
+            if (!nextValue.trim()) {
+              this._setDaySymbolEntity(key, "");
+            }
+          }}
+        />
+        <span class="entity-arrow" aria-hidden="true">▾</span>
+        ${this._openDaySymbolEntity === key
+          ? html`
+              <div class="entity-menu">
+                ${matches.length
+                  ? matches.map((entityId) => {
+                      const stateObj = this.hass?.states?.[entityId];
+                      const friendlyName = stateObj?.attributes?.friendly_name ?? entityId;
+                      return html`
+                        <button
+                          type="button"
+                          @mousedown=${(ev: MouseEvent) => ev.preventDefault()}
+                          @click=${() => this._selectDaySymbolEntity(key, entityId)}
+                        >
+                          <span>${friendlyName}</span>
+                          <small>${entityId}</small>
+                        </button>
+                      `;
+                    })
+                  : html`<p>Keine Entität gefunden</p>`}
+              </div>
+            `
+          : nothing}
+      </div>
+    `;
   }
 
   private _notifyEntityMissing() {
@@ -1174,6 +1301,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         analog_seconds: this._analogSeconds,
         date: this._date,
         weekday: this._weekday,
+        day_symbol: {
+          holiday_entity: (this._holidayEntity || DEFAULT_HOLIDAY_ENTITY).trim(),
+          birthday_entity: (this._birthdayEntity || DEFAULT_BIRTHDAY_ENTITY).trim(),
+          christmas_entity: (this._christmasEntity || DEFAULT_CHRISTMAS_ENTITY).trim(),
+          size: normalizedDaySymbolSize(this._daySymbolSize),
+        },
         notify: {
           enabled: this._notifyEnabled,
           entity: (this._notifyEntity || DEFAULT_NOTIFY_ENTITY).trim(),
@@ -1575,6 +1708,38 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               ${this._renderColorField("Stundenzeiger Farbe", "analogHourHandColor", this._analogHourHandColor, "Standard")}
               ${this._renderColorField("Minutenzeiger Farbe", "analogMinuteHandColor", this._analogMinuteHandColor, "Standard")}
               ${this._renderColorField("Sekundenzeiger Farbe", "analogSecondHandColor", this._analogSecondHandColor, "Standard")}
+              <fieldset class="day-symbol-options group wide">
+                <legend>Tages-Symbol</legend>
+                <label>
+                  Feiertag Helper
+                  ${this._renderDaySymbolEntityPicker("holiday")}
+                </label>
+                <label>
+                  Geburtstag Helper
+                  ${this._renderDaySymbolEntityPicker("birthday")}
+                </label>
+                <label>
+                  Weihnachten/Advent Helper
+                  ${this._renderDaySymbolEntityPicker("christmas")}
+                </label>
+                <label class="wide-style">
+                  Symbolgröße
+                  <div class="range-row">
+                    <input
+                      type="range"
+                      min="24"
+                      max="64"
+                      step="1"
+                      .value=${this._daySymbolSize}
+                      @input=${(ev: Event) => this._setValue("daySymbolSize", (ev.target as HTMLInputElement).value)}
+                    />
+                    <span>${normalizedDaySymbolSize(this._daySymbolSize)}</span>
+                  </div>
+                </label>
+                <p class="hint">
+                  Priorität: Geburtstag vor Weihnachten/Advent vor Feiertag. Leere oder inaktive Helper zeigen kein Symbol.
+                </p>
+              </fieldset>
             </div>
           </details>
 

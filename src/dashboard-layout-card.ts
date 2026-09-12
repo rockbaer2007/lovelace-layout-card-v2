@@ -67,6 +67,13 @@ function notifyMessage(value?: string) {
   return message;
 }
 
+function helperActive(hass: any, entityId?: string) {
+  const id = String(entityId ?? "").trim();
+  if (!id) return false;
+  const value = String(hass?.states?.[id]?.state ?? "").trim().toLowerCase();
+  return Boolean(value) && !["off", "false", "0", "unknown", "unavailable", "none"].includes(value);
+}
+
 class DashboardLayoutCardV2 extends LitElement {
   @property() hass;
   @property() editMode = false;
@@ -224,6 +231,34 @@ class DashboardLayoutCardV2 extends LitElement {
     })}</strong>`;
   }
 
+  _activeDaySymbol(menu: DashboardLayoutMenuConfig) {
+    const config = menu.day_symbol ?? {};
+    if (helperActive(this.hass, config.birthday_entity)) {
+      return { icon: "mdi:cake-variant", color: "#ff80ab", label: "Geburtstag" };
+    }
+    if (helperActive(this.hass, config.christmas_entity)) {
+      return { icon: "mdi:pine-tree", color: "#1faa59", label: "Weihnachten/Advent" };
+    }
+    if (helperActive(this.hass, config.holiday_entity)) {
+      return { icon: "mdi:calendar-star", color: "#ffd600", label: "Feiertag" };
+    }
+    return undefined;
+  }
+
+  _renderDaySymbol(menu: DashboardLayoutMenuConfig) {
+    const symbol = this._activeDaySymbol(menu);
+    if (!symbol) return html``;
+    const size = menu.day_symbol?.size ?? "32px";
+    return html`
+      <ha-icon
+        class="day-symbol"
+        .icon=${symbol.icon}
+        style=${`--dashboard-layout-v2-day-symbol-size: ${size}; --dashboard-layout-v2-day-symbol-color: ${symbol.color}`}
+        title=${symbol.label}
+      ></ha-icon>
+    `;
+  }
+
   _renderDate(menu: DashboardLayoutMenuConfig) {
     if (menu.date === false) return html``;
     const style = menu.style ?? {};
@@ -367,6 +402,7 @@ class DashboardLayoutCardV2 extends LitElement {
         <header class="menu-header">
           ${menu.title ? html`<span class="menu-title">${menu.title}</span>` : ""}
           ${this._renderClock(menu)}
+          ${this._renderDaySymbol(menu)}
           ${this._renderDate(menu)}
         </header>
         <div class="menu-pages">
@@ -498,6 +534,13 @@ class DashboardLayoutCardV2 extends LitElement {
       .menu-date {
         color: var(--secondary-text-color);
         font-size: var(--dashboard-layout-v2-date-size, 12px);
+      }
+
+      .day-symbol {
+        color: var(--dashboard-layout-v2-day-symbol-color, var(--primary-color));
+        width: var(--dashboard-layout-v2-day-symbol-size, 32px);
+        height: var(--dashboard-layout-v2-day-symbol-size, 32px);
+        --mdc-icon-size: var(--dashboard-layout-v2-day-symbol-size, 32px);
       }
 
       .menu-date.two-line {
