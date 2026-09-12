@@ -143,6 +143,7 @@ export interface DashboardLayoutMenuConfig {
     icon_background_color?: string;
     icon_circle_color?: string;
     icon_shape?: "circle" | "rounded-square";
+    icon_size?: string;
     active_tab_color?: string;
     inactive_tab_color?: string;
     hover_tab_color?: string;

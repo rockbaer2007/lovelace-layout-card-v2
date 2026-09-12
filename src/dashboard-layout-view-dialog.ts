@@ -46,7 +46,8 @@ const defaultConfig = {
       icon_color: "",
       icon_active_color: "",
       icon_background_color: "",
-      icon_shape: "circle",
+      icon_shape: "rounded-square",
+      icon_size: "20px",
       active_tab_color: "",
       inactive_tab_color: "",
       hover_tab_color: "",
@@ -301,6 +302,12 @@ function normalizedDaySymbolSize(value: string) {
   return `${Math.max(24, Math.min(64, size))}px`;
 }
 
+function normalizedIconSize(value: string) {
+  const size = Number(clockSizeInputValue(value));
+  if (!Number.isFinite(size) || size <= 0) return "20px";
+  return `${Math.max(14, Math.min(36, size))}px`;
+}
+
 function normalizedShadowFrameOffset(value: string) {
   const size = Number(clockSizeInputValue(value));
   if (!Number.isFinite(size) || size <= 0) return "4px";
@@ -383,7 +390,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _iconColor = "";
   @state() private _iconActiveColor = "";
   @state() private _iconBackgroundColor = "";
-  @state() private _iconShape = "circle";
+  @state() private _iconShape = "rounded-square";
+  @state() private _iconSize = "20";
   @state() private _activeTabColor = "";
   @state() private _inactiveTabColor = "";
   @state() private _hoverTabColor = "";
@@ -470,7 +478,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._iconColor = config.menu.style?.icon_color ?? "";
     this._iconActiveColor = config.menu.style?.icon_active_color ?? "";
     this._iconBackgroundColor = config.menu.style?.icon_background_color ?? config.menu.style?.icon_circle_color ?? "";
-    this._iconShape = config.menu.style?.icon_shape ?? "circle";
+    this._iconShape = config.menu.style?.icon_shape ?? "rounded-square";
+    this._iconSize = clockSizeInputValue(config.menu.style?.icon_size ?? "20px");
     this._activeTabColor = config.menu.style?.active_tab_color ?? "";
     this._inactiveTabColor = config.menu.style?.inactive_tab_color ?? "";
     this._hoverTabColor = config.menu.style?.hover_tab_color ?? "";
@@ -583,6 +592,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "iconActiveColor") this._iconActiveColor = value;
     if (key === "iconBackgroundColor") this._iconBackgroundColor = value;
     if (key === "iconShape") this._iconShape = value;
+    if (key === "iconSize") this._iconSize = value;
     if (key === "activeTabColor") this._activeTabColor = value;
     if (key === "inactiveTabColor") this._inactiveTabColor = value;
     if (key === "hoverTabColor") this._hoverTabColor = value;
@@ -1326,6 +1336,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           icon_active_color: this._iconActiveColor,
           icon_background_color: this._iconBackgroundColor,
           icon_shape: this._iconShape,
+          icon_size: normalizedIconSize(this._iconSize),
           active_tab_color: this._activeTabColor,
           inactive_tab_color: this._inactiveTabColor,
           hover_tab_color: this._hoverTabColor,
@@ -2165,6 +2176,20 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       >
                         <span class="shape-preview rounded-square"></span>
                       </button>
+                    </div>
+                  </label>
+                  <label>
+                    Icon-Größe
+                    <div class="range-row">
+                      <input
+                        type="range"
+                        min="14"
+                        max="36"
+                        step="1"
+                        .value=${this._iconSize}
+                        @input=${(ev: Event) => this._setValue("iconSize", (ev.target as HTMLInputElement).value)}
+                      />
+                      <span>${normalizedIconSize(this._iconSize)}</span>
                     </div>
                   </label>
                 </div>

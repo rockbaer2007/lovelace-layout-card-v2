@@ -381,7 +381,8 @@ class DashboardLayoutCardV2 extends LitElement {
           style.icon_background_color || style.icon_circle_color
             ? `--dashboard-layout-v2-icon-background-color: ${style.icon_background_color ?? style.icon_circle_color}`
             : "",
-          style.icon_shape === "rounded-square" ? "--dashboard-layout-v2-icon-radius: 8px" : "",
+          style.icon_shape === "circle" ? "--dashboard-layout-v2-icon-radius: 50%" : "--dashboard-layout-v2-icon-radius: 8px",
+          style.icon_size ? `--dashboard-layout-v2-icon-size: ${style.icon_size}` : "",
           style.active_tab_color ? `--dashboard-layout-v2-active-tab-color: ${style.active_tab_color}` : "",
           style.inactive_tab_color ? `--dashboard-layout-v2-inactive-tab-color: ${style.inactive_tab_color}` : "",
           style.hover_tab_color ? `--dashboard-layout-v2-hover-tab-color: ${style.hover_tab_color}` : "",
@@ -664,15 +665,15 @@ class DashboardLayoutCardV2 extends LitElement {
       }
 
       .menu-pages ha-icon {
-        --mdc-icon-size: 20px;
+        --mdc-icon-size: var(--dashboard-layout-v2-icon-size, 20px);
         display: inline-grid;
         place-items: center;
-        width: 28px;
-        height: 28px;
-        min-width: 28px;
+        width: calc(var(--dashboard-layout-v2-icon-size, 20px) + 10px);
+        height: calc(var(--dashboard-layout-v2-icon-size, 20px) + 10px);
+        min-width: calc(var(--dashboard-layout-v2-icon-size, 20px) + 10px);
         padding: 4px;
         box-sizing: border-box;
-        border-radius: var(--dashboard-layout-v2-icon-radius, 50%);
+        border-radius: var(--dashboard-layout-v2-icon-radius, 8px);
         background: var(--dashboard-layout-v2-icon-background-color, transparent);
         color: var(--dashboard-layout-v2-icon-color, var(--primary-color));
       }
