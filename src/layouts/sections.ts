@@ -1,4 +1,5 @@
 import { css, html } from "lit";
+import { repeat } from "lit/directives/repeat.js";
 import { property, state } from "lit/decorators.js";
 import { BaseLayout } from "./base-layout";
 import { CardConfig, HuiCard, LovelaceCard, ViewConfig } from "../types";
@@ -628,9 +629,11 @@ class SectionsLayout extends BaseLayout {
   }
 
   private _renderSectionsView(sections: Array<Record<string, any>>, maxColumns: number, editMode: boolean) {
+    // Native card sorting moves DOM without rollback. Recreate changed sections
+    // after HA replaces their configs so moved nodes cannot survive as duplicates.
     return html`
       <div class="sections-view">
-        ${sections.map((sectionConfig, index) => html`
+        ${repeat(sections, (sectionConfig) => sectionConfig, (sectionConfig, index) => html`
           <div
             class=${editMode ? "section edit-mode" : "section"}
             style=${[

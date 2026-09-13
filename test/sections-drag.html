@@ -1,0 +1,65 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Sections drag regression</title>
+<script type="importmap">
+{"imports":{"lit":"../node_modules/lit/index.js","lit/":"../node_modules/lit/","lit-html":"../node_modules/lit-html/lit-html.js","lit-html/":"../node_modules/lit-html/","lit-element/":"../node_modules/lit-element/","@lit/reactive-element":"../node_modules/@lit/reactive-element/reactive-element.js","@lit/reactive-element/":"../node_modules/@lit/reactive-element/"}}
+</script>
+<div id="fixture"></div>
+<pre id="result">Running...</pre>
+<script type="module">
+import {html, render, LitElement} from 'lit';
+import {repeat} from 'lit/directives/repeat.js';
+import '../dashboard-layout-card-v2.js';
+
+// Model HA's grid: keyed card nodes and Sortable's rollback=false DOM moves.
+class SectionFixture extends LitElement {
+  static properties = {config: {attribute: false}};
+  render() {
+    return html`<div class="cards">${repeat(this.config.cards, card => card,
+      card => html`<div class="card">${card.name}</div>`)}</div>`;
+  }
+}
+customElements.define('hui-section', SectionFixture);
+const layout = document.createElement('sections-layout-v2');
+layout._resolvedViewIndex = () => 0;
+const fixture = document.querySelector('#fixture');
+const card = name => ({type: 'button', name});
+let sections = [{cards: [card('A'), card('B')]}, {cards: [card('C')]}, {cards: [card('D')]}];
+const elements = () => [...fixture.querySelectorAll('hui-section')];
+async function draw() {
+  render(layout._renderSectionsView(sections, 4, true), fixture);
+  await Promise.all(elements().map(section => section.updateComplete));
+}
+function check(expected) {
+  const actual = elements().map(section => [...section.shadowRoot.querySelectorAll('.card')].map(el => el.textContent));
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error(`Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+}
+try {
+  await draw();
+  const untouched = elements()[2];
+  // Move B from section 0 into section 1 before HA saves its immutable config.
+  elements()[1].shadowRoot.querySelector('.cards').append(elements()[0].shadowRoot.querySelectorAll('.card')[1]);
+  const moved = sections[0].cards[1];
+  sections = [{...sections[0], cards: [sections[0].cards[0]]}, {...sections[1], cards: [...sections[1].cards, moved]}, sections[2]];
+  await draw();
+  check([['A'], ['C', 'B'], ['D']]);
+  if (elements()[2] !== untouched) throw new Error('Unchanged section was recreated');
+  // Move within a section, again with Sortable modifying the DOM first.
+  const container = elements()[1].shadowRoot.querySelector('.cards');
+  container.prepend(container.querySelectorAll('.card')[1]);
+  sections = [sections[0], {...sections[1], cards: [...sections[1].cards].reverse()}, sections[2]];
+  await draw();
+  check([['A'], ['B', 'C'], ['D']]);
+  await draw();
+  check([['A'], ['B', 'C'], ['D']]);
+  // Moving the last card out must also remove all old DOM from the empty section.
+  elements()[1].shadowRoot.querySelector('.cards').append(elements()[0].shadowRoot.querySelector('.card'));
+  sections = [{...sections[0], cards: []}, {...sections[1], cards: [...sections[1].cards, sections[0].cards[0]]}, sections[2]];
+  await draw();
+  check([[], ['B', 'C', 'A'], ['D']]);
+  document.querySelector('#result').textContent = 'PASS: cross-section move, same-section move, repeated render, empty source, unchanged section preserved';
+} catch (error) {
+  document.querySelector('#result').textContent = `FAIL: ${error.message}`;
+  throw error;
+}
+</script>
