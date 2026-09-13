@@ -354,12 +354,14 @@ class DashboardLayoutCardV2 extends LitElement {
       <button
         class=${index === this._activePage ? "active" : ""}
         type="button"
+        aria-label=${pageTitle(page)}
+        title=${pageTitle(page)}
         @click=${() => this._selectPage(index)}
       >
         ${page.icon
           ? html`<span class="menu-icon-field"><ha-icon class="menu-icon" .icon=${page.icon}></ha-icon></span>`
-          : ""}
-        <span>${pageTitle(page)}</span>
+          : html`<span class="menu-icon-field mobile-fallback-icon"><ha-icon class="menu-icon" .icon=${"mdi:view-dashboard"}></ha-icon></span>`}
+        <span class="menu-page-label">${pageTitle(page)}</span>
       </button>
     `;
   }
@@ -692,6 +694,26 @@ class DashboardLayoutCardV2 extends LitElement {
         margin-top: auto;
         min-width: 0;
         max-width: 100%;
+      }
+
+      .mobile-fallback-icon {
+        display: none;
+      }
+
+      @media (max-width: 600px) {
+        .menu-page-label {
+          display: none;
+        }
+
+        .menu-pages button {
+          justify-content: center;
+          min-height: 44px;
+          gap: 0;
+        }
+
+        .mobile-fallback-icon {
+          display: inline-grid;
+        }
       }
 
       .menu-notify {

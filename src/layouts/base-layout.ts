@@ -262,12 +262,14 @@ export class BaseLayout extends LitElement {
     return html`
       <button
         class=${location.pathname.endsWith(`/${page.path}`) ? "active" : ""}
+        aria-label=${dashboardLayoutV2PageTitle(page)}
+        title=${dashboardLayoutV2PageTitle(page)}
         @click=${() => this._navigateDashboardLayoutV2Page(page.path)}
       >
         ${page.icon
           ? html`<span class="dashboard-layout-v2-menu-icon-field"><ha-icon class="dashboard-layout-v2-menu-icon" .icon=${page.icon}></ha-icon></span>`
-          : ""}
-        <span>${dashboardLayoutV2PageTitle(page)}</span>
+          : html`<span class="dashboard-layout-v2-menu-icon-field mobile-fallback-icon"><ha-icon class="dashboard-layout-v2-menu-icon" .icon=${"mdi:view-dashboard"}></ha-icon></span>`}
+        <span class="dashboard-layout-v2-page-label">${dashboardLayoutV2PageTitle(page)}</span>
       </button>
     `;
   }
@@ -721,6 +723,26 @@ export class BaseLayout extends LitElement {
         gap: 8px;
         min-width: 0;
         max-width: 100%;
+      }
+
+      .mobile-fallback-icon {
+        display: none;
+      }
+
+      @media (max-width: 600px) {
+        .dashboard-layout-v2-page-label {
+          display: none;
+        }
+
+        .dashboard-layout-v2-menu button {
+          justify-content: center;
+          min-height: 44px;
+          gap: 0;
+        }
+
+        .mobile-fallback-icon {
+          display: inline-grid;
+        }
       }
 
       .dashboard-layout-v2-menu-notify {

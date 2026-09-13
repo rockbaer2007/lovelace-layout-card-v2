@@ -12,6 +12,8 @@ layout-card without overwriting it.
 
 - Adds V2 view layouts for Masonry, Sections, Horizontal, Vertical and Grid.
 - Adds an optional left or right dashboard tab menu for view navigation.
+- At viewport widths up to 600px, navigation buttons show icons only; desktop
+  keeps text labels. Pages without an icon use a dashboard icon on mobile.
 - Supports non-clickable menu spacers and rounded divider bars.
 - Divider bars support their own color and optional 3D frame color.
 - Supports an optional notification box above the side-menu status values.
