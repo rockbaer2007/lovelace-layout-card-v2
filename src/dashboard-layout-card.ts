@@ -525,6 +525,7 @@ class DashboardLayoutCardV2 extends LitElement {
             : "",
           style.icon_shape === "circle" ? "--dashboard-layout-v2-icon-radius: 50%" : "--dashboard-layout-v2-icon-radius: 8px",
           style.icon_size ? `--dashboard-layout-v2-icon-size: ${style.icon_size}` : "",
+          "--dashboard-layout-v2-icon-column-width: max(64px, calc(var(--dashboard-layout-v2-icon-size, 20px) + 36px))",
           style.active_tab_color ? `--dashboard-layout-v2-active-tab-color: ${style.active_tab_color}` : "",
           style.inactive_tab_color ? `--dashboard-layout-v2-inactive-tab-color: ${style.inactive_tab_color}` : "",
           style.hover_tab_color ? `--dashboard-layout-v2-hover-tab-color: ${style.hover_tab_color}` : "",
@@ -634,21 +635,21 @@ class DashboardLayoutCardV2 extends LitElement {
     return css`
       ha-card.dashboard-layout-card {
         display: grid;
-        grid-template-columns: minmax(132px, 196px) 64px minmax(0, 1fr);
+        grid-template-columns: minmax(132px, 196px) var(--dashboard-layout-v2-icon-column-width, 64px) minmax(0, 1fr);
         min-height: 320px;
         overflow: hidden;
       }
 
       ha-card.menu-right {
-        grid-template-columns: minmax(0, 1fr) 64px minmax(132px, 196px);
+        grid-template-columns: minmax(0, 1fr) var(--dashboard-layout-v2-icon-column-width, 64px) minmax(132px, 196px);
       }
 
       ha-card.menu-icon-only {
-        grid-template-columns: 64px 64px minmax(0, 1fr);
+        grid-template-columns: var(--dashboard-layout-v2-icon-column-width, 64px) var(--dashboard-layout-v2-icon-column-width, 64px) minmax(0, 1fr);
       }
 
       ha-card.menu-right.menu-icon-only {
-        grid-template-columns: minmax(0, 1fr) 64px 64px;
+        grid-template-columns: minmax(0, 1fr) var(--dashboard-layout-v2-icon-column-width, 64px) var(--dashboard-layout-v2-icon-column-width, 64px);
       }
 
       ha-card.menu-none {
@@ -967,8 +968,8 @@ class DashboardLayoutCardV2 extends LitElement {
       .submenu-pages button {
         justify-content: center;
         min-height: 44px;
-        width: 48px;
-        max-width: 48px;
+        width: calc(var(--dashboard-layout-v2-icon-size, 20px) + 28px);
+        max-width: calc(var(--dashboard-layout-v2-icon-size, 20px) + 28px);
         justify-self: center;
         gap: 0;
         padding-inline: 6px;
@@ -977,10 +978,6 @@ class DashboardLayoutCardV2 extends LitElement {
       .menu.icon-only .mobile-fallback-icon,
       .submenu-pages .mobile-fallback-icon {
         display: inline-grid;
-      }
-
-      .submenu-pages .menu-icon-field {
-        min-width: 0;
       }
 
       @media (max-width: 600px) {
