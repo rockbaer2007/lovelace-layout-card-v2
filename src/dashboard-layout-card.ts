@@ -439,7 +439,9 @@ class DashboardLayoutCardV2 extends LitElement {
 
   _activeSubPages() {
     const mainPage = this._activeMainPageConfig;
-    return Array.isArray(mainPage?.subpages) ? [mainPage, ...mainPage.subpages] : [];
+    return Array.isArray(mainPage?.subpages)
+      ? [...(mainPage.hide_submenu_parent === true ? [] : [mainPage]), ...mainPage.subpages]
+      : [];
   }
 
   _subMenuOffset() {

@@ -276,6 +276,7 @@ function pageNavigationMetadata(page: any) {
     ...(Array.isArray(page.subpages) && page.subpages.length
       ? { subpages: page.subpages.map((subpage: any) => pageNavigationMetadata(subpage)) }
       : {}),
+    ...(page.hide_submenu_parent === true ? { hide_submenu_parent: true } : {}),
     type: page.type,
     layout_type: page.layout_type ?? page.type,
   };
@@ -2201,6 +2202,23 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         />
                         Hat Submenü
                       </label>
+                      ${selectedSubpages.length
+                        ? html`
+                            <label class="check">
+                              <input
+                                type="checkbox"
+                                .checked=${selectedPage.hide_submenu_parent === true}
+                                @change=${(ev: Event) =>
+                                  this._updatePage(
+                                    this._selectedPageIndex,
+                                    "hide_submenu_parent",
+                                    (ev.target as HTMLInputElement).checked
+                                  )}
+                              />
+                              Hauptseite nicht als ersten Subbutton anzeigen
+                            </label>
+                          `
+                        : nothing}
                       ${selectedSubpages.length
                         ? html`<button type="button" @click=${() => this._selectTab("submenu")}>Submenü bearbeiten</button>`
                         : nothing}

@@ -177,6 +177,7 @@ export interface DashboardLayoutPageConfig {
   title?: string;
   icon?: string;
   subpages?: Array<DashboardLayoutPageConfig>;
+  hide_submenu_parent?: boolean;
   type?: string;
   path?: string;
   color?: string;

@@ -271,7 +271,7 @@ export class BaseLayout extends LitElement {
     const homePath = String(menu.home?.path ?? "");
     if (!page || !Array.isArray(page.subpages) || dashboardLayoutV2PagePath(page) === homePath) return [];
     return [
-      page,
+      ...(page.hide_submenu_parent === true ? [] : [page]),
       ...page.subpages.filter((subpage: any) => !isDashboardLayoutV2MenuOnlyPage(subpage)),
     ];
   }
