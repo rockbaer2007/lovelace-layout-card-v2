@@ -275,6 +275,26 @@ export class BaseLayout extends LitElement {
     ];
   }
 
+  _dashboardLayoutV2SubmenuOffset() {
+    const activePage = this._dashboardLayoutV2ActivePage();
+    if (!activePage) return 0;
+    const activePath = dashboardLayoutV2PagePath(activePage);
+    const pages = this._dashboardLayoutV2Pages();
+    let offset = 0;
+    for (const page of pages) {
+      if (dashboardLayoutV2PagePath(page) === activePath) return offset;
+      if (page?.type === "spacer") {
+        offset += 24;
+      } else if (page?.type === "divider") {
+        const height = Number(String(page.height ?? "4px").replace(/[^\d.]/g, "")) || 4;
+        offset += height + 26;
+      } else {
+        offset += 50;
+      }
+    }
+    return 0;
+  }
+
   _renderDashboardLayoutV2MenuItem(page: any) {
     if (page?.type === "spacer") {
       return html`<div class="dashboard-layout-v2-menu-spacer" aria-hidden="true"></div>`;
@@ -543,7 +563,10 @@ export class BaseLayout extends LitElement {
     return html`
       <aside
         class="dashboard-layout-v2-menu dashboard-layout-v2-submenu icon-only"
-        style=${this._dashboardLayoutV2MenuStyle(menu, true)}
+        style=${[
+          this._dashboardLayoutV2MenuStyle(menu, true),
+          `--dashboard-layout-v2-submenu-offset: ${this._dashboardLayoutV2SubmenuOffset()}px`,
+        ].filter(Boolean).join(";")}
       >
         <nav aria-label=${`${dashboardLayoutV2PageTitle(activePage)} Untermenü`}>
           ${subpages.map((page) => this._renderDashboardLayoutV2SubMenuItem(page))}
@@ -654,7 +677,7 @@ export class BaseLayout extends LitElement {
 
       .dashboard-layout-v2-submenu {
         grid-template-rows: minmax(0, 1fr);
-        padding-top: 8px;
+        padding-top: calc(8px + var(--dashboard-layout-v2-submenu-offset, 0px));
       }
 
       .dashboard-layout-v2-menu header {
@@ -848,6 +871,10 @@ export class BaseLayout extends LitElement {
       }
 
       .dashboard-layout-v2-menu.icon-only header {
+        display: none;
+      }
+
+      .dashboard-layout-v2-menu.icon-only .dashboard-layout-v2-menu-bottom {
         display: none;
       }
 
