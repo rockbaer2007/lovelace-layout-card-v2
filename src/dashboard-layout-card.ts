@@ -462,16 +462,19 @@ class DashboardLayoutCardV2 extends LitElement {
   _renderSubMenu() {
     const mainPage = this._activeMainPageConfig;
     const subpages = this._activeSubPages();
-    if (!subpages.length) return html``;
     return html`
       <nav
         class="submenu"
         aria-label=${`${pageTitle(mainPage)} Untermenü`}
         style=${`--dashboard-layout-v2-submenu-offset: ${this._subMenuOffset()}px`}
       >
-        <div class="submenu-pages">
-          ${subpages.map((page, index) => this._renderSubMenuItem(page, index))}
-        </div>
+        ${subpages.length
+          ? html`
+              <div class="submenu-pages">
+                ${subpages.map((page, index) => this._renderSubMenuItem(page, index))}
+              </div>
+            `
+          : html`<div class="submenu-pages" aria-hidden="true"></div>`}
       </nav>
     `;
   }
@@ -573,10 +576,9 @@ class DashboardLayoutCardV2 extends LitElement {
     const menu = normalizeMenu(this._config.menu);
     const position = this._menuPosition(menu);
     const iconOnly = menu.icon_only === true;
-    const hasSubmenu = this._activeSubPages().length > 0;
     return html`
       <ha-card
-        class=${`dashboard-layout-card menu-${position}${iconOnly ? " menu-icon-only" : ""}${hasSubmenu ? " has-submenu" : ""}`}
+        class=${`dashboard-layout-card menu-${position}${iconOnly ? " menu-icon-only" : ""}`}
         style=${this._contentStyle(menu)}
       >
         ${position === "left" ? this._renderMenu(menu) : ""}
@@ -626,36 +628,20 @@ class DashboardLayoutCardV2 extends LitElement {
     return css`
       ha-card.dashboard-layout-card {
         display: grid;
-        grid-template-columns: minmax(132px, 196px) minmax(0, 1fr);
+        grid-template-columns: minmax(132px, 196px) 64px minmax(0, 1fr);
         min-height: 320px;
         overflow: hidden;
       }
 
       ha-card.menu-right {
-        grid-template-columns: minmax(0, 1fr) minmax(132px, 196px);
-      }
-
-      ha-card.has-submenu {
-        grid-template-columns: minmax(132px, 196px) 64px minmax(0, 1fr);
-      }
-
-      ha-card.menu-right.has-submenu {
         grid-template-columns: minmax(0, 1fr) 64px minmax(132px, 196px);
       }
 
       ha-card.menu-icon-only {
-        grid-template-columns: 64px minmax(0, 1fr);
-      }
-
-      ha-card.menu-icon-only.has-submenu {
         grid-template-columns: 64px 64px minmax(0, 1fr);
       }
 
       ha-card.menu-right.menu-icon-only {
-        grid-template-columns: minmax(0, 1fr) 64px;
-      }
-
-      ha-card.menu-right.menu-icon-only.has-submenu {
         grid-template-columns: minmax(0, 1fr) 64px 64px;
       }
 

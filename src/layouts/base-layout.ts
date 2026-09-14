@@ -607,7 +607,6 @@ export class BaseLayout extends LitElement {
     if (menu.position === "none") return html``;
     const activePage = this._dashboardLayoutV2ActivePage();
     const subpages = this._dashboardLayoutV2ActiveSubpages();
-    if (!subpages.length) return html``;
 
     return html`
       <aside
@@ -617,9 +616,13 @@ export class BaseLayout extends LitElement {
           `--dashboard-layout-v2-submenu-offset: ${this._dashboardLayoutV2SubmenuOffset()}px`,
         ].filter(Boolean).join(";")}
       >
-        <nav aria-label=${`${dashboardLayoutV2PageTitle(activePage)} Untermenü`}>
-          ${subpages.map((page) => this._renderDashboardLayoutV2SubMenuItem(page))}
-        </nav>
+        ${subpages.length
+          ? html`
+              <nav aria-label=${`${dashboardLayoutV2PageTitle(activePage)} Untermenü`}>
+                ${subpages.map((page) => this._renderDashboardLayoutV2SubMenuItem(page))}
+              </nav>
+            `
+          : html`<nav aria-hidden="true"></nav>`}
       </aside>
     `;
   }
@@ -641,11 +644,10 @@ export class BaseLayout extends LitElement {
   _renderDashboardLayoutV2Shell(content) {
     const menu = this._dashboardLayoutV2Menu();
     if (menu.position === "none") return content;
-    const hasSubmenu = this._dashboardLayoutV2ActiveSubpages().length > 0;
 
     return html`
       <section
-        class=${`dashboard-layout-v2-shell menu-${menu.position}${menu.icon_only === true ? " menu-icon-only" : ""}${hasSubmenu ? " has-submenu" : ""}`}
+        class=${`dashboard-layout-v2-shell menu-${menu.position}${menu.icon_only === true ? " menu-icon-only" : ""}`}
         style=${this._dashboardLayoutV2ContentStyle(menu)}
       >
         ${menu.position === "left" ? this._renderDashboardLayoutV2Menu() : ""}
@@ -668,36 +670,20 @@ export class BaseLayout extends LitElement {
 
       .dashboard-layout-v2-shell {
         display: grid;
-        grid-template-columns: minmax(160px, 220px) minmax(0, 1fr);
+        grid-template-columns: minmax(160px, 220px) 64px minmax(0, 1fr);
         gap: 12px;
         height: 100%;
       }
 
       .dashboard-layout-v2-shell.menu-right {
-        grid-template-columns: minmax(0, 1fr) minmax(160px, 220px);
-      }
-
-      .dashboard-layout-v2-shell.has-submenu {
-        grid-template-columns: minmax(160px, 220px) 64px minmax(0, 1fr);
-      }
-
-      .dashboard-layout-v2-shell.menu-right.has-submenu {
         grid-template-columns: minmax(0, 1fr) 64px minmax(160px, 220px);
       }
 
       .dashboard-layout-v2-shell.menu-icon-only {
-        grid-template-columns: 64px minmax(0, 1fr);
-      }
-
-      .dashboard-layout-v2-shell.menu-icon-only.has-submenu {
         grid-template-columns: 64px 64px minmax(0, 1fr);
       }
 
       .dashboard-layout-v2-shell.menu-right.menu-icon-only {
-        grid-template-columns: minmax(0, 1fr) 64px;
-      }
-
-      .dashboard-layout-v2-shell.menu-right.menu-icon-only.has-submenu {
         grid-template-columns: minmax(0, 1fr) 64px 64px;
       }
 
@@ -1020,18 +1006,10 @@ export class BaseLayout extends LitElement {
 
       @media (max-width: 600px) {
         .dashboard-layout-v2-shell {
-          grid-template-columns: 64px minmax(0, 1fr);
-        }
-
-        .dashboard-layout-v2-shell.has-submenu {
           grid-template-columns: 64px 64px minmax(0, 1fr);
         }
 
         .dashboard-layout-v2-shell.menu-right {
-          grid-template-columns: minmax(0, 1fr) 64px;
-        }
-
-        .dashboard-layout-v2-shell.menu-right.has-submenu {
           grid-template-columns: minmax(0, 1fr) 64px 64px;
         }
 
