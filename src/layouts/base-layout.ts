@@ -234,7 +234,9 @@ export class BaseLayout extends LitElement {
     const homePath = String(
       menu.home?.path ?? parentHome?.path ?? parentView?.path ?? currentView?.path ?? this.index ?? "home"
     );
+    const homeSourcePage = sourcePages.find((page) => String(page.path ?? "") === homePath);
     const homePage = {
+      ...(homeSourcePage ?? {}),
       title: menu.home?.title ?? parentHome?.title ?? parentView?.title ?? currentView?.title ?? homePath ?? "Home",
       icon: menu.home?.icon ?? parentHome?.icon ?? parentView?.icon ?? currentView?.icon ?? "mdi:home",
       path: homePath,
@@ -830,6 +832,10 @@ export class BaseLayout extends LitElement {
         display: none;
       }
 
+      .dashboard-layout-v2-menu.icon-only header {
+        display: none;
+      }
+
       .dashboard-layout-v2-menu.icon-only button,
       .dashboard-layout-v2-submenu button {
         justify-content: center;
@@ -844,6 +850,26 @@ export class BaseLayout extends LitElement {
       }
 
       @media (max-width: 600px) {
+        .dashboard-layout-v2-shell {
+          grid-template-columns: 64px minmax(0, 1fr);
+        }
+
+        .dashboard-layout-v2-shell.has-submenu {
+          grid-template-columns: 64px 64px minmax(0, 1fr);
+        }
+
+        .dashboard-layout-v2-shell.menu-right {
+          grid-template-columns: minmax(0, 1fr) 64px;
+        }
+
+        .dashboard-layout-v2-shell.menu-right.has-submenu {
+          grid-template-columns: minmax(0, 1fr) 64px 64px;
+        }
+
+        .dashboard-layout-v2-menu header {
+          display: none;
+        }
+
         .dashboard-layout-v2-page-label {
           display: none;
         }
