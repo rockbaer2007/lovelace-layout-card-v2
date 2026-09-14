@@ -19,6 +19,18 @@ function dashboardLayoutV2PageTitle(page: any) {
   return String(page?.title ?? page?.name ?? page?.path ?? "");
 }
 
+function dashboardLayoutV2PagePath(page: any) {
+  return String(page?.path ?? "");
+}
+
+function dashboardLayoutV2PageMatchesPath(page: any, path: string) {
+  if (isDashboardLayoutV2MenuOnlyPage(page)) return false;
+  if (dashboardLayoutV2PagePath(page) === path) return true;
+  return Array.isArray(page?.subpages)
+    ? page.subpages.some((subpage: any) => dashboardLayoutV2PagePath(subpage) === path)
+    : false;
+}
+
 function formatDashboardLayoutV2StatusValue(value?: string) {
   if (value === undefined || value === null) return "—";
   const normalized = String(value).replace(",", ".");
@@ -177,7 +189,7 @@ export class BaseLayout extends LitElement {
       ? views.find((view, index) => {
           if (index === this.index || view?.subview) return false;
           const pages = view?.layout?.dashboard_layout_v2?.pages ?? view?.dashboard_layout_v2?.pages ?? [];
-          return Array.isArray(pages) && pages.some((page) => String(page?.path ?? "") === currentPath);
+          return Array.isArray(pages) && pages.some((page) => dashboardLayoutV2PageMatchesPath(page, currentPath));
         })
       : undefined;
     return parentView?.layout?.dashboard_layout_v2 ?? parentView?.dashboard_layout_v2;
@@ -214,7 +226,7 @@ export class BaseLayout extends LitElement {
       ? views.find((view, index) => {
           if (index === this.index || view?.subview) return false;
           const pages = view?.layout?.dashboard_layout_v2?.pages ?? view?.dashboard_layout_v2?.pages ?? [];
-          return Array.isArray(pages) && pages.some((page) => String(page?.path ?? "") === currentPath);
+          return Array.isArray(pages) && pages.some((page) => dashboardLayoutV2PageMatchesPath(page, currentPath));
         })
       : undefined;
     const parentMenu = parentView?.layout?.dashboard_layout_v2?.menu ?? parentView?.dashboard_layout_v2?.menu;
@@ -241,6 +253,20 @@ export class BaseLayout extends LitElement {
     window.dispatchEvent(new Event("location-changed"));
   }
 
+  _dashboardLayoutV2CurrentPath() {
+    return decodeURIComponent(location.pathname.split("/").filter(Boolean).pop() ?? "");
+  }
+
+  _dashboardLayoutV2ActivePage() {
+    const currentPath = this._dashboardLayoutV2CurrentPath();
+    return this._dashboardLayoutV2Pages().find((page) => dashboardLayoutV2PageMatchesPath(page, currentPath));
+  }
+
+  _dashboardLayoutV2ActiveSubpages() {
+    const page = this._dashboardLayoutV2ActivePage();
+    return Array.isArray(page?.subpages) ? page.subpages.filter((subpage: any) => !isDashboardLayoutV2MenuOnlyPage(subpage)) : [];
+  }
+
   _renderDashboardLayoutV2MenuItem(page: any) {
     if (page?.type === "spacer") {
       return html`<div class="dashboard-layout-v2-menu-spacer" aria-hidden="true"></div>`;
@@ -258,10 +284,28 @@ export class BaseLayout extends LitElement {
         ></div>
       `;
     }
+    const currentPath = this._dashboardLayoutV2CurrentPath();
 
     return html`
       <button
-        class=${location.pathname.endsWith(`/${page.path}`) ? "active" : ""}
+        class=${dashboardLayoutV2PageMatchesPath(page, currentPath) ? "active" : ""}
+        aria-label=${dashboardLayoutV2PageTitle(page)}
+        title=${dashboardLayoutV2PageTitle(page)}
+        @click=${() => this._navigateDashboardLayoutV2Page(page.path)}
+      >
+        ${page.icon
+          ? html`<span class="dashboard-layout-v2-menu-icon-field"><ha-icon class="dashboard-layout-v2-menu-icon" .icon=${page.icon}></ha-icon></span>`
+          : html`<span class="dashboard-layout-v2-menu-icon-field mobile-fallback-icon"><ha-icon class="dashboard-layout-v2-menu-icon" .icon=${"mdi:view-dashboard"}></ha-icon></span>`}
+        <span class="dashboard-layout-v2-page-label">${dashboardLayoutV2PageTitle(page)}</span>
+      </button>
+    `;
+  }
+
+  _renderDashboardLayoutV2SubMenuItem(page: any) {
+    const currentPath = this._dashboardLayoutV2CurrentPath();
+    return html`
+      <button
+        class=${dashboardLayoutV2PagePath(page) === currentPath ? "active" : ""}
         aria-label=${dashboardLayoutV2PageTitle(page)}
         title=${dashboardLayoutV2PageTitle(page)}
         @click=${() => this._navigateDashboardLayoutV2Page(page.path)}
@@ -429,7 +473,7 @@ export class BaseLayout extends LitElement {
 
     return html`
       <aside
-        class="dashboard-layout-v2-menu"
+        class=${`dashboard-layout-v2-menu${menu.icon_only === true ? " icon-only" : ""}`}
         style=${[
           style.icon_color ? `--dashboard-layout-v2-icon-color: ${style.icon_color}` : "",
           style.icon_active_color ? `--dashboard-layout-v2-icon-active-color: ${style.icon_active_color}` : "",
@@ -475,6 +519,22 @@ export class BaseLayout extends LitElement {
     `;
   }
 
+  _renderDashboardLayoutV2SubMenu() {
+    const menu = this._dashboardLayoutV2Menu();
+    if (menu.position === "none") return html``;
+    const activePage = this._dashboardLayoutV2ActivePage();
+    const subpages = this._dashboardLayoutV2ActiveSubpages();
+    if (!subpages.length) return html``;
+
+    return html`
+      <aside class="dashboard-layout-v2-menu dashboard-layout-v2-submenu icon-only">
+        <nav aria-label=${`${dashboardLayoutV2PageTitle(activePage)} Untermenü`}>
+          ${subpages.map((page) => this._renderDashboardLayoutV2SubMenuItem(page))}
+        </nav>
+      </aside>
+    `;
+  }
+
   _dashboardLayoutV2ContentStyle(menu: DashboardLayoutMenuConfig) {
     const style = menu.style ?? {};
     return [
@@ -492,11 +552,17 @@ export class BaseLayout extends LitElement {
   _renderDashboardLayoutV2Shell(content) {
     const menu = this._dashboardLayoutV2Menu();
     if (menu.position === "none") return content;
+    const hasSubmenu = this._dashboardLayoutV2ActiveSubpages().length > 0;
 
     return html`
-      <section class=${`dashboard-layout-v2-shell menu-${menu.position}`} style=${this._dashboardLayoutV2ContentStyle(menu)}>
+      <section
+        class=${`dashboard-layout-v2-shell menu-${menu.position}${menu.icon_only === true ? " menu-icon-only" : ""}${hasSubmenu ? " has-submenu" : ""}`}
+        style=${this._dashboardLayoutV2ContentStyle(menu)}
+      >
         ${menu.position === "left" ? this._renderDashboardLayoutV2Menu() : ""}
+        ${menu.position === "left" ? this._renderDashboardLayoutV2SubMenu() : ""}
         <div class="dashboard-layout-v2-content">${content}</div>
+        ${menu.position === "right" ? this._renderDashboardLayoutV2SubMenu() : ""}
         ${menu.position === "right" ? this._renderDashboardLayoutV2Menu() : ""}
       </section>
     `;
@@ -522,6 +588,30 @@ export class BaseLayout extends LitElement {
         grid-template-columns: minmax(0, 1fr) minmax(160px, 220px);
       }
 
+      .dashboard-layout-v2-shell.has-submenu {
+        grid-template-columns: minmax(160px, 220px) 64px minmax(0, 1fr);
+      }
+
+      .dashboard-layout-v2-shell.menu-right.has-submenu {
+        grid-template-columns: minmax(0, 1fr) 64px minmax(160px, 220px);
+      }
+
+      .dashboard-layout-v2-shell.menu-icon-only {
+        grid-template-columns: 64px minmax(0, 1fr);
+      }
+
+      .dashboard-layout-v2-shell.menu-icon-only.has-submenu {
+        grid-template-columns: 64px 64px minmax(0, 1fr);
+      }
+
+      .dashboard-layout-v2-shell.menu-right.menu-icon-only {
+        grid-template-columns: minmax(0, 1fr) 64px;
+      }
+
+      .dashboard-layout-v2-shell.menu-right.menu-icon-only.has-submenu {
+        grid-template-columns: minmax(0, 1fr) 64px 64px;
+      }
+
       .dashboard-layout-v2-content {
         min-width: 0;
         margin-right: 5px;
@@ -543,6 +633,11 @@ export class BaseLayout extends LitElement {
           --dashboard-layout-v2-menu-background,
           var(--card-background-color, rgba(0, 0, 0, 0.18))
         );
+      }
+
+      .dashboard-layout-v2-submenu {
+        grid-template-rows: minmax(0, 1fr);
+        padding-top: 8px;
       }
 
       .dashboard-layout-v2-menu header {
@@ -727,6 +822,25 @@ export class BaseLayout extends LitElement {
 
       .mobile-fallback-icon {
         display: none;
+      }
+
+      .dashboard-layout-v2-menu.icon-only header strong,
+      .dashboard-layout-v2-menu.icon-only .dashboard-layout-v2-page-label,
+      .dashboard-layout-v2-submenu .dashboard-layout-v2-page-label {
+        display: none;
+      }
+
+      .dashboard-layout-v2-menu.icon-only button,
+      .dashboard-layout-v2-submenu button {
+        justify-content: center;
+        gap: 0;
+        min-height: 44px;
+        padding: 7px;
+      }
+
+      .dashboard-layout-v2-menu.icon-only .mobile-fallback-icon,
+      .dashboard-layout-v2-submenu .mobile-fallback-icon {
+        display: inline-grid;
       }
 
       @media (max-width: 600px) {
