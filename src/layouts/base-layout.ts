@@ -1,5 +1,5 @@
 import { css, html, LitElement } from "lit";
-import { property } from "lit/decorators.js";
+import { property, state } from "lit/decorators.js";
 import {
   CardConfig,
   CardConfigGroup,
@@ -63,6 +63,7 @@ export class BaseLayout extends LitElement {
   @property() hass;
   @property() lovelace: any;
   @property() _editMode: boolean = false;
+  @state() private _dashboardLayoutV2NotifyOpen = false;
   _editorLoaded = false;
 
   @property() _config: ViewConfig;
@@ -459,6 +460,53 @@ export class BaseLayout extends LitElement {
     `;
   }
 
+  _renderDashboardLayoutV2NotifyPopup(menu: DashboardLayoutMenuConfig) {
+    const notify = menu.notify;
+    if (notify?.enabled !== true) return html``;
+    const entityId = notify.entity?.trim() || "input_text.dashboard_notification";
+    const stateObj = this.hass?.states?.[entityId];
+    const message = dashboardLayoutV2NotifyMessage(stateObj?.state);
+    if (!message) return html``;
+    const borderColor = this._dashboardLayoutV2NotifyBorderColor(menu);
+
+    return html`
+      <div
+        class="dashboard-layout-v2-notify-popup-wrap"
+        style=${`--dashboard-layout-v2-notify-border-color: ${borderColor}`}
+      >
+        <button
+          class=${`dashboard-layout-v2-notify-popup-button${this._dashboardLayoutV2NotifyOpen ? " active" : ""}`}
+          type="button"
+          aria-label="Meldungen anzeigen"
+          title="Meldungen"
+          @click=${(ev: Event) => {
+            ev.stopPropagation();
+            this._dashboardLayoutV2NotifyOpen = !this._dashboardLayoutV2NotifyOpen;
+          }}
+        >
+          <ha-icon .icon=${"mdi:alert-circle-outline"}></ha-icon>
+        </button>
+        ${this._dashboardLayoutV2NotifyOpen
+          ? html`
+              <div class="dashboard-layout-v2-notify-popup" role="dialog" aria-label="Meldungen">
+                <strong>Meldung</strong>
+                <p>${message}</p>
+                <button
+                  type="button"
+                  @click=${(ev: Event) => {
+                    ev.stopPropagation();
+                    this._dashboardLayoutV2NotifyOpen = false;
+                  }}
+                >
+                  Schließen
+                </button>
+              </div>
+            `
+          : html``}
+      </div>
+    `;
+  }
+
   _renderDashboardLayoutV2Status(menu: DashboardLayoutMenuConfig) {
     const status = menu.status;
     if (status?.enabled !== true) return html``;
@@ -546,6 +594,7 @@ export class BaseLayout extends LitElement {
           ${pages.map((page) => this._renderDashboardLayoutV2MenuItem(page))}
         </nav>
         <div class="dashboard-layout-v2-menu-bottom">
+          ${this._renderDashboardLayoutV2NotifyPopup(menu)}
           ${this._renderDashboardLayoutV2Notify(menu)}
           ${this._renderDashboardLayoutV2Status(menu)}
         </div>
@@ -864,6 +913,75 @@ export class BaseLayout extends LitElement {
         max-width: 100%;
       }
 
+      .dashboard-layout-v2-notify-popup-wrap {
+        display: none;
+        position: relative;
+        justify-self: center;
+      }
+
+      .dashboard-layout-v2-notify-popup-button {
+        display: inline-grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        border: 1px solid var(--dashboard-layout-v2-notify-border-color, var(--error-color, #db4437));
+        border-radius: 8px;
+        color: var(--dashboard-layout-v2-notify-border-color, var(--error-color, #db4437));
+        background: color-mix(in srgb, var(--dashboard-layout-v2-notify-border-color, var(--error-color, #db4437)) 12%, transparent);
+        cursor: pointer;
+      }
+
+      .dashboard-layout-v2-notify-popup-button.active {
+        color: var(--dashboard-layout-v2-active-tab-text-color, var(--text-primary-color, #fff));
+        background: var(--dashboard-layout-v2-notify-border-color, var(--error-color, #db4437));
+      }
+
+      .dashboard-layout-v2-notify-popup-button ha-icon {
+        --mdc-icon-size: 24px;
+      }
+
+      .dashboard-layout-v2-notify-popup {
+        position: absolute;
+        left: calc(100% + 10px);
+        bottom: 0;
+        z-index: 20;
+        width: min(280px, calc(100vw - 120px));
+        padding: 12px;
+        border: 1px solid var(--dashboard-layout-v2-notify-border-color, var(--error-color, #db4437));
+        border-radius: 12px;
+        box-sizing: border-box;
+        color: var(--primary-text-color);
+        background: var(--card-background-color, #1c1c1c);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+        text-align: left;
+      }
+
+      .dashboard-layout-v2-shell.menu-right .dashboard-layout-v2-notify-popup {
+        right: calc(100% + 10px);
+        left: auto;
+      }
+
+      .dashboard-layout-v2-notify-popup strong {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--dashboard-layout-v2-notify-border-color, var(--error-color, #db4437));
+      }
+
+      .dashboard-layout-v2-notify-popup p {
+        margin: 0 0 10px;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+      }
+
+      .dashboard-layout-v2-notify-popup button {
+        min-height: 32px;
+        padding: 6px 10px;
+        border: 1px solid var(--divider-color);
+        border-radius: 8px;
+        color: var(--primary-text-color);
+        background: var(--secondary-background-color, transparent);
+      }
+
       .mobile-fallback-icon {
         display: none;
       }
@@ -878,8 +996,13 @@ export class BaseLayout extends LitElement {
         display: none;
       }
 
-      .dashboard-layout-v2-menu.icon-only .dashboard-layout-v2-menu-bottom {
+      .dashboard-layout-v2-menu.icon-only .dashboard-layout-v2-menu-notify,
+      .dashboard-layout-v2-menu.icon-only .dashboard-layout-v2-menu-status {
         display: none;
+      }
+
+      .dashboard-layout-v2-menu.icon-only .dashboard-layout-v2-notify-popup-wrap {
+        display: block;
       }
 
       .dashboard-layout-v2-menu.icon-only button,
@@ -916,8 +1039,13 @@ export class BaseLayout extends LitElement {
           display: none;
         }
 
-        .dashboard-layout-v2-menu-bottom {
+        .dashboard-layout-v2-menu-notify,
+        .dashboard-layout-v2-menu-status {
           display: none;
+        }
+
+        .dashboard-layout-v2-notify-popup-wrap {
+          display: block;
         }
 
         .dashboard-layout-v2-page-label {

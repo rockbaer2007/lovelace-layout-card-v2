@@ -84,6 +84,7 @@ class DashboardLayoutCardV2 extends LitElement {
   @state() _activePage = 0;
   @state() _activeSubPage = -1;
   @state() _now = new Date();
+  @state() _notifyOpen = false;
 
   _clockTimer?: number;
 
@@ -334,6 +335,50 @@ class DashboardLayoutCardV2 extends LitElement {
     `;
   }
 
+  _renderNotifyPopup(menu: DashboardLayoutMenuConfig) {
+    const notify = menu.notify;
+    if (notify?.enabled !== true) return html``;
+    const entityId = notify.entity?.trim() || "input_text.dashboard_notification";
+    const stateObj = this.hass?.states?.[entityId];
+    const message = notifyMessage(stateObj?.state);
+    if (!message) return html``;
+    const borderColor = this._notifyBorderColor(menu);
+
+    return html`
+      <div class="notify-popup-wrap" style=${`--dashboard-layout-v2-notify-border-color: ${borderColor}`}>
+        <button
+          class=${`notify-popup-button${this._notifyOpen ? " active" : ""}`}
+          type="button"
+          aria-label="Meldungen anzeigen"
+          title="Meldungen"
+          @click=${(ev: Event) => {
+            ev.stopPropagation();
+            this._notifyOpen = !this._notifyOpen;
+          }}
+        >
+          <ha-icon .icon=${"mdi:alert-circle-outline"}></ha-icon>
+        </button>
+        ${this._notifyOpen
+          ? html`
+              <div class="notify-popup" role="dialog" aria-label="Meldungen">
+                <strong>Meldung</strong>
+                <p>${message}</p>
+                <button
+                  type="button"
+                  @click=${(ev: Event) => {
+                    ev.stopPropagation();
+                    this._notifyOpen = false;
+                  }}
+                >
+                  Schließen
+                </button>
+              </div>
+            `
+          : html``}
+      </div>
+    `;
+  }
+
   _renderStatus(menu: DashboardLayoutMenuConfig) {
     const status = menu.status;
     if (status?.enabled !== true) return html``;
@@ -501,6 +546,7 @@ class DashboardLayoutCardV2 extends LitElement {
           ${this._pages.map((page, index) => this._renderMenuItem(page, index))}
         </div>
         <div class="menu-bottom">
+          ${this._renderNotifyPopup(menu)}
           ${this._renderNotify(menu)}
           ${this._renderStatus(menu)}
         </div>
@@ -837,6 +883,75 @@ class DashboardLayoutCardV2 extends LitElement {
         max-width: 100%;
       }
 
+      .notify-popup-wrap {
+        display: none;
+        position: relative;
+        justify-self: center;
+      }
+
+      .notify-popup-button {
+        display: inline-grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        border: 1px solid var(--dashboard-layout-v2-notify-border-color, var(--error-color, #db4437));
+        border-radius: 8px;
+        color: var(--dashboard-layout-v2-notify-border-color, var(--error-color, #db4437));
+        background: color-mix(in srgb, var(--dashboard-layout-v2-notify-border-color, var(--error-color, #db4437)) 12%, transparent);
+        cursor: pointer;
+      }
+
+      .notify-popup-button.active {
+        color: var(--dashboard-layout-v2-active-tab-text-color, var(--text-primary-color, #fff));
+        background: var(--dashboard-layout-v2-notify-border-color, var(--error-color, #db4437));
+      }
+
+      .notify-popup-button ha-icon {
+        --mdc-icon-size: 24px;
+      }
+
+      .notify-popup {
+        position: absolute;
+        left: calc(100% + 10px);
+        bottom: 0;
+        z-index: 20;
+        width: min(280px, calc(100vw - 120px));
+        padding: 12px;
+        border: 1px solid var(--dashboard-layout-v2-notify-border-color, var(--error-color, #db4437));
+        border-radius: 12px;
+        box-sizing: border-box;
+        color: var(--primary-text-color);
+        background: var(--card-background-color, #1c1c1c);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+        text-align: left;
+      }
+
+      ha-card.menu-right .notify-popup {
+        right: calc(100% + 10px);
+        left: auto;
+      }
+
+      .notify-popup strong {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--dashboard-layout-v2-notify-border-color, var(--error-color, #db4437));
+      }
+
+      .notify-popup p {
+        margin: 0 0 10px;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+      }
+
+      .notify-popup button {
+        min-height: 32px;
+        padding: 6px 10px;
+        border: 1px solid var(--divider-color);
+        border-radius: 8px;
+        color: var(--primary-text-color);
+        background: var(--secondary-background-color, transparent);
+      }
+
       .mobile-fallback-icon {
         display: none;
       }
@@ -847,8 +962,13 @@ class DashboardLayoutCardV2 extends LitElement {
       }
 
       .menu.icon-only .menu-header,
-      .menu.icon-only .menu-bottom {
+      .menu.icon-only .menu-notify,
+      .menu.icon-only .menu-status {
         display: none;
+      }
+
+      .menu.icon-only .notify-popup-wrap {
+        display: block;
       }
 
       .menu.icon-only .menu-pages button,
@@ -884,8 +1004,13 @@ class DashboardLayoutCardV2 extends LitElement {
         }
 
         .menu-header,
-        .menu-bottom {
+        .menu-notify,
+        .menu-status {
           display: none;
+        }
+
+        .notify-popup-wrap {
+          display: block;
         }
 
         .mobile-fallback-icon {
