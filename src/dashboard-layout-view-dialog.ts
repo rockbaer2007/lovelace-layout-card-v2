@@ -75,6 +75,7 @@ const defaultConfig = {
       background_mode: "none",
       background_color: "",
       background_image: "",
+      submenu_background_color: "",
     },
   },
   chrome: {
@@ -141,6 +142,13 @@ function dashboardLayoutV2ConfigFromView(viewConfig: any) {
   return viewConfig?.layout?.dashboard_layout_v2 ?? viewConfig?.dashboard_layout_v2;
 }
 
+function dashboardLayoutV2PageContainsPath(page: any, path: string) {
+  if (String(page?.path ?? "") === path) return true;
+  return Array.isArray(page?.subpages)
+    ? page.subpages.some((subpage: any) => String(subpage?.path ?? "") === path)
+    : false;
+}
+
 function parentDashboardLayoutV2Config(viewConfig: any, views: any[], viewIndex?: number) {
   if (!Array.isArray(views)) return undefined;
   const currentPath = String(viewConfig?.path ?? viewIndex ?? "");
@@ -154,7 +162,7 @@ function parentDashboardLayoutV2Config(viewConfig: any, views: any[], viewIndex?
   const parentView = views.find((view, index) => {
     if (index === viewIndex || view?.subview) return false;
     const pages = dashboardLayoutV2ConfigFromView(view)?.pages ?? [];
-    return Array.isArray(pages) && pages.some((page: any) => String(page?.path ?? "") === currentPath);
+    return Array.isArray(pages) && pages.some((page: any) => dashboardLayoutV2PageContainsPath(page, currentPath));
   });
   return dashboardLayoutV2ConfigFromView(parentView);
 }
@@ -423,6 +431,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _backgroundMode = "none";
   @state() private _backgroundColor = "";
   @state() private _backgroundImage = "";
+  @state() private _submenuBackgroundColor = "";
   @state() private _hideHaChrome = false;
   @state() private _adminAlwaysVisible = true;
   @state() private _visibleUsers = "";
@@ -515,6 +524,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._backgroundMode = config.menu.style?.background_mode ?? "none";
     this._backgroundColor = config.menu.style?.background_color ?? "";
     this._backgroundImage = config.menu.style?.background_image ?? "";
+    this._submenuBackgroundColor = config.menu.style?.submenu_background_color ?? "";
     this._hideHaChrome = config.chrome?.hide_ha_chrome === true;
     this._adminAlwaysVisible = config.chrome?.admin_always_visible !== false;
     this._visibleUsers = Array.isArray(config.chrome?.visible_users)
@@ -629,6 +639,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "backgroundMode") this._backgroundMode = value;
     if (key === "backgroundColor") this._backgroundColor = value;
     if (key === "backgroundImage") this._backgroundImage = value;
+    if (key === "submenuBackgroundColor") this._submenuBackgroundColor = value;
     if (key === "hideHaChrome") this._hideHaChrome = value;
     if (key === "adminAlwaysVisible") this._adminAlwaysVisible = value;
     if (key === "visibleUsers") this._visibleUsers = value;
@@ -1515,6 +1526,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           background_mode: this._backgroundMode,
           background_color: this._backgroundColor,
           background_image: this._backgroundImage,
+          submenu_background_color: this._submenuBackgroundColor,
         },
       },
       chrome: {
@@ -2561,6 +2573,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                     </label>
                   `
                 : nothing}
+              ${this._renderColorField(
+                "Submenü Hintergrund",
+                "submenuBackgroundColor",
+                this._submenuBackgroundColor,
+                "wie Menü"
+              )}
             </div>
           </details>
 

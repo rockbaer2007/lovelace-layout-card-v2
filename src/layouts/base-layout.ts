@@ -265,8 +265,14 @@ export class BaseLayout extends LitElement {
   }
 
   _dashboardLayoutV2ActiveSubpages() {
+    const menu = this._dashboardLayoutV2Menu();
     const page = this._dashboardLayoutV2ActivePage();
-    return Array.isArray(page?.subpages) ? page.subpages.filter((subpage: any) => !isDashboardLayoutV2MenuOnlyPage(subpage)) : [];
+    const homePath = String(menu.home?.path ?? "");
+    if (!page || !Array.isArray(page.subpages) || dashboardLayoutV2PagePath(page) === homePath) return [];
+    return [
+      page,
+      ...page.subpages.filter((subpage: any) => !isDashboardLayoutV2MenuOnlyPage(subpage)),
+    ];
   }
 
   _renderDashboardLayoutV2MenuItem(page: any) {
@@ -460,49 +466,55 @@ export class BaseLayout extends LitElement {
     `;
   }
 
-  _renderDashboardLayoutV2Menu() {
-    const menu = this._dashboardLayoutV2Menu();
-    if (menu.position === "none") return html``;
-
-    const pages = this._dashboardLayoutV2Pages();
+  _dashboardLayoutV2MenuStyle(menu: DashboardLayoutMenuConfig, submenu = false) {
     const style = menu.style ?? {};
-    const background =
-      style.background_mode === "color" && style.background_color
+    const background = submenu && style.submenu_background_color
+      ? style.submenu_background_color
+      : style.background_mode === "color" && style.background_color
         ? style.background_color
         : style.background_mode === "image" && style.background_image
           ? `center / cover no-repeat url("${style.background_image}")`
           : "";
 
+    return [
+      style.icon_color ? `--dashboard-layout-v2-icon-color: ${style.icon_color}` : "",
+      style.icon_active_color ? `--dashboard-layout-v2-icon-active-color: ${style.icon_active_color}` : "",
+      style.icon_background_color || style.icon_circle_color
+        ? `--dashboard-layout-v2-icon-background-color: ${style.icon_background_color ?? style.icon_circle_color}`
+        : "",
+      style.icon_shape === "circle" ? "--dashboard-layout-v2-icon-radius: 50%" : "--dashboard-layout-v2-icon-radius: 8px",
+      style.icon_size ? `--dashboard-layout-v2-icon-size: ${style.icon_size}` : "",
+      style.active_tab_color ? `--dashboard-layout-v2-active-tab-color: ${style.active_tab_color}` : "",
+      style.inactive_tab_color ? `--dashboard-layout-v2-inactive-tab-color: ${style.inactive_tab_color}` : "",
+      style.hover_tab_color ? `--dashboard-layout-v2-hover-tab-color: ${style.hover_tab_color}` : "",
+      style.active_tab_text_color ? `--dashboard-layout-v2-active-tab-text-color: ${style.active_tab_text_color}` : "",
+      style.inactive_tab_text_color ? `--dashboard-layout-v2-inactive-tab-text-color: ${style.inactive_tab_text_color}` : "",
+      style.hover_tab_text_color ? `--dashboard-layout-v2-hover-tab-text-color: ${style.hover_tab_text_color}` : "",
+      style.tab_border_color ? `--dashboard-layout-v2-tab-border-color: ${style.tab_border_color}` : "",
+      style.tab_shadow_frame_color ? `--dashboard-layout-v2-tab-shadow-frame-color: ${style.tab_shadow_frame_color}` : "",
+      style.shadow_frame_offset ? `--dashboard-layout-v2-shadow-frame-offset: ${style.shadow_frame_offset}` : "",
+      style.clock_size ? `--dashboard-layout-v2-clock-size: ${style.clock_size}` : "",
+      style.date_size ? `--dashboard-layout-v2-date-size: ${style.date_size}` : "",
+      style.clock_color ? `--dashboard-layout-v2-clock-color: ${style.clock_color}` : "",
+      style.analog_minute_mark_color ? `--dashboard-layout-v2-analog-minute-mark-color: ${style.analog_minute_mark_color}` : "",
+      style.analog_hour_mark_color ? `--dashboard-layout-v2-analog-hour-mark-color: ${style.analog_hour_mark_color}` : "",
+      style.analog_hour_hand_color ? `--dashboard-layout-v2-analog-hour-hand-color: ${style.analog_hour_hand_color}` : "",
+      style.analog_minute_hand_color ? `--dashboard-layout-v2-analog-minute-hand-color: ${style.analog_minute_hand_color}` : "",
+      style.analog_second_hand_color ? `--dashboard-layout-v2-analog-second-hand-color: ${style.analog_second_hand_color}` : "",
+      background ? `--dashboard-layout-v2-menu-background: ${background}` : "",
+    ].filter(Boolean).join(";");
+  }
+
+  _renderDashboardLayoutV2Menu() {
+    const menu = this._dashboardLayoutV2Menu();
+    if (menu.position === "none") return html``;
+
+    const pages = this._dashboardLayoutV2Pages();
+
     return html`
       <aside
         class=${`dashboard-layout-v2-menu${menu.icon_only === true ? " icon-only" : ""}`}
-        style=${[
-          style.icon_color ? `--dashboard-layout-v2-icon-color: ${style.icon_color}` : "",
-          style.icon_active_color ? `--dashboard-layout-v2-icon-active-color: ${style.icon_active_color}` : "",
-          style.icon_background_color || style.icon_circle_color
-            ? `--dashboard-layout-v2-icon-background-color: ${style.icon_background_color ?? style.icon_circle_color}`
-            : "",
-          style.icon_shape === "circle" ? "--dashboard-layout-v2-icon-radius: 50%" : "--dashboard-layout-v2-icon-radius: 8px",
-          style.icon_size ? `--dashboard-layout-v2-icon-size: ${style.icon_size}` : "",
-          style.active_tab_color ? `--dashboard-layout-v2-active-tab-color: ${style.active_tab_color}` : "",
-          style.inactive_tab_color ? `--dashboard-layout-v2-inactive-tab-color: ${style.inactive_tab_color}` : "",
-          style.hover_tab_color ? `--dashboard-layout-v2-hover-tab-color: ${style.hover_tab_color}` : "",
-          style.active_tab_text_color ? `--dashboard-layout-v2-active-tab-text-color: ${style.active_tab_text_color}` : "",
-          style.inactive_tab_text_color ? `--dashboard-layout-v2-inactive-tab-text-color: ${style.inactive_tab_text_color}` : "",
-          style.hover_tab_text_color ? `--dashboard-layout-v2-hover-tab-text-color: ${style.hover_tab_text_color}` : "",
-          style.tab_border_color ? `--dashboard-layout-v2-tab-border-color: ${style.tab_border_color}` : "",
-          style.tab_shadow_frame_color ? `--dashboard-layout-v2-tab-shadow-frame-color: ${style.tab_shadow_frame_color}` : "",
-          style.shadow_frame_offset ? `--dashboard-layout-v2-shadow-frame-offset: ${style.shadow_frame_offset}` : "",
-          style.clock_size ? `--dashboard-layout-v2-clock-size: ${style.clock_size}` : "",
-          style.date_size ? `--dashboard-layout-v2-date-size: ${style.date_size}` : "",
-          style.clock_color ? `--dashboard-layout-v2-clock-color: ${style.clock_color}` : "",
-          style.analog_minute_mark_color ? `--dashboard-layout-v2-analog-minute-mark-color: ${style.analog_minute_mark_color}` : "",
-          style.analog_hour_mark_color ? `--dashboard-layout-v2-analog-hour-mark-color: ${style.analog_hour_mark_color}` : "",
-          style.analog_hour_hand_color ? `--dashboard-layout-v2-analog-hour-hand-color: ${style.analog_hour_hand_color}` : "",
-          style.analog_minute_hand_color ? `--dashboard-layout-v2-analog-minute-hand-color: ${style.analog_minute_hand_color}` : "",
-          style.analog_second_hand_color ? `--dashboard-layout-v2-analog-second-hand-color: ${style.analog_second_hand_color}` : "",
-          background ? `--dashboard-layout-v2-menu-background: ${background}` : "",
-        ].filter(Boolean).join(";")}
+        style=${this._dashboardLayoutV2MenuStyle(menu)}
       >
         <header>
           ${menu.title ? html`<strong>${menu.title}</strong>` : ""}
@@ -529,7 +541,10 @@ export class BaseLayout extends LitElement {
     if (!subpages.length) return html``;
 
     return html`
-      <aside class="dashboard-layout-v2-menu dashboard-layout-v2-submenu icon-only">
+      <aside
+        class="dashboard-layout-v2-menu dashboard-layout-v2-submenu icon-only"
+        style=${this._dashboardLayoutV2MenuStyle(menu, true)}
+      >
         <nav aria-label=${`${dashboardLayoutV2PageTitle(activePage)} Untermenü`}>
           ${subpages.map((page) => this._renderDashboardLayoutV2SubMenuItem(page))}
         </nav>

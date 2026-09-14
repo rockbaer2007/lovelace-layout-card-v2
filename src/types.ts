@@ -169,6 +169,7 @@ export interface DashboardLayoutMenuConfig {
     background_mode?: "none" | "color" | "image";
     background_color?: string;
     background_image?: string;
+    submenu_background_color?: string;
   };
 }
 
