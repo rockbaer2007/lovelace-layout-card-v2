@@ -82,6 +82,7 @@ class DashboardLayoutCardV2 extends LitElement {
   @property() _cards: Array<LovelaceCard> = [];
   @property() _layoutElement?: HTMLElement;
   @state() _activePage = 0;
+  @state() _activeSubPage = -1;
   @state() _now = new Date();
 
   _clockTimer?: number;
@@ -96,6 +97,12 @@ class DashboardLayoutCardV2 extends LitElement {
       pages: config.pages.map((page) => ({
         ...page,
         cards: page.cards ?? [],
+        subpages: Array.isArray(page.subpages)
+          ? page.subpages.map((subpage) => ({
+              ...subpage,
+              cards: subpage.cards ?? [],
+            }))
+          : undefined,
       })),
     };
     this._activePage = Math.min(this._activePage, this._config.pages.length - 1);
@@ -103,6 +110,8 @@ class DashboardLayoutCardV2 extends LitElement {
       this._activePage = this._config.pages.findIndex((page) => !isMenuOnlyPage(page));
     }
     if (this._activePage < 0) this._activePage = 0;
+    const activeSubpages = this._config.pages[this._activePage]?.subpages;
+    if (!Array.isArray(activeSubpages) || this._activeSubPage >= activeSubpages.length) this._activeSubPage = -1;
     this._createActivePageLayout();
   }
 
@@ -135,6 +144,14 @@ class DashboardLayoutCardV2 extends LitElement {
   }
 
   get _activePageConfig(): DashboardLayoutPageConfig {
+    const page = this._pages[this._activePage] ?? this._pages[0];
+    if (this._activeSubPage >= 0 && Array.isArray(page?.subpages)) {
+      return page.subpages[this._activeSubPage] ?? page;
+    }
+    return page;
+  }
+
+  get _activeMainPageConfig(): DashboardLayoutPageConfig {
     return this._pages[this._activePage] ?? this._pages[0];
   }
 
@@ -187,9 +204,18 @@ class DashboardLayoutCardV2 extends LitElement {
   }
 
   async _selectPage(index: number) {
-    if (index === this._activePage) return;
     if (isMenuOnlyPage(this._config.pages[index])) return;
+    if (index === this._activePage && this._activeSubPage < 0) return;
     this._activePage = index;
+    this._activeSubPage = -1;
+    await this._createActivePageLayout();
+  }
+
+  async _selectSubPage(index: number) {
+    const mainPage = this._activeMainPageConfig;
+    if (!Array.isArray(mainPage?.subpages) || isMenuOnlyPage(mainPage.subpages[index])) return;
+    if (index === this._activeSubPage) return;
+    this._activeSubPage = index;
     await this._createActivePageLayout();
   }
 
@@ -352,11 +378,40 @@ class DashboardLayoutCardV2 extends LitElement {
 
     return html`
       <button
-        class=${index === this._activePage ? "active" : ""}
+        class=${`${index === this._activePage && this._activeSubPage < 0 ? "active" : ""}${page.icon_only ? " item-icon-only" : ""}`}
         type="button"
         aria-label=${pageTitle(page)}
         title=${pageTitle(page)}
         @click=${() => this._selectPage(index)}
+      >
+        ${page.icon
+          ? html`<span class="menu-icon-field"><ha-icon class="menu-icon" .icon=${page.icon}></ha-icon></span>`
+          : html`<span class="menu-icon-field mobile-fallback-icon"><ha-icon class="menu-icon" .icon=${"mdi:view-dashboard"}></ha-icon></span>`}
+        <span class="menu-page-label">${pageTitle(page)}</span>
+      </button>
+    `;
+  }
+
+  _renderSubMenu() {
+    const mainPage = this._activeMainPageConfig;
+    const subpages = Array.isArray(mainPage?.subpages) ? mainPage.subpages : [];
+    if (!subpages.length) return html``;
+    return html`
+      <div class="submenu-pages" aria-label=${`${pageTitle(mainPage)} Untermenü`}>
+        ${subpages.map((page, index) => this._renderSubMenuItem(page, index))}
+      </div>
+    `;
+  }
+
+  _renderSubMenuItem(page: DashboardLayoutPageConfig, index: number) {
+    if (isMenuOnlyPage(page)) return html``;
+    return html`
+      <button
+        class=${`${index === this._activeSubPage ? "active" : ""}${page.icon_only ? " item-icon-only" : ""}`}
+        type="button"
+        aria-label=${pageTitle(page)}
+        title=${pageTitle(page)}
+        @click=${() => this._selectSubPage(index)}
       >
         ${page.icon
           ? html`<span class="menu-icon-field"><ha-icon class="menu-icon" .icon=${page.icon}></ha-icon></span>`
@@ -417,6 +472,7 @@ class DashboardLayoutCardV2 extends LitElement {
         <div class="menu-pages">
           ${this._pages.map((page, index) => this._renderMenuItem(page, index))}
         </div>
+        ${this._renderSubMenu()}
         <div class="menu-bottom">
           ${this._renderNotify(menu)}
           ${this._renderStatus(menu)}
@@ -627,9 +683,16 @@ class DashboardLayoutCardV2 extends LitElement {
         background: var(--dashboard-layout-v2-analog-second-hand-color, var(--dashboard-layout-v2-icon-color, var(--primary-color)));
       }
 
-      .menu-pages {
+      .menu-pages,
+      .submenu-pages {
         display: grid;
         gap: 6px;
+      }
+
+      .submenu-pages {
+        margin-left: 14px;
+        padding-left: 10px;
+        border-left: 1px solid var(--dashboard-layout-v2-tab-border-color, var(--divider-color));
       }
 
       .menu-spacer {
@@ -644,7 +707,8 @@ class DashboardLayoutCardV2 extends LitElement {
         box-shadow: var(--dashboard-layout-v2-divider-height, 4px) var(--dashboard-layout-v2-divider-height, 4px) 0 0 var(--dashboard-layout-v2-divider-shadow-frame-color, transparent);
       }
 
-      .menu-pages button {
+      .menu-pages button,
+      .submenu-pages button {
         display: flex;
         align-items: center;
         gap: 8px;
@@ -662,17 +726,20 @@ class DashboardLayoutCardV2 extends LitElement {
         cursor: pointer;
       }
 
-      .menu-pages button:hover {
+      .menu-pages button:hover,
+      .submenu-pages button:hover {
         color: var(--dashboard-layout-v2-hover-tab-text-color, var(--dashboard-layout-v2-inactive-tab-text-color, var(--primary-text-color)));
         background: var(--dashboard-layout-v2-hover-tab-color, transparent);
       }
 
-      .menu-pages button.active {
+      .menu-pages button.active,
+      .submenu-pages button.active {
         color: var(--dashboard-layout-v2-active-tab-text-color, var(--text-primary-color, #fff));
         background: var(--dashboard-layout-v2-active-tab-color, var(--primary-color));
       }
 
-      .menu-pages button.active .menu-icon-field {
+      .menu-pages button.active .menu-icon-field,
+      .submenu-pages button.active .menu-icon-field {
         color: var(
           --dashboard-layout-v2-icon-active-color,
           var(--dashboard-layout-v2-icon-color, var(--primary-color))
@@ -711,18 +778,25 @@ class DashboardLayoutCardV2 extends LitElement {
         display: none;
       }
 
-      .menu.icon-only .menu-page-label {
+      .menu.icon-only .menu-page-label,
+      .menu-pages button.item-icon-only .menu-page-label,
+      .submenu-pages button.item-icon-only .menu-page-label {
         display: none;
       }
 
-      .menu.icon-only .menu-pages button {
+      .menu.icon-only .menu-pages button,
+      .menu.icon-only .submenu-pages button,
+      .menu-pages button.item-icon-only,
+      .submenu-pages button.item-icon-only {
         justify-content: center;
         min-height: 44px;
         gap: 0;
         padding-inline: 8px;
       }
 
-      .menu.icon-only .mobile-fallback-icon {
+      .menu.icon-only .mobile-fallback-icon,
+      .menu-pages button.item-icon-only .mobile-fallback-icon,
+      .submenu-pages button.item-icon-only .mobile-fallback-icon {
         display: inline-grid;
       }
 
@@ -731,7 +805,8 @@ class DashboardLayoutCardV2 extends LitElement {
           display: none;
         }
 
-        .menu-pages button {
+        .menu-pages button,
+        .submenu-pages button {
           justify-content: center;
           min-height: 44px;
           gap: 0;
@@ -739,6 +814,12 @@ class DashboardLayoutCardV2 extends LitElement {
 
         .mobile-fallback-icon {
           display: inline-grid;
+        }
+
+        .submenu-pages {
+          margin-left: 0;
+          padding-left: 0;
+          border-left: 0;
         }
       }
 

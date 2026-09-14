@@ -13,7 +13,7 @@ const DEFAULT_HOLIDAY_ENTITY = "input_boolean.dashboard_holiday";
 const DEFAULT_BIRTHDAY_ENTITY = "input_boolean.dashboard_birthday";
 const DEFAULT_CHRISTMAS_ENTITY = "input_boolean.dashboard_christmas";
 
-type DashboardLayoutDialogTab = "menu" | "display" | "pages" | "messages" | "style" | "advanced";
+type DashboardLayoutDialogTab = "menu" | "display" | "pages" | "submenu" | "messages" | "style" | "advanced";
 
 const defaultConfig = {
   inherit_theme: true,
@@ -265,6 +265,10 @@ function pageNavigationMetadata(page: any) {
     title: pageTitle(page, 0),
     path: page.path,
     ...(page.icon ? { icon: page.icon } : {}),
+    ...(page.icon_only ? { icon_only: true } : {}),
+    ...(Array.isArray(page.subpages) && page.subpages.length
+      ? { subpages: page.subpages.map((subpage: any) => pageNavigationMetadata(subpage)) }
+      : {}),
     type: page.type,
     layout_type: page.layout_type ?? page.type,
   };
@@ -426,6 +430,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _pages: any[] = [];
   private _pageSourcePaths: Array<string | undefined> = [];
   @state() private _selectedPageIndex = 0;
+  @state() private _selectedSubPageIndex = 0;
   @state() private _openNotifyEntityPicker = false;
   @state() private _notifyEntitySearch = "";
   @state() private _openStatusEntityIndex = -1;
@@ -1026,6 +1031,23 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     };
   }
 
+  private _defaultPage(index: number, titlePrefix = "Unterseite") {
+    const nextIndex = index + 1;
+    return {
+      title: `${titlePrefix} ${nextIndex}`,
+      path: `${slugifyPath(titlePrefix) || "unterseite"}-${nextIndex}`,
+      icon: "mdi:view-dashboard",
+      type: SECTIONS_LAYOUT_V2,
+      layout_type: SECTIONS_LAYOUT_V2,
+      max_columns: 4,
+      sections: defaultSections(),
+    };
+  }
+
+  private _normalizeSubPage(page: any, index: number) {
+    return this._normalizePage(page, index);
+  }
+
   private _normalizePage(page: any, index: number) {
     if (page?.type === "spacer") return { type: "spacer" };
     if (page?.type === "divider") {
@@ -1048,6 +1070,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       path: String(path),
       type,
       layout_type: type,
+      ...(Array.isArray(cleanPage.subpages) && cleanPage.subpages.length
+        ? { subpages: cleanPage.subpages.map((subpage: any, subIndex: number) => this._normalizeSubPage(subpage, subIndex)) }
+        : {}),
       ...(layout ? { layout } : {}),
     };
     if (!layout) delete normalizedPage.layout;
@@ -1083,6 +1108,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       if (Array.isArray(config?.pages)) {
         config.pages.forEach((page: any) => {
           changed = addPath(page?.path) || changed;
+          if (Array.isArray(page?.subpages)) {
+            page.subpages.forEach((subpage: any) => {
+              changed = addPath(subpage?.path) || changed;
+            });
+          }
         });
       }
       return changed;
@@ -1099,7 +1129,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         if (!config) return;
 
         const pagePaths = Array.isArray(config.pages)
-          ? config.pages.map((page: any) => String(page?.path ?? ""))
+          ? config.pages.flatMap((page: any) => [
+              String(page?.path ?? ""),
+              ...(Array.isArray(page?.subpages) ? page.subpages.map((subpage: any) => String(subpage?.path ?? "")) : []),
+            ])
           : [];
         const homePath = config.menu?.home?.path ? String(config.menu.home.path) : "";
         const isConnected =
@@ -1267,6 +1300,119 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._pageSourcePaths = sourcePaths;
     this._selectedPageIndex = targetIndex;
     this._syncJsonFromPages();
+  }
+
+  private _selectedSubpages() {
+    const page = this._pages[this._selectedPageIndex];
+    return Array.isArray(page?.subpages) ? page.subpages : [];
+  }
+
+  private _setSelectedSubpages(subpages: any[]) {
+    this._pages = this._pages.map((page, index) =>
+      index === this._selectedPageIndex
+        ? {
+            ...page,
+            ...(subpages.length ? { subpages } : { subpages: undefined }),
+          }
+        : page
+    );
+    this._selectedSubPageIndex = Math.min(this._selectedSubPageIndex, subpages.length - 1);
+    if (this._selectedSubPageIndex < 0 && subpages.length) this._selectedSubPageIndex = 0;
+    if (!subpages.length && this._activeTab === "submenu") this._activeTab = "pages";
+    this._syncJsonFromPages();
+  }
+
+  private _setPageSubmenuEnabled(enabled: boolean) {
+    const page = this._pages[this._selectedPageIndex];
+    if (!page || isMenuOnlyPage(page)) return;
+    const subpages = enabled
+      ? Array.isArray(page.subpages) && page.subpages.length
+        ? page.subpages
+        : [this._defaultPage(0, "Subseite")]
+      : [];
+    this._pages = this._pages.map((entry, index) =>
+      index === this._selectedPageIndex
+        ? {
+            ...entry,
+            ...(subpages.length ? { subpages } : { subpages: undefined }),
+          }
+        : entry
+    );
+    this._selectedSubPageIndex = subpages.length ? 0 : -1;
+    this._activeTab = enabled ? "submenu" : "pages";
+    this._syncJsonFromPages();
+  }
+
+  private _updateSubPage(index: number, key: string, value: any) {
+    const subpages = this._selectedSubpages().map((page, pageIndex) =>
+      pageIndex === index ? { ...page, [key]: value } : page
+    );
+    this._setSelectedSubpages(subpages);
+  }
+
+  private _updateSubPageLayout(index: number, value: string) {
+    const subpages = this._selectedSubpages().map((page, pageIndex) => {
+      if (pageIndex !== index) return page;
+      if (value === "sections" || value === SECTIONS_LAYOUT_V2) {
+        const { cards: _cards, ...rest } = page;
+        return {
+          ...rest,
+          type: SECTIONS_LAYOUT_V2,
+          layout_type: SECTIONS_LAYOUT_V2,
+          sections: Array.isArray(page.sections) ? page.sections : defaultSections(),
+          max_columns: page.max_columns ?? 4,
+        };
+      }
+
+      const { sections: _sections, max_columns: _maxColumns, ...rest } = page;
+      return {
+        ...rest,
+        type: value,
+        layout_type: value,
+        cards: Array.isArray(page.cards) ? page.cards : [],
+      };
+    });
+    this._setSelectedSubpages(subpages);
+  }
+
+  private _addSubPage() {
+    const subpages = this._selectedSubpages();
+    this._setSelectedSubpages([...subpages, this._defaultPage(subpages.length, "Subseite")]);
+    this._selectedSubPageIndex = subpages.length;
+  }
+
+  private _duplicateSubPage() {
+    const subpages = this._selectedSubpages();
+    const page = subpages[this._selectedSubPageIndex];
+    if (!page) return;
+    const copy = {
+      ...page,
+      title: `${page.title ?? "Subseite"} Kopie`,
+      path: `${page.path ?? "subseite"}-kopie`,
+    };
+    const next = [
+      ...subpages.slice(0, this._selectedSubPageIndex + 1),
+      copy,
+      ...subpages.slice(this._selectedSubPageIndex + 1),
+    ];
+    this._setSelectedSubpages(next);
+    this._selectedSubPageIndex += 1;
+  }
+
+  private _deleteSubPage() {
+    const subpages = this._selectedSubpages();
+    if (this._selectedSubPageIndex < 0) return;
+    this._setSelectedSubpages(subpages.filter((_, index) => index !== this._selectedSubPageIndex));
+  }
+
+  private _moveSubPage(direction: -1 | 1) {
+    const subpages = [...this._selectedSubpages()];
+    const targetIndex = this._selectedSubPageIndex + direction;
+    if (targetIndex < 0 || targetIndex >= subpages.length) return;
+    const [page] = subpages.splice(this._selectedSubPageIndex, 1);
+    subpages.splice(targetIndex, 0, page);
+    this._setSelectedSubpages(subpages);
+    this._selectedSubPageIndex = targetIndex;
   }
 
   private _applyJson() {
@@ -1542,6 +1688,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const selectedPage = this._pages[this._selectedPageIndex];
     const selectedPageLayout = selectedPage ? pageLayoutType(selectedPage) : "";
     const selectedPageItemType = selectedPage ? pageItemType(selectedPage) : "page";
+    const selectedSubpages = Array.isArray(selectedPage?.subpages) ? selectedPage.subpages : [];
+    const selectedSubPage = selectedSubpages[this._selectedSubPageIndex];
+    const selectedSubPageLayout = selectedSubPage ? pageLayoutType(selectedSubPage) : "";
     const statusLabelError = this._statusLabelError();
 
     return html`
@@ -1556,6 +1705,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           ${this._renderTabButton("menu", "Menü")}
           ${this._renderTabButton("display", "Anzeige")}
           ${this._renderTabButton("pages", "Seiten")}
+          ${selectedSubpages.length ? this._renderTabButton("submenu", "Submenü") : nothing}
           ${this._renderTabButton("messages", "Meldungen")}
           ${this._renderTabButton("style", "Style")}
           ${this._renderTabButton("advanced", "Erweitert")}
@@ -1851,7 +2001,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   (page, index) => html`
                     <button
                       class=${index === this._selectedPageIndex ? "selected" : ""}
-                      @click=${() => (this._selectedPageIndex = index)}
+                      @click=${() => { this._selectedPageIndex = index; this._selectedSubPageIndex = 0; }}
                     >
                       <span>
                         ${page.type === "spacer"
@@ -2023,6 +2173,26 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                             </label>
                           `
                         : nothing}
+                      <label class="check">
+                        <input
+                          type="checkbox"
+                          .checked=${selectedPage.icon_only === true}
+                          @change=${(ev: Event) =>
+                            this._updatePage(this._selectedPageIndex, "icon_only", (ev.target as HTMLInputElement).checked)}
+                        />
+                        Nur Icon
+                      </label>
+                      <label class="check">
+                        <input
+                          type="checkbox"
+                          .checked=${selectedSubpages.length > 0}
+                          @change=${(ev: Event) => this._setPageSubmenuEnabled((ev.target as HTMLInputElement).checked)}
+                        />
+                        Hat Submenü
+                      </label>
+                      ${selectedSubpages.length
+                        ? html`<button type="button" @click=${() => this._selectTab("submenu")}>Submenü bearbeiten</button>`
+                        : nothing}
                         `
                         : nothing}
                     `
@@ -2039,6 +2209,130 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               <button @click=${() => this._movePage(1)} ?disabled=${this._selectedPageIndex >= this._pages.length - 1}>Runter</button>
               <button class="danger" @click=${this._deletePage} ?disabled=${!selectedPage}>Löschen</button>
             </div>
+          </details>
+
+          <details class="wide collapsible-group settings-panel" data-tab="submenu" open>
+            <summary>Submenü</summary>
+            ${selectedPage && selectedSubpages.length
+              ? html`
+                  <p class="hint">Subbuttons erben Farben und Stil vom ausgewählten Hauptbutton.</p>
+                  <div class="page-editor">
+                    <div class="page-list">
+                      ${selectedSubpages.map(
+                        (page, index) => html`
+                          <button
+                            class=${index === this._selectedSubPageIndex ? "selected" : ""}
+                            @click=${() => (this._selectedSubPageIndex = index)}
+                          >
+                            <span>${pageTitle(page, index)}</span>
+                            <small>${page.path ?? ""}</small>
+                          </button>
+                        `
+                      )}
+                    </div>
+
+                    <div class="page-form">
+                      ${selectedSubPage
+                        ? html`
+                            <label>
+                              Titel
+                              <input
+                                .value=${selectedSubPage.title ?? ""}
+                                @input=${(ev: Event) =>
+                                  this._updateSubPage(this._selectedSubPageIndex, "title", (ev.target as HTMLInputElement).value)}
+                              />
+                            </label>
+                            <label>
+                              Pfad
+                              <input
+                                .value=${selectedSubPage.path ?? ""}
+                                @input=${(ev: Event) =>
+                                  this._updateSubPage(this._selectedSubPageIndex, "path", (ev.target as HTMLInputElement).value)}
+                              />
+                            </label>
+                            <label>
+                              Icon
+                              <input
+                                .value=${selectedSubPage.icon ?? ""}
+                                @input=${(ev: Event) =>
+                                  this._updateSubPage(this._selectedSubPageIndex, "icon", (ev.target as HTMLInputElement).value)}
+                              />
+                            </label>
+                            <label>
+                              Layout
+                              <select
+                                .value=${pageLayoutType(selectedSubPage)}
+                                @change=${(ev: Event) =>
+                                  this._updateSubPageLayout(this._selectedSubPageIndex, (ev.target as HTMLSelectElement).value)}
+                              >
+                                <option value=${SECTIONS_LAYOUT_V2} ?selected=${selectedSubPageLayout === SECTIONS_LAYOUT_V2}>
+                                  Abschnitte V2
+                                </option>
+                                <option value="custom:masonry-layout-v2" ?selected=${selectedSubPageLayout === "custom:masonry-layout-v2"}>
+                                  Masonry V2
+                                </option>
+                                <option value="custom:horizontal-layout-v2" ?selected=${selectedSubPageLayout === "custom:horizontal-layout-v2"}>
+                                  Horizontal V2
+                                </option>
+                                <option value="custom:vertical-layout-v2" ?selected=${selectedSubPageLayout === "custom:vertical-layout-v2"}>
+                                  Vertical V2
+                                </option>
+                                <option value="custom:grid-layout-v2" ?selected=${selectedSubPageLayout === "custom:grid-layout-v2"}>
+                                  Grid V2
+                                </option>
+                              </select>
+                            </label>
+                            ${isSectionsPage(selectedSubPage)
+                              ? html`
+                                  <label>
+                                    Max. Spalten
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      max="10"
+                                      .value=${String(selectedSubPage.max_columns ?? 4)}
+                                      @input=${(ev: Event) =>
+                                        this._updateSubPage(
+                                          this._selectedSubPageIndex,
+                                          "max_columns",
+                                          Number((ev.target as HTMLInputElement).value)
+                                        )}
+                                    />
+                                  </label>
+                                `
+                              : nothing}
+                            <label class="check">
+                              <input
+                                type="checkbox"
+                                .checked=${selectedSubPage.icon_only === true}
+                                @change=${(ev: Event) =>
+                                  this._updateSubPage(
+                                    this._selectedSubPageIndex,
+                                    "icon_only",
+                                    (ev.target as HTMLInputElement).checked
+                                  )}
+                              />
+                              Nur Icon
+                            </label>
+                          `
+                        : html`<p class="empty">Noch kein Subbutton angelegt.</p>`}
+                    </div>
+                  </div>
+
+                  <div class="actions">
+                    <button @click=${this._addSubPage}>Hinzufügen</button>
+                    <button @click=${this._duplicateSubPage} ?disabled=${!selectedSubPage}>Duplizieren</button>
+                    <button @click=${() => this._moveSubPage(-1)} ?disabled=${this._selectedSubPageIndex <= 0}>Hoch</button>
+                    <button
+                      @click=${() => this._moveSubPage(1)}
+                      ?disabled=${this._selectedSubPageIndex >= selectedSubpages.length - 1}
+                    >
+                      Runter
+                    </button>
+                    <button class="danger" @click=${this._deleteSubPage} ?disabled=${!selectedSubPage}>Löschen</button>
+                  </div>
+                `
+              : html`<p class="empty">Aktiviere bei einer Seite „Hat Submenü“, um Subbuttons anzulegen.</p>`}
           </details>
 
           <details class="wide collapsible-group settings-panel" data-tab="messages" open>
@@ -2402,6 +2696,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         .content[data-active-tab="menu"] .settings-panel:not([data-tab="menu"]),
         .content[data-active-tab="display"] .settings-panel:not([data-tab="display"]),
         .content[data-active-tab="pages"] .settings-panel:not([data-tab="pages"]),
+        .content[data-active-tab="submenu"] .settings-panel:not([data-tab="submenu"]),
         .content[data-active-tab="messages"] .settings-panel:not([data-tab="messages"]),
         .content[data-active-tab="style"] .settings-panel:not([data-tab="style"]),
         .content[data-active-tab="advanced"] .settings-panel:not([data-tab="advanced"]) {
