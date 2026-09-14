@@ -13,12 +13,15 @@ const DEFAULT_HOLIDAY_ENTITY = "input_boolean.dashboard_holiday";
 const DEFAULT_BIRTHDAY_ENTITY = "input_boolean.dashboard_birthday";
 const DEFAULT_CHRISTMAS_ENTITY = "input_boolean.dashboard_christmas";
 
+type DashboardLayoutDialogTab = "menu" | "display" | "pages" | "messages" | "style" | "advanced";
+
 const defaultConfig = {
   inherit_theme: true,
   menu: {
     position: "left",
     title: "Haus",
     show_home: true,
+    icon_only: false,
     home: {},
     clock: "digital",
     analog_hour_marks: false,
@@ -364,6 +367,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _menuPosition = "left";
   @state() private _menuTitle = "Haus";
   @state() private _showHome = true;
+  @state() private _iconOnly = false;
   @state() private _homeTitle = "Home";
   @state() private _homePath = "home";
   @state() private _homeIcon = "mdi:home";
@@ -431,6 +435,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _jsonExpanded = false;
   @state() private _pagesText = "[]";
   @state() private _error = "";
+  @state() private _activeTab: DashboardLayoutDialogTab = "menu";
+  @state() private _wideDialog = false;
 
   showDialog(params: DashboardLayoutV2DialogParams) {
     this.hass = params.hass;
@@ -451,6 +457,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._menuPosition = config.menu.position ?? "left";
     this._menuTitle = config.menu.title ?? "Haus";
     this._showHome = config.menu.show_home !== false;
+    this._iconOnly = config.menu.icon_only === true;
     const homeEntry = this._homeEntryFromView(config.menu.home);
     this._homeTitle = homeEntry.title;
     this._homePath = homeEntry.path;
@@ -566,6 +573,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "menuPosition") this._menuPosition = value;
     if (key === "menuTitle") this._menuTitle = value;
     if (key === "showHome") this._showHome = value;
+    if (key === "iconOnly") this._iconOnly = value;
     if (key === "homeTitle") this._homeTitle = value;
     if (key === "homePath") this._homePath = value;
     if (key === "homeIcon") this._homeIcon = value;
@@ -1308,6 +1316,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         position: this._menuPosition,
         title: this._menuTitle,
         show_home: this._showHome,
+        icon_only: this._iconOnly,
         home: homeEntry,
         clock: this._clock,
         analog_hour_marks: this._analogHourMarks,
@@ -1505,6 +1514,29 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._close();
   }
 
+  private _selectTab(tab: DashboardLayoutDialogTab) {
+    this._activeTab = tab;
+  }
+
+  private _toggleDialogWidth() {
+    this._wideDialog = !this._wideDialog;
+  }
+
+  private _renderTabButton(tab: DashboardLayoutDialogTab, label: string) {
+    const active = this._activeTab === tab;
+    return html`
+      <button
+        type="button"
+        class=${active ? "active" : ""}
+        role="tab"
+        aria-selected=${String(active)}
+        @click=${() => this._selectTab(tab)}
+      >
+        ${label}
+      </button>
+    `;
+  }
+
   render() {
     if (!this.viewConfig) return nothing;
     const selectedPage = this._pages[this._selectedPageIndex];
@@ -1514,14 +1546,23 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
     return html`
       <div class="scrim" @click=${this._close}></div>
-      <section class="dialog" role="dialog" aria-modal="true">
-        <header>
+      <section class=${`dialog${this._wideDialog ? " wide-dialog" : ""}`} role="dialog" aria-modal="true">
+        <header @dblclick=${this._toggleDialogWidth} title="Doppelklick: Fensterbreite umschalten">
           <h2>Dashboard Layout V2</h2>
           <button class="icon" @click=${this._close} title="Schließen">×</button>
         </header>
 
-        <div class="content">
-          <details class="wide collapsible-group">
+        <nav class="settings-tabs" role="tablist" aria-label="Dashboard Layout V2 Einstellungen">
+          ${this._renderTabButton("menu", "Menü")}
+          ${this._renderTabButton("display", "Anzeige")}
+          ${this._renderTabButton("pages", "Seiten")}
+          ${this._renderTabButton("messages", "Meldungen")}
+          ${this._renderTabButton("style", "Style")}
+          ${this._renderTabButton("advanced", "Erweitert")}
+        </nav>
+
+        <div class="content" data-active-tab=${this._activeTab}>
+          <details class="wide collapsible-group settings-panel" data-tab="menu" open>
             <summary>Menü</summary>
             <div class="section-grid">
               <label>
@@ -1543,10 +1584,19 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   @input=${(ev: Event) => this._setValue("menuTitle", (ev.target as HTMLInputElement).value)}
                 />
               </label>
+
+              <label class="check">
+                <input
+                  type="checkbox"
+                  .checked=${this._iconOnly}
+                  @change=${(ev: Event) => this._setValue("iconOnly", (ev.target as HTMLInputElement).checked)}
+                />
+                Nur Icons im Menü anzeigen
+              </label>
             </div>
           </details>
 
-          <details class="wide collapsible-group" open>
+          <details class="wide collapsible-group settings-panel" data-tab="menu" open>
             <summary>Hauptseite</summary>
             <div class="section-grid">
               <label class="check">
@@ -1626,7 +1676,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             </div>
           </details>
 
-          <details class="wide collapsible-group">
+          <details class="wide collapsible-group settings-panel" data-tab="display" open>
             <summary>Uhr</summary>
             <div class="section-grid">
               <label>
@@ -1760,7 +1810,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             </div>
           </details>
 
-          <details class="wide collapsible-group">
+          <details class="wide collapsible-group settings-panel" data-tab="advanced" open>
             <summary>HA Setting</summary>
             <div class="section-grid">
               <label class="check">
@@ -1793,7 +1843,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             </div>
           </details>
 
-          <details class="wide collapsible-group" open>
+          <details class="wide collapsible-group settings-panel" data-tab="pages" open>
             <summary>Tabs / Unterseiten</summary>
             <div class="page-editor">
               <div class="page-list">
@@ -1991,7 +2041,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             </div>
           </details>
 
-          <details class="wide collapsible-group">
+          <details class="wide collapsible-group settings-panel" data-tab="messages" open>
             <summary>Benachrichtigung</summary>
             <div class="notify-editor">
               <label class="check">
@@ -2039,7 +2089,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             </div>
           </details>
 
-          <details class="wide collapsible-group">
+          <details class="wide collapsible-group settings-panel" data-tab="messages" open>
             <summary>Statuswerte</summary>
             <div class="status-editor">
               <label class="check">
@@ -2088,7 +2138,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             </div>
           </details>
 
-          <details class="wide collapsible-group">
+          <details class="wide collapsible-group settings-panel" data-tab="style" open>
             <summary>Style</summary>
             <div class="style-grid">
               <label>
@@ -2234,7 +2284,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             </div>
           </details>
 
-          <details class="wide json-box" ?open=${this._jsonExpanded} @toggle=${(ev: Event) => (this._jsonExpanded = (ev.target as HTMLDetailsElement).open)}>
+          <details class="wide json-box settings-panel" data-tab="advanced" ?open=${this._jsonExpanded} @toggle=${(ev: Event) => (this._jsonExpanded = (ev.target as HTMLDetailsElement).open)}>
             <summary>Spezialoptionen / JSON bearbeiten</summary>
             <textarea
               .value=${this._pagesText}
@@ -2278,13 +2328,18 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           transform: translateX(-50%);
           width: min(760px, calc(100vw - 32px));
           height: min(920px, calc(100vh - 32px));
+          transition: width 160ms ease;
           display: grid;
-          grid-template-rows: auto 1fr auto;
+          grid-template-rows: auto auto 1fr auto;
           background: var(--card-background-color, #1c1c1c);
           border: 1px solid var(--divider-color, #333);
           border-radius: 12px;
           box-shadow: var(--ha-card-box-shadow, 0 8px 24px rgba(0, 0, 0, 0.4));
           overflow: hidden;
+        }
+
+        .dialog.wide-dialog {
+          width: min(1180px, calc(100vw - 32px));
         }
 
         header,
@@ -2295,6 +2350,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           gap: 12px;
           padding: 16px;
           border-bottom: 1px solid var(--divider-color, #333);
+        }
+
+        header {
+          cursor: ew-resize;
+          user-select: none;
         }
 
         footer {
@@ -2308,12 +2368,44 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           font-size: 20px;
         }
 
+        .settings-tabs {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          padding: 12px 16px 0;
+          border-bottom: 1px solid var(--divider-color, #333);
+        }
+
+        .settings-tabs button {
+          min-width: 0;
+          height: 34px;
+          padding: 0 12px;
+          border-radius: 999px;
+          color: var(--secondary-text-color);
+          background: transparent;
+        }
+
+        .settings-tabs button.active {
+          color: var(--text-primary-color, #fff);
+          border-color: var(--primary-color, #03a9f4);
+          background: color-mix(in srgb, var(--primary-color, #03a9f4) 28%, transparent);
+        }
+
         .content {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 16px;
           padding: 16px;
           overflow: auto;
+        }
+
+        .content[data-active-tab="menu"] .settings-panel:not([data-tab="menu"]),
+        .content[data-active-tab="display"] .settings-panel:not([data-tab="display"]),
+        .content[data-active-tab="pages"] .settings-panel:not([data-tab="pages"]),
+        .content[data-active-tab="messages"] .settings-panel:not([data-tab="messages"]),
+        .content[data-active-tab="style"] .settings-panel:not([data-tab="style"]),
+        .content[data-active-tab="advanced"] .settings-panel:not([data-tab="advanced"]) {
+          display: none;
         }
 
         label {
