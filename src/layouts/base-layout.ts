@@ -590,11 +590,11 @@ export class BaseLayout extends LitElement {
           ${this._renderDashboardLayoutV2DaySymbol(menu)}
           ${this._renderDashboardLayoutV2Date(menu)}
         </header>
+        ${this._renderDashboardLayoutV2NotifyPopup(menu)}
         <nav>
           ${pages.map((page) => this._renderDashboardLayoutV2MenuItem(page))}
         </nav>
         <div class="dashboard-layout-v2-menu-bottom">
-          ${this._renderDashboardLayoutV2NotifyPopup(menu)}
           ${this._renderDashboardLayoutV2Notify(menu)}
           ${this._renderDashboardLayoutV2Status(menu)}
         </div>
@@ -1005,7 +1005,7 @@ export class BaseLayout extends LitElement {
         display: block;
       }
 
-      .dashboard-layout-v2-menu.icon-only button,
+      .dashboard-layout-v2-menu.icon-only nav > button,
       .dashboard-layout-v2-submenu button {
         justify-content: center;
         gap: 0;
@@ -1052,7 +1052,7 @@ export class BaseLayout extends LitElement {
           display: none;
         }
 
-        .dashboard-layout-v2-menu button {
+        .dashboard-layout-v2-menu nav > button {
           justify-content: center;
           min-height: 44px;
           gap: 0;

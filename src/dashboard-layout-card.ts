@@ -542,11 +542,11 @@ class DashboardLayoutCardV2 extends LitElement {
           ${this._renderDaySymbol(menu)}
           ${this._renderDate(menu)}
         </header>
+        ${this._renderNotifyPopup(menu)}
         <div class="menu-pages">
           ${this._pages.map((page, index) => this._renderMenuItem(page, index))}
         </div>
         <div class="menu-bottom">
-          ${this._renderNotifyPopup(menu)}
           ${this._renderNotify(menu)}
           ${this._renderStatus(menu)}
         </div>
