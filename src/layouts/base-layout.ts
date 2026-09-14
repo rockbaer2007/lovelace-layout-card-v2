@@ -277,23 +277,14 @@ export class BaseLayout extends LitElement {
   }
 
   _dashboardLayoutV2SubmenuOffset() {
-    const activePage = this._dashboardLayoutV2ActivePage();
-    if (!activePage) return 0;
-    const activePath = dashboardLayoutV2PagePath(activePage);
-    const pages = this._dashboardLayoutV2Pages();
-    let offset = 0;
-    for (const page of pages) {
-      if (dashboardLayoutV2PagePath(page) === activePath) return offset;
-      if (page?.type === "spacer") {
-        offset += 24;
-      } else if (page?.type === "divider") {
-        const height = Number(String(page.height ?? "4px").replace(/[^\d.]/g, "")) || 4;
-        offset += height + 26;
-      } else {
-        offset += 50;
-      }
-    }
-    return 0;
+    const menu = this._dashboardLayoutV2Menu();
+    if (menu.icon_only === true) return 50;
+    const hasClock = menu.clock !== "none";
+    const hasDate = menu.date !== false;
+    if (hasClock && hasDate) return 250;
+    if (hasClock) return 200;
+    if (hasDate) return 150;
+    return 50;
   }
 
   _renderDashboardLayoutV2MenuItem(page: any) {

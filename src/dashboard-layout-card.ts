@@ -443,20 +443,14 @@ class DashboardLayoutCardV2 extends LitElement {
   }
 
   _subMenuOffset() {
-    let offset = 0;
-    for (let index = 0; index < this._pages.length; index += 1) {
-      const page = this._pages[index];
-      if (index === this._activePage) return offset;
-      if (page?.type === "spacer") {
-        offset += 24;
-      } else if (page?.type === "divider") {
-        const height = Number(String((page as any).height ?? "4px").replace(/[^\d.]/g, "")) || 4;
-        offset += height + 26;
-      } else {
-        offset += 50;
-      }
-    }
-    return 0;
+    const menu = normalizeMenu(this._config.menu);
+    if (menu.icon_only === true) return 50;
+    const hasClock = menu.clock !== "none";
+    const hasDate = menu.date !== false;
+    if (hasClock && hasDate) return 250;
+    if (hasClock) return 200;
+    if (hasDate) return 150;
+    return 50;
   }
 
   _renderSubMenu() {
