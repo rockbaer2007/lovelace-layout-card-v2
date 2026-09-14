@@ -677,7 +677,11 @@ export class BaseLayout extends LitElement {
 
       .dashboard-layout-v2-submenu {
         grid-template-rows: minmax(0, 1fr);
-        padding-top: calc(8px + var(--dashboard-layout-v2-submenu-offset, 0px));
+        padding-top: 8px;
+      }
+
+      .dashboard-layout-v2-submenu nav {
+        margin-top: var(--dashboard-layout-v2-submenu-offset, 0px);
       }
 
       .dashboard-layout-v2-menu header {
@@ -909,6 +913,10 @@ export class BaseLayout extends LitElement {
         }
 
         .dashboard-layout-v2-menu header {
+          display: none;
+        }
+
+        .dashboard-layout-v2-menu-bottom {
           display: none;
         }
 
