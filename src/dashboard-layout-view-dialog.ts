@@ -265,7 +265,6 @@ function pageNavigationMetadata(page: any) {
     title: pageTitle(page, 0),
     path: page.path,
     ...(page.icon ? { icon: page.icon } : {}),
-    ...(page.icon_only ? { icon_only: true } : {}),
     ...(Array.isArray(page.subpages) && page.subpages.length
       ? { subpages: page.subpages.map((subpage: any) => pageNavigationMetadata(subpage)) }
       : {}),
@@ -2185,15 +2184,6 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       <label class="check">
                         <input
                           type="checkbox"
-                          .checked=${selectedPage.icon_only === true}
-                          @change=${(ev: Event) =>
-                            this._updatePage(this._selectedPageIndex, "icon_only", (ev.target as HTMLInputElement).checked)}
-                        />
-                        Nur Icon
-                      </label>
-                      <label class="check">
-                        <input
-                          type="checkbox"
                           .checked=${selectedSubpages.length > 0}
                           @change=${(ev: Event) => this._setPageSubmenuEnabled((ev.target as HTMLInputElement).checked)}
                         />
@@ -2310,19 +2300,6 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                                   </label>
                                 `
                               : nothing}
-                            <label class="check">
-                              <input
-                                type="checkbox"
-                                .checked=${selectedSubPage.icon_only === true}
-                                @change=${(ev: Event) =>
-                                  this._updateSubPage(
-                                    this._selectedSubPageIndex,
-                                    "icon_only",
-                                    (ev.target as HTMLInputElement).checked
-                                  )}
-                              />
-                              Nur Icon
-                            </label>
                           `
                         : html`<p class="empty">Noch kein Subbutton angelegt.</p>`}
                     </div>

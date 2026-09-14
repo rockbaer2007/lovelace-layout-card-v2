@@ -175,7 +175,6 @@ export interface DashboardLayoutMenuConfig {
 export interface DashboardLayoutPageConfig {
   title?: string;
   icon?: string;
-  icon_only?: boolean;
   subpages?: Array<DashboardLayoutPageConfig>;
   type?: string;
   path?: string;

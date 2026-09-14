@@ -378,7 +378,7 @@ class DashboardLayoutCardV2 extends LitElement {
 
     return html`
       <button
-        class=${`${index === this._activePage && this._activeSubPage < 0 ? "active" : ""}${page.icon_only ? " item-icon-only" : ""}`}
+        class=${index === this._activePage && this._activeSubPage < 0 ? "active" : ""}
         type="button"
         aria-label=${pageTitle(page)}
         title=${pageTitle(page)}
@@ -392,14 +392,21 @@ class DashboardLayoutCardV2 extends LitElement {
     `;
   }
 
+  _activeSubPages() {
+    const mainPage = this._activeMainPageConfig;
+    return Array.isArray(mainPage?.subpages) ? mainPage.subpages : [];
+  }
+
   _renderSubMenu() {
     const mainPage = this._activeMainPageConfig;
-    const subpages = Array.isArray(mainPage?.subpages) ? mainPage.subpages : [];
+    const subpages = this._activeSubPages();
     if (!subpages.length) return html``;
     return html`
-      <div class="submenu-pages" aria-label=${`${pageTitle(mainPage)} Untermenü`}>
-        ${subpages.map((page, index) => this._renderSubMenuItem(page, index))}
-      </div>
+      <nav class="submenu" aria-label=${`${pageTitle(mainPage)} Untermenü`}>
+        <div class="submenu-pages">
+          ${subpages.map((page, index) => this._renderSubMenuItem(page, index))}
+        </div>
+      </nav>
     `;
   }
 
@@ -407,7 +414,7 @@ class DashboardLayoutCardV2 extends LitElement {
     if (isMenuOnlyPage(page)) return html``;
     return html`
       <button
-        class=${`${index === this._activeSubPage ? "active" : ""}${page.icon_only ? " item-icon-only" : ""}`}
+        class=${index === this._activeSubPage ? "active" : ""}
         type="button"
         aria-label=${pageTitle(page)}
         title=${pageTitle(page)}
@@ -472,7 +479,6 @@ class DashboardLayoutCardV2 extends LitElement {
         <div class="menu-pages">
           ${this._pages.map((page, index) => this._renderMenuItem(page, index))}
         </div>
-        ${this._renderSubMenu()}
         <div class="menu-bottom">
           ${this._renderNotify(menu)}
           ${this._renderStatus(menu)}
@@ -500,10 +506,16 @@ class DashboardLayoutCardV2 extends LitElement {
     const menu = normalizeMenu(this._config.menu);
     const position = this._menuPosition(menu);
     const iconOnly = menu.icon_only === true;
+    const hasSubmenu = this._activeSubPages().length > 0;
     return html`
-      <ha-card class=${`dashboard-layout-card menu-${position}${iconOnly ? " menu-icon-only" : ""}`} style=${this._contentStyle(menu)}>
+      <ha-card
+        class=${`dashboard-layout-card menu-${position}${iconOnly ? " menu-icon-only" : ""}${hasSubmenu ? " has-submenu" : ""}`}
+        style=${this._contentStyle(menu)}
+      >
         ${position === "left" ? this._renderMenu(menu) : ""}
+        ${position === "left" ? this._renderSubMenu() : ""}
         <main class="page">${this._layoutElement}</main>
+        ${position === "right" ? this._renderSubMenu() : ""}
         ${position === "right" ? this._renderMenu(menu) : ""}
       </ha-card>
     `;
@@ -547,28 +559,45 @@ class DashboardLayoutCardV2 extends LitElement {
     return css`
       ha-card.dashboard-layout-card {
         display: grid;
-        grid-template-columns: minmax(148px, 220px) minmax(0, 1fr);
+        grid-template-columns: minmax(132px, 196px) minmax(0, 1fr);
         min-height: 320px;
         overflow: hidden;
       }
 
       ha-card.menu-right {
-        grid-template-columns: minmax(0, 1fr) minmax(148px, 220px);
+        grid-template-columns: minmax(0, 1fr) minmax(132px, 196px);
+      }
+
+      ha-card.has-submenu {
+        grid-template-columns: minmax(132px, 196px) 64px minmax(0, 1fr);
+      }
+
+      ha-card.menu-right.has-submenu {
+        grid-template-columns: minmax(0, 1fr) 64px minmax(132px, 196px);
       }
 
       ha-card.menu-icon-only {
-        grid-template-columns: minmax(58px, 76px) minmax(0, 1fr);
+        grid-template-columns: 64px minmax(0, 1fr);
+      }
+
+      ha-card.menu-icon-only.has-submenu {
+        grid-template-columns: 64px 64px minmax(0, 1fr);
       }
 
       ha-card.menu-right.menu-icon-only {
-        grid-template-columns: minmax(0, 1fr) minmax(58px, 76px);
+        grid-template-columns: minmax(0, 1fr) 64px;
+      }
+
+      ha-card.menu-right.menu-icon-only.has-submenu {
+        grid-template-columns: minmax(0, 1fr) 64px 64px;
       }
 
       ha-card.menu-none {
         display: block;
       }
 
-      .menu {
+      .menu,
+      .submenu {
         display: flex;
         flex-direction: column;
         gap: 12px;
@@ -581,6 +610,17 @@ class DashboardLayoutCardV2 extends LitElement {
       }
 
       ha-card.menu-right .menu {
+        border-right: 0;
+        border-left: 1px solid var(--divider-color);
+      }
+
+      .submenu {
+        border-right: 1px solid var(--divider-color);
+        border-left: 0;
+        padding-inline: 8px;
+      }
+
+      ha-card.menu-right .submenu {
         border-right: 0;
         border-left: 1px solid var(--divider-color);
       }
@@ -690,9 +730,7 @@ class DashboardLayoutCardV2 extends LitElement {
       }
 
       .submenu-pages {
-        margin-left: 14px;
-        padding-left: 10px;
-        border-left: 1px solid var(--dashboard-layout-v2-tab-border-color, var(--divider-color));
+        align-content: start;
       }
 
       .menu-spacer {
@@ -779,15 +817,12 @@ class DashboardLayoutCardV2 extends LitElement {
       }
 
       .menu.icon-only .menu-page-label,
-      .menu-pages button.item-icon-only .menu-page-label,
-      .submenu-pages button.item-icon-only .menu-page-label {
+      .submenu-pages .menu-page-label {
         display: none;
       }
 
       .menu.icon-only .menu-pages button,
-      .menu.icon-only .submenu-pages button,
-      .menu-pages button.item-icon-only,
-      .submenu-pages button.item-icon-only {
+      .submenu-pages button {
         justify-content: center;
         min-height: 44px;
         width: 48px;
@@ -798,13 +833,11 @@ class DashboardLayoutCardV2 extends LitElement {
       }
 
       .menu.icon-only .mobile-fallback-icon,
-      .menu-pages button.item-icon-only .mobile-fallback-icon,
-      .submenu-pages button.item-icon-only .mobile-fallback-icon {
+      .submenu-pages .mobile-fallback-icon {
         display: inline-grid;
       }
 
-      .menu-pages button.item-icon-only .menu-icon-field,
-      .submenu-pages button.item-icon-only .menu-icon-field {
+      .submenu-pages .menu-icon-field {
         min-width: 0;
       }
 
@@ -824,10 +857,8 @@ class DashboardLayoutCardV2 extends LitElement {
           display: inline-grid;
         }
 
-        .submenu-pages {
-          margin-left: 0;
-          padding-left: 0;
-          border-left: 0;
+        .submenu {
+          padding-inline: 8px;
         }
       }
 
