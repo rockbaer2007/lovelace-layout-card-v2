@@ -106,6 +106,7 @@ export interface DashboardLayoutMenuConfig {
   position?: DashboardLayoutMenuPosition;
   title?: string;
   show_home?: boolean;
+  icon_only?: boolean;
   home?: {
     title?: string;
     path?: string;

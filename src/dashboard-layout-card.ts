@@ -369,6 +369,7 @@ class DashboardLayoutCardV2 extends LitElement {
   _renderMenu(menu: DashboardLayoutMenuConfig) {
     if (this._menuPosition(menu) === "none") return html``;
     const style = menu.style ?? {};
+    const iconOnly = menu.icon_only === true;
     const background =
       style.background_mode === "color" && style.background_color
         ? style.background_color
@@ -377,7 +378,7 @@ class DashboardLayoutCardV2 extends LitElement {
           : "";
     return html`
       <nav
-        class="menu"
+        class=${`menu${iconOnly ? " icon-only" : ""}`}
         aria-label="Dashboard pages"
         style=${[
           style.icon_color ? `--dashboard-layout-v2-icon-color: ${style.icon_color}` : "",
@@ -442,8 +443,9 @@ class DashboardLayoutCardV2 extends LitElement {
     if (!this._config) return html``;
     const menu = normalizeMenu(this._config.menu);
     const position = this._menuPosition(menu);
+    const iconOnly = menu.icon_only === true;
     return html`
-      <ha-card class=${`dashboard-layout-card menu-${position}`} style=${this._contentStyle(menu)}>
+      <ha-card class=${`dashboard-layout-card menu-${position}${iconOnly ? " menu-icon-only" : ""}`} style=${this._contentStyle(menu)}>
         ${position === "left" ? this._renderMenu(menu) : ""}
         <main class="page">${this._layoutElement}</main>
         ${position === "right" ? this._renderMenu(menu) : ""}
@@ -463,6 +465,7 @@ class DashboardLayoutCardV2 extends LitElement {
         clock: "digital",
         date: true,
         weekday: "none",
+        icon_only: false,
       },
       chrome: {
         hide_ha_chrome: false,
@@ -495,6 +498,14 @@ class DashboardLayoutCardV2 extends LitElement {
 
       ha-card.menu-right {
         grid-template-columns: minmax(0, 1fr) minmax(148px, 220px);
+      }
+
+      ha-card.menu-icon-only {
+        grid-template-columns: minmax(58px, 76px) minmax(0, 1fr);
+      }
+
+      ha-card.menu-right.menu-icon-only {
+        grid-template-columns: minmax(0, 1fr) minmax(58px, 76px);
       }
 
       ha-card.menu-none {
@@ -698,6 +709,21 @@ class DashboardLayoutCardV2 extends LitElement {
 
       .mobile-fallback-icon {
         display: none;
+      }
+
+      .menu.icon-only .menu-page-label {
+        display: none;
+      }
+
+      .menu.icon-only .menu-pages button {
+        justify-content: center;
+        min-height: 44px;
+        gap: 0;
+        padding-inline: 8px;
+      }
+
+      .menu.icon-only .mobile-fallback-icon {
+        display: inline-grid;
       }
 
       @media (max-width: 600px) {
