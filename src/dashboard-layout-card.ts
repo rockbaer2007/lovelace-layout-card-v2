@@ -206,6 +206,16 @@ class DashboardLayoutCardV2 extends LitElement {
 
   async _selectPage(index: number) {
     if (isMenuOnlyPage(this._config.pages[index])) return;
+    const page = this._config.pages[index];
+    if (page?.hide_submenu_parent === true && Array.isArray(page.subpages)) {
+      const firstSubpageIndex = page.subpages.findIndex((subpage) => !isMenuOnlyPage(subpage));
+      if (firstSubpageIndex >= 0) {
+        this._activePage = index;
+        this._activeSubPage = firstSubpageIndex;
+        await this._createActivePageLayout();
+        return;
+      }
+    }
     if (index === this._activePage && this._activeSubPage < 0) return;
     this._activePage = index;
     this._activeSubPage = -1;

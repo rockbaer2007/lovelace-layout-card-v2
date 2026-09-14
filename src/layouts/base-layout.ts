@@ -256,6 +256,14 @@ export class BaseLayout extends LitElement {
     window.dispatchEvent(new Event("location-changed"));
   }
 
+  _dashboardLayoutV2MenuTargetPath(page: any) {
+    if (page?.hide_submenu_parent === true && Array.isArray(page.subpages)) {
+      const firstSubpage = page.subpages.find((subpage: any) => !isDashboardLayoutV2MenuOnlyPage(subpage));
+      if (firstSubpage?.path) return firstSubpage.path;
+    }
+    return page?.path;
+  }
+
   _dashboardLayoutV2CurrentPath() {
     return decodeURIComponent(location.pathname.split("/").filter(Boolean).pop() ?? "");
   }
@@ -311,7 +319,7 @@ export class BaseLayout extends LitElement {
         class=${dashboardLayoutV2PageMatchesPath(page, currentPath) ? "active" : ""}
         aria-label=${dashboardLayoutV2PageTitle(page)}
         title=${dashboardLayoutV2PageTitle(page)}
-        @click=${() => this._navigateDashboardLayoutV2Page(page.path)}
+        @click=${() => this._navigateDashboardLayoutV2Page(this._dashboardLayoutV2MenuTargetPath(page))}
       >
         ${page.icon
           ? html`<span class="dashboard-layout-v2-menu-icon-field"><ha-icon class="dashboard-layout-v2-menu-icon" .icon=${page.icon}></ha-icon></span>`
