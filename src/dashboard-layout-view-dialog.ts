@@ -569,7 +569,20 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         viewsByPath.get(pagePath(cleanPage, index)) ??
         viewsByTitle.get(normalizedTitle(cleanPage.title)) ??
         rawViews[index + 1];
-      return this._mergePageWithView(cleanPage, matchingView);
+      const mergedPage = this._mergePageWithView(cleanPage, matchingView);
+      if (!Array.isArray(cleanPage.subpages)) return mergedPage;
+
+      return {
+        ...mergedPage,
+        subpages: cleanPage.subpages.map((subpage: any, subIndex: number) => {
+          const cleanSubpage = pageWithoutRecursiveDashboardLayout(subpage);
+          if (isMenuOnlyPage(cleanSubpage)) return cleanSubpage;
+          const matchingSubView =
+            viewsByPath.get(pagePath(cleanSubpage, subIndex)) ??
+            viewsByTitle.get(normalizedTitle(cleanSubpage.title));
+          return this._mergePageWithView(cleanSubpage, matchingSubView);
+        }),
+      };
     });
     this._pageSourcePaths = this._pages.map((page, index) =>
       isMenuOnlyPage(page) ? undefined : pagePath(page, index)
