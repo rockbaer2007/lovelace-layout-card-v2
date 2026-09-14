@@ -1553,6 +1553,16 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       const sourcePath = this._pageSourcePaths[index];
       if (sourcePath) relatedPaths.add(sourcePath);
     });
+    const normalizedPageEntries = normalizedPages.flatMap((page, pageIndex) => {
+      const entries = [{ page, pageIndex, sourcePath: this._pageSourcePaths[pageIndex] }];
+      if (Array.isArray(page.subpages)) {
+        page.subpages.forEach((subpage: any) => {
+          entries.push({ page: subpage, pageIndex, sourcePath: undefined });
+          if (!isMenuOnlyPage(subpage)) relatedPaths.add(String(subpage.path));
+        });
+      }
+      return entries;
+    });
     const nextViews = views.map((view, index) => {
       const viewPath = String(view.path ?? index);
       const isHomeView = viewPath === currentPath || viewPath === homePath || (index === this.viewIndex && !view.subview);
@@ -1581,11 +1591,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       return applyHomeSectionsOptions(applyInheritedTheme(nextView, isHomeView ? homePath : viewPath), isHomeView);
     });
 
-    for (const [pageIndex, page] of normalizedPages.entries()) {
+    for (const { page, sourcePath } of normalizedPageEntries) {
       if (isMenuOnlyPage(page)) continue;
 
       const pagePath = String(page.path);
-      const sourcePath = this._pageSourcePaths[pageIndex];
       const existing = sourcePath
         ? existingViewsByPath.get(sourcePath) ?? existingViewsByPath.get(pagePath)
         : existingViewsByPath.get(pagePath);

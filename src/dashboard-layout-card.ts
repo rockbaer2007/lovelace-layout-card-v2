@@ -790,14 +790,22 @@ class DashboardLayoutCardV2 extends LitElement {
       .submenu-pages button.item-icon-only {
         justify-content: center;
         min-height: 44px;
+        width: 48px;
+        max-width: 48px;
+        justify-self: center;
         gap: 0;
-        padding-inline: 8px;
+        padding-inline: 6px;
       }
 
       .menu.icon-only .mobile-fallback-icon,
       .menu-pages button.item-icon-only .mobile-fallback-icon,
       .submenu-pages button.item-icon-only .mobile-fallback-icon {
         display: inline-grid;
+      }
+
+      .menu-pages button.item-icon-only .menu-icon-field,
+      .submenu-pages button.item-icon-only .menu-icon-field {
+        min-width: 0;
       }
 
       @media (max-width: 600px) {
