@@ -74,6 +74,13 @@ function helperActive(hass: any, entityId?: string) {
   return Boolean(value) && !["off", "false", "0", "unknown", "unavailable", "none"].includes(value);
 }
 
+function colorWithOpacity(color?: string, opacity?: number) {
+  const value = String(color ?? "").trim();
+  if (!value || value === "transparent") return value;
+  const percent = Math.max(0, Math.min(100, Number(opacity ?? 100)));
+  return `color-mix(in srgb, ${value} ${percent}%, transparent)`;
+}
+
 class DashboardLayoutCardV2 extends LitElement {
   @property() hass;
   @property() editMode = false;
@@ -532,7 +539,7 @@ class DashboardLayoutCardV2 extends LitElement {
           style.active_tab_text_color ? `--dashboard-layout-v2-active-tab-text-color: ${style.active_tab_text_color}` : "",
           style.inactive_tab_text_color ? `--dashboard-layout-v2-inactive-tab-text-color: ${style.inactive_tab_text_color}` : "",
           style.hover_tab_text_color ? `--dashboard-layout-v2-hover-tab-text-color: ${style.hover_tab_text_color}` : "",
-          style.tab_border_color ? `--dashboard-layout-v2-tab-border-color: ${style.tab_border_color}` : "",
+          style.tab_border_color ? `--dashboard-layout-v2-tab-border-color: ${colorWithOpacity(style.tab_border_color, style.tab_border_opacity)}` : "",
           style.tab_shadow_frame_color ? `--dashboard-layout-v2-tab-shadow-frame-color: ${style.tab_shadow_frame_color}` : "",
           style.shadow_frame_offset ? `--dashboard-layout-v2-shadow-frame-offset: ${style.shadow_frame_offset}` : "",
           style.clock_size ? `--dashboard-layout-v2-clock-size: ${style.clock_size}` : "",
@@ -567,9 +574,11 @@ class DashboardLayoutCardV2 extends LitElement {
   _contentStyle(menu: DashboardLayoutMenuConfig) {
     const style = menu.style ?? {};
     return [
-      style.card_border_color ? `--dashboard-layout-v2-card-border-color: ${style.card_border_color}` : "",
-      style.card_border_color ? `--ha-card-border-color: ${style.card_border_color}` : "",
+      style.card_border_color ? `--dashboard-layout-v2-card-border-color: ${colorWithOpacity(style.card_border_color, style.card_border_opacity)}` : "",
+      style.card_border_color ? `--ha-card-border-color: ${colorWithOpacity(style.card_border_color, style.card_border_opacity)}` : "",
       style.card_border_color ? "--ha-card-border-width: 1px" : "",
+      "--dashboard-layout-v2-icon-column-width: max(64px, calc(var(--dashboard-layout-v2-icon-size, 20px) + 36px))",
+      style.icon_size ? `--dashboard-layout-v2-icon-size: ${style.icon_size}` : "",
       style.shadow_frame_color ? `--dashboard-layout-v2-shadow-frame-color: ${style.shadow_frame_color}` : "",
       style.shadow_frame_offset ? `--dashboard-layout-v2-shadow-frame-offset: ${style.shadow_frame_offset}` : "",
       style.shadow_frame_color

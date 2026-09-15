@@ -152,8 +152,10 @@ export interface DashboardLayoutMenuConfig {
     inactive_tab_text_color?: string;
     hover_tab_text_color?: string;
     tab_border_color?: string;
+    tab_border_opacity?: number;
     tab_shadow_frame_color?: string;
     card_border_color?: string;
+    card_border_opacity?: number;
     shadow_frame_color?: string;
     shadow_frame_offset?: string;
     clock_size?: string;

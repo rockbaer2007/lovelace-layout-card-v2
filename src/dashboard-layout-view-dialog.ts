@@ -58,8 +58,10 @@ const defaultConfig = {
       inactive_tab_text_color: "",
       hover_tab_text_color: "",
       tab_border_color: "",
+      tab_border_opacity: 100,
       tab_shadow_frame_color: "",
       card_border_color: "",
+      card_border_opacity: 100,
       shadow_frame_color: "",
       shadow_frame_offset: "4px",
       clock_size: "44px",
@@ -323,6 +325,12 @@ function normalizedIconSize(value: string) {
   return `${Math.max(14, Math.min(36, size))}px`;
 }
 
+function normalizedOpacity(value: any) {
+  const opacity = Number(String(value ?? 100).replace(/[^\d.]/g, ""));
+  if (!Number.isFinite(opacity)) return 100;
+  return Math.max(0, Math.min(100, Math.round(opacity)));
+}
+
 function normalizedShadowFrameOffset(value: string) {
   const size = Number(clockSizeInputValue(value));
   if (!Number.isFinite(size) || size <= 0) return "4px";
@@ -415,8 +423,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _inactiveTabTextColor = "";
   @state() private _hoverTabTextColor = "";
   @state() private _tabBorderColor = "";
+  @state() private _tabBorderOpacity = 100;
   @state() private _tabShadowFrameColor = "";
   @state() private _cardBorderColor = "";
+  @state() private _cardBorderOpacity = 100;
   @state() private _shadowFrameColor = "";
   @state() private _shadowFrameOffset = "4";
   @state() private _clockSize = "44";
@@ -508,8 +518,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._inactiveTabTextColor = config.menu.style?.inactive_tab_text_color ?? "";
     this._hoverTabTextColor = config.menu.style?.hover_tab_text_color ?? "";
     this._tabBorderColor = config.menu.style?.tab_border_color ?? "";
+    this._tabBorderOpacity = normalizedOpacity(config.menu.style?.tab_border_opacity);
     this._tabShadowFrameColor = config.menu.style?.tab_shadow_frame_color ?? "";
     this._cardBorderColor = config.menu.style?.card_border_color ?? "";
+    this._cardBorderOpacity = normalizedOpacity(config.menu.style?.card_border_opacity);
     this._shadowFrameColor = config.menu.style?.shadow_frame_color ?? "";
     this._shadowFrameOffset = clockSizeInputValue(config.menu.style?.shadow_frame_offset ?? "4px");
     this._clockSize = clockSizeInputValue(config.menu.style?.clock_size ?? "44px");
@@ -636,8 +648,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "inactiveTabTextColor") this._inactiveTabTextColor = value;
     if (key === "hoverTabTextColor") this._hoverTabTextColor = value;
     if (key === "tabBorderColor") this._tabBorderColor = value;
+    if (key === "tabBorderOpacity") this._tabBorderOpacity = normalizedOpacity(value);
     if (key === "tabShadowFrameColor") this._tabShadowFrameColor = value;
     if (key === "cardBorderColor") this._cardBorderColor = value;
+    if (key === "cardBorderOpacity") this._cardBorderOpacity = normalizedOpacity(value);
     if (key === "shadowFrameColor") this._shadowFrameColor = value;
     if (key === "shadowFrameOffset") this._shadowFrameOffset = value;
     if (key === "clockSize") this._clockSize = value;
@@ -1523,8 +1537,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           inactive_tab_text_color: this._inactiveTabTextColor,
           hover_tab_text_color: this._hoverTabTextColor,
           tab_border_color: this._tabBorderColor,
+          tab_border_opacity: this._tabBorderOpacity,
           tab_shadow_frame_color: this._tabShadowFrameColor,
           card_border_color: this._cardBorderColor,
+          card_border_opacity: this._cardBorderOpacity,
           shadow_frame_color: this._shadowFrameColor,
           shadow_frame_offset: normalizedShadowFrameOffset(this._shadowFrameOffset),
           clock_size: normalizedClockSize(this._clockSize),
@@ -2510,8 +2526,36 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               ${this._renderColorField("Hover Farbe", "hoverTabColor", this._hoverTabColor, "var(--secondary-background-color)")}
               ${this._renderColorField("Hover Text", "hoverTabTextColor", this._hoverTabTextColor, "var(--primary-text-color)")}
               ${this._renderColorField("Tabumrandung", "tabBorderColor", this._tabBorderColor, "transparent")}
+              <label class="wide-style">
+                Menü-Rahmen Opacity
+                <div class="range-row">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="1"
+                    .value=${String(this._tabBorderOpacity)}
+                    @input=${(ev: Event) => this._setValue("tabBorderOpacity", (ev.target as HTMLInputElement).value)}
+                  />
+                  <span>${this._tabBorderOpacity}%</span>
+                </div>
+              </label>
               ${this._renderColorField("3D-Effekt Tab", "tabShadowFrameColor", this._tabShadowFrameColor, "transparent")}
               ${this._renderColorField("Cardumrandung", "cardBorderColor", this._cardBorderColor, "transparent")}
+              <label class="wide-style">
+                Card-/Inhaltsrahmen Opacity
+                <div class="range-row">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="1"
+                    .value=${String(this._cardBorderOpacity)}
+                    @input=${(ev: Event) => this._setValue("cardBorderOpacity", (ev.target as HTMLInputElement).value)}
+                  />
+                  <span>${this._cardBorderOpacity}%</span>
+                </div>
+              </label>
               ${this._renderColorField("3D-Effekt Card", "shadowFrameColor", this._shadowFrameColor, "transparent")}
               <label class="wide-style">
                 3D-Versatz
