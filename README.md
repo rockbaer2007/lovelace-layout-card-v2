@@ -27,6 +27,8 @@ layout-card without overwriting it.
 - Each home, menu and submenu entry has a "Use global colors" reset action
   with confirmation. It only clears the individual color overrides of that one
   entry.
+- The editor can export the current dashboard configuration as a YAML backup
+  file without writing anything back to Home Assistant.
 - Supports non-clickable menu spacers and rounded divider bars.
 - Divider bars support their own color, opacity and optional 3D frame color.
 - Supports an optional notification box above the side-menu status values, and
@@ -267,6 +269,7 @@ dashboard settings are available from the view editor and allow editing:
 - optional per-entry icon color, active icon color, icon background, active icon
   background and button background colors, including the home entry
 - per-entry reset action for returning one button to the global colors
+- YAML backup export from the Advanced tab
 - tab, text, hover, icon and background colors
 - tab/view borders with separate opacity controls and separate 3D frame colors
 - optional submenu for a selected main menu entry, rendered as compact icon

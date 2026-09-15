@@ -328,6 +328,54 @@ function normalizedDateSize(value: string) {
   return `${Math.max(8, Math.min(48, size))}px`;
 }
 
+function yamlScalar(value: any) {
+  if (value === null || value === undefined) return "null";
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  const text = String(value);
+  if (!text) return '""';
+  if (/^[A-Za-z0-9_./:@#%+-]+$/.test(text) && !["true", "false", "null", "yes", "no", "on", "off"].includes(text.toLowerCase())) {
+    return text;
+  }
+  return JSON.stringify(text);
+}
+
+function yamlDump(value: any, indent = 0): string {
+  const space = " ".repeat(indent);
+  if (Array.isArray(value)) {
+    if (!value.length) return `${space}[]\n`;
+    return value.map((item) => {
+      if (item && typeof item === "object") {
+        const nested = yamlDump(item, indent + 2).trimEnd();
+        return `${space}- ${nested.slice(indent + 2)}\n`;
+      }
+      return `${space}- ${yamlScalar(item)}\n`;
+    }).join("");
+  }
+  if (value && typeof value === "object") {
+    const entries = Object.entries(value).filter(([, entryValue]) => entryValue !== undefined);
+    if (!entries.length) return `${space}{}\n`;
+    return entries.map(([key, entryValue]) => {
+      if (entryValue && typeof entryValue === "object") {
+        return `${space}${key}:\n${yamlDump(entryValue, indent + 2)}`;
+      }
+      return `${space}${key}: ${yamlScalar(entryValue)}\n`;
+    }).join("");
+  }
+  return `${space}${yamlScalar(value)}\n`;
+}
+
+function downloadTextFile(filename: string, content: string, mimeType: string) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 function normalizedDaySymbolSize(value: string) {
   const size = Number(clockSizeInputValue(value));
   if (!Number.isFinite(size) || size <= 0) return "32px";
@@ -1571,7 +1619,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     }
   }
 
-  private async _save() {
+  private _pagesForCurrentEditorState() {
     let pagesForSave = this._pages;
     try {
       const parsed = JSON.parse(this._pagesText || "[]");
@@ -1580,15 +1628,16 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         pagesForSave = parsed;
       }
     } catch (err: any) {
-      this._error = err?.message || "Pages konnten nicht gelesen werden.";
-      return;
+      throw new Error(err?.message || "Pages konnten nicht gelesen werden.");
     }
+    return pagesForSave;
+  }
 
+  private _buildExportConfig(pagesForSave = this._pages) {
     const rawConfig = this.lovelace?.rawConfig ?? this.lovelace?.config;
     const views = rawConfig?.views;
     if (!Array.isArray(views) || !views[this.viewIndex]) {
-      this._error = "Aktuelle View konnte nicht gefunden werden.";
-      return;
+      throw new Error("Aktuelle View konnte nicht gefunden werden.");
     }
 
     const normalizedPages = pagesForSave.map((page, index) => this._normalizePage(page, index));
@@ -1811,13 +1860,43 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       }
     }
 
-    const nextConfig = {
+    return {
       ...rawConfig,
       views: nextViews,
     };
+  }
+
+  private async _save() {
+    let nextConfig;
+    try {
+      nextConfig = this._buildExportConfig(this._pagesForCurrentEditorState());
+    } catch (err: any) {
+      this._error = err?.message || "Dashboard konnte nicht vorbereitet werden.";
+      return;
+    }
 
     await this.lovelace.saveConfig(nextConfig);
     this._close();
+  }
+
+  private _exportDashboardYaml() {
+    try {
+      const exportConfig = this._buildExportConfig(this._pagesForCurrentEditorState());
+      const now = new Date();
+      const stamp = [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, "0"),
+        String(now.getDate()).padStart(2, "0"),
+        String(now.getHours()).padStart(2, "0"),
+        String(now.getMinutes()).padStart(2, "0"),
+      ].join("-");
+      const homePath = slugifyPath(this._homePath || "dashboard") || "dashboard";
+      const filename = `dashboard-layout-v2-${homePath}-backup-${stamp}.yaml`;
+      downloadTextFile(filename, yamlDump(exportConfig), "application/x-yaml;charset=utf-8");
+      this._error = "";
+    } catch (err: any) {
+      this._error = err?.message || "Dashboard YAML konnte nicht exportiert werden.";
+    }
   }
 
   private _selectTab(tab: DashboardLayoutDialogTab) {
@@ -2848,6 +2927,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
           <details class="wide json-box settings-panel" data-tab="advanced" ?open=${this._jsonExpanded} @toggle=${(ev: Event) => (this._jsonExpanded = (ev.target as HTMLDetailsElement).open)}>
             <summary>Spezialoptionen / JSON bearbeiten</summary>
+            <p class="hint">
+              Exportiert den aktuellen Editorstand als YAML-Datei auf deinen PC. Home Assistant wird dabei nicht verändert.
+            </p>
+            <button type="button" @click=${this._exportDashboardYaml}>Dashboard YAML exportieren</button>
             <textarea
               .value=${this._pagesText}
               @input=${(ev: Event) => this._setValue("pagesText", (ev.target as HTMLTextAreaElement).value)}
