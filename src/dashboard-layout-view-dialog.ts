@@ -1477,13 +1477,19 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
   private _resetSubPageColors(index: number) {
     if (!window.confirm("Farben dieses Subbuttons auf globale Werte zurücksetzen?")) return;
-    const subpages = this._selectedSubpages().map((page, pageIndex) => {
-      if (pageIndex !== index) return page;
-      const next = { ...page };
-      PAGE_COLOR_KEYS.forEach((key) => delete next[key]);
-      return next;
+    this._pages = this._pages.map((page, pageIndex) => {
+      if (pageIndex !== this._selectedPageIndex || !Array.isArray(page?.subpages)) return page;
+      return {
+        ...page,
+        subpages: page.subpages.map((subpage: any, subpageIndex: number) => {
+          if (subpageIndex !== index) return subpage;
+          const next = { ...subpage };
+          PAGE_COLOR_KEYS.forEach((key) => delete next[key]);
+          return next;
+        }),
+      };
     });
-    this._setSelectedSubpages(subpages);
+    this._syncJsonFromPages();
   }
 
   private _updateSubPageLayout(index: number, value: string) {
