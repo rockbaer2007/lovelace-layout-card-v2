@@ -286,6 +286,31 @@ dashboard settings are available from the view editor and allow editing:
 The JSON section in the editor is optional and meant for advanced page edits.
 Normal tab changes should be done through the form fields.
 
+## Per-entry menu colors and YAML backup
+
+The Home entry, every main menu entry and every submenu entry can define its own
+optional color overrides. Empty values fall back to the global menu style.
+
+Supported per-entry fields:
+
+```yaml
+icon_color: "#fbff00"
+icon_active_color: "#ffffff"
+icon_background_color: ""
+icon_background_active_color: ""
+tab_color: ""
+active_tab_color: "#333aff"
+```
+
+In the editor, the **Globale Farben verwenden** action clears only these six
+color fields for the selected Home, main menu or submenu button. It does not
+change the page, subpage, layout, icon, path or global colors.
+
+The **Dashboard YAML exportieren** action in the Advanced tab downloads the
+current editor state as a `.yaml` backup file to the local computer. It does not
+write anything back to Home Assistant and is intended as a quick safety backup
+before testing larger menu, color or layout changes.
+
 ## Background Images
 
 Menu background images should be stored in Home Assistant's `www` folder and
