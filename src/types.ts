@@ -184,6 +184,7 @@ export interface DashboardLayoutPageConfig {
   path?: string;
   color?: string;
   shadow_frame_color?: string;
+  divider_opacity?: number;
   height?: string;
   layout_type?: string;
   layout?: any;

@@ -21,7 +21,7 @@ layout-card without overwriting it.
   menu entry. The first submenu button can act as the home button for that main
   entry, or the main entry can jump directly to the first submenu page.
 - Supports non-clickable menu spacers and rounded divider bars.
-- Divider bars support their own color and optional 3D frame color.
+- Divider bars support their own color, opacity and optional 3D frame color.
 - Supports an optional notification box above the side-menu status values, and
   switches to a compact popup notification button in icon-only mode.
 - Supports an optional bottom menu status list with up to four read-only entity values.
@@ -193,6 +193,7 @@ views:
           - type: divider
             color: "#ffffff"
             shadow_frame_color: "transparent"
+            divider_opacity: 100
           - title: Erdgeschoss
             path: erdgeschoss
             icon: mdi:view-dashboard
@@ -243,6 +244,7 @@ dashboard settings are available from the view editor and allow editing:
 - tab pages and their layouts; new pages default to Sections V2
 - moving Sections V2 sections with the three-line handle in edit mode
 - new divider entries inherit colors from the previous divider
+- divider entries support color, 3D frame color, opacity and height
 - tab, text, hover, icon and background colors
 - tab/view borders with separate opacity controls and separate 3D frame colors
 - optional submenu for a selected main menu entry, rendered as compact icon

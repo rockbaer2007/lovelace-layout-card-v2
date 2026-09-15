@@ -311,8 +311,8 @@ export class BaseLayout extends LitElement {
         <div
           class="dashboard-layout-v2-menu-divider"
           style=${[
-            `--dashboard-layout-v2-divider-color: ${page.color || "#ffffff"}`,
-            `--dashboard-layout-v2-divider-shadow-frame-color: ${page.shadow_frame_color || "transparent"}`,
+            `--dashboard-layout-v2-divider-color: ${dashboardLayoutV2ColorWithOpacity(page.color || "#ffffff", page.divider_opacity)}`,
+            `--dashboard-layout-v2-divider-shadow-frame-color: ${dashboardLayoutV2ColorWithOpacity(page.shadow_frame_color || "transparent", page.divider_opacity)}`,
             `--dashboard-layout-v2-divider-height: ${page.height || "4px"}`,
           ].join(";")}
           aria-hidden="true"

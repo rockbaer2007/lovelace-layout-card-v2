@@ -429,8 +429,8 @@ class DashboardLayoutCardV2 extends LitElement {
         <div
           class="menu-divider"
           style=${[
-            `--dashboard-layout-v2-divider-color: ${page.color || "#ffffff"}`,
-            `--dashboard-layout-v2-divider-shadow-frame-color: ${page.shadow_frame_color || "transparent"}`,
+            `--dashboard-layout-v2-divider-color: ${colorWithOpacity(page.color || "#ffffff", page.divider_opacity)}`,
+            `--dashboard-layout-v2-divider-shadow-frame-color: ${colorWithOpacity(page.shadow_frame_color || "transparent", page.divider_opacity)}`,
             `--dashboard-layout-v2-divider-height: ${page.height || "4px"}`,
           ].join(";")}
           aria-hidden="true"

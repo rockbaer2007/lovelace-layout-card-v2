@@ -267,6 +267,7 @@ function pageNavigationMetadata(page: any) {
       type: "divider",
       color: page.color || "#ffffff",
       shadow_frame_color: page.shadow_frame_color || "transparent",
+      divider_opacity: normalizedOpacity(page.divider_opacity),
       height: normalizedDividerHeight(page.height ?? "4px"),
     };
   }
@@ -1093,6 +1094,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         type: "divider",
         color: page.color || "#ffffff",
         shadow_frame_color: page.shadow_frame_color || "transparent",
+        divider_opacity: normalizedOpacity(page.divider_opacity),
         height: normalizedDividerHeight(page.height ?? "4px"),
       };
     }
@@ -1229,6 +1231,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           type: "divider",
           color: page.color || colors.color,
           shadow_frame_color: page.shadow_frame_color || colors.shadow_frame_color,
+          divider_opacity: normalizedOpacity(page.divider_opacity ?? colors.divider_opacity),
           height: normalizedDividerHeight(page.height ?? colors.height),
         };
       }
@@ -1280,6 +1283,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     return {
       color: source?.page?.color || "#ffffff",
       shadow_frame_color: source?.page?.shadow_frame_color || "transparent",
+      divider_opacity: normalizedOpacity(source?.page?.divider_opacity),
       height: normalizedDividerHeight(source?.page?.height ?? "4px"),
     };
   }
@@ -2131,6 +2135,25 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                                       (ev.target as HTMLInputElement).value
                                     )}
                                 />
+                              </div>
+                            </label>
+                            <label class="wide-style">
+                              Trenner Opacity
+                              <div class="range-row">
+                                <input
+                                  type="range"
+                                  min="0"
+                                  max="100"
+                                  step="1"
+                                  .value=${String(normalizedOpacity(selectedPage.divider_opacity))}
+                                  @input=${(ev: Event) =>
+                                    this._updatePage(
+                                      this._selectedPageIndex,
+                                      "divider_opacity",
+                                      normalizedOpacity((ev.target as HTMLInputElement).value)
+                                    )}
+                                />
+                                <span>${normalizedOpacity(selectedPage.divider_opacity)}%</span>
                               </div>
                             </label>
                             <label class="wide-style">
