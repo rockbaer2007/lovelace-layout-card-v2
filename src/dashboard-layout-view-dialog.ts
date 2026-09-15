@@ -3228,14 +3228,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           display: grid;
           grid-template-columns: minmax(180px, 240px) 1fr;
           gap: 12px;
-          min-height: 220px;
+          min-height: min(620px, calc(100vh - 330px));
         }
 
         .page-list {
           display: grid;
           align-content: start;
           gap: 6px;
-          max-height: 300px;
+          max-height: clamp(420px, calc(100vh - 330px), 720px);
           overflow: auto;
         }
 
