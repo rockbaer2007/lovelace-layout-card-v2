@@ -98,6 +98,14 @@ const DASHBOARD_LAYOUT_V2_VIEW_TYPES = new Set([
 ]);
 const MENU_ONLY_PAGE_TYPES = new Set(["spacer", "divider"]);
 const STATUS_LABEL_MAX_LENGTH = 18;
+const PAGE_COLOR_KEYS = [
+  "icon_color",
+  "icon_active_color",
+  "icon_background_color",
+  "icon_background_active_color",
+  "tab_color",
+  "active_tab_color",
+];
 
 function slugifyPath(value: string) {
   return value
@@ -1250,6 +1258,27 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._syncJsonFromPages();
   }
 
+  private _resetHomeColors() {
+    if (!window.confirm("Farben des Home-Buttons auf globale Werte zurücksetzen?")) return;
+    this._homeIconColor = "";
+    this._homeIconActiveColor = "";
+    this._homeIconBackgroundColor = "";
+    this._homeIconBackgroundActiveColor = "";
+    this._homeTabColor = "";
+    this._homeActiveTabColor = "";
+  }
+
+  private _resetPageColors(index: number) {
+    if (!window.confirm("Farben dieses Buttons auf globale Werte zurücksetzen?")) return;
+    this._pages = this._pages.map((page, pageIndex) => {
+      if (pageIndex !== index) return page;
+      const next = { ...page };
+      PAGE_COLOR_KEYS.forEach((key) => delete next[key]);
+      return next;
+    });
+    this._syncJsonFromPages();
+  }
+
   private _updatePageLayout(index: number, value: string) {
     this._pages = this._pages.map((page, pageIndex) => {
       if (pageIndex !== index) return page;
@@ -1443,6 +1472,17 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const subpages = this._selectedSubpages().map((page, pageIndex) =>
       pageIndex === index ? { ...page, [key]: value } : page
     );
+    this._setSelectedSubpages(subpages);
+  }
+
+  private _resetSubPageColors(index: number) {
+    if (!window.confirm("Farben dieses Subbuttons auf globale Werte zurücksetzen?")) return;
+    const subpages = this._selectedSubpages().map((page, pageIndex) => {
+      if (pageIndex !== index) return page;
+      const next = { ...page };
+      PAGE_COLOR_KEYS.forEach((key) => delete next[key]);
+      return next;
+    });
     this._setSelectedSubpages(subpages);
   }
 
@@ -1906,6 +1946,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                 )}
                 ${this._renderColorField("Button Farbe", "homeTabColor", this._homeTabColor, "Global")}
                 ${this._renderColorField("Button aktiv Farbe", "homeActiveTabColor", this._homeActiveTabColor, "Global")}
+                <div class="wide-style color-reset-row">
+                  <button type="button" @click=${this._resetHomeColors}>Globale Farben verwenden</button>
+                </div>
               </fieldset>
 
               <fieldset class="home-entry group wide">
@@ -2292,6 +2335,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       ${this._renderPageColorField("Button aktiv Farbe", selectedPage, "active_tab_color", (value) =>
                         this._updatePage(this._selectedPageIndex, "active_tab_color", value)
                       )}
+                      <div class="wide-style color-reset-row">
+                        <button type="button" @click=${() => this._resetPageColors(this._selectedPageIndex)}>
+                          Globale Farben verwenden
+                        </button>
+                      </div>
                       <label>
                         Layout
                         <select
@@ -2446,6 +2494,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                             ${this._renderPageColorField("Button aktiv Farbe", selectedSubPage, "active_tab_color", (value) =>
                               this._updateSubPage(this._selectedSubPageIndex, "active_tab_color", value)
                             )}
+                            <div class="wide-style color-reset-row">
+                              <button type="button" @click=${() => this._resetSubPageColors(this._selectedSubPageIndex)}>
+                                Globale Farben verwenden
+                              </button>
+                            </div>
                             <label>
                               Layout
                               <select
@@ -3290,6 +3343,15 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
         .wide-style {
           grid-column: 1 / -1;
+        }
+
+        .color-reset-row {
+          display: flex;
+          justify-content: flex-end;
+        }
+
+        .color-reset-row button {
+          width: auto;
         }
 
         .actions {

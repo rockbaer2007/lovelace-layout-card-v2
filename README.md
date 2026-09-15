@@ -24,6 +24,9 @@ layout-card without overwriting it.
   background, active icon background, inactive button background and active
   button background individually. Empty values keep using the global menu style.
 - The home menu entry supports the same individual color overrides.
+- Each home, menu and submenu entry has a "Use global colors" reset action
+  with confirmation. It only clears the individual color overrides of that one
+  entry.
 - Supports non-clickable menu spacers and rounded divider bars.
 - Divider bars support their own color, opacity and optional 3D frame color.
 - Supports an optional notification box above the side-menu status values, and
@@ -263,6 +266,7 @@ dashboard settings are available from the view editor and allow editing:
 - divider entries support color, 3D frame color, opacity and height
 - optional per-entry icon color, active icon color, icon background, active icon
   background and button background colors, including the home entry
+- per-entry reset action for returning one button to the global colors
 - tab, text, hover, icon and background colors
 - tab/view borders with separate opacity controls and separate 3D frame colors
 - optional submenu for a selected main menu entry, rendered as compact icon
