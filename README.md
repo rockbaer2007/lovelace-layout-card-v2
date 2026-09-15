@@ -269,7 +269,7 @@ dashboard settings are available from the view editor and allow editing:
 - optional per-entry icon color, active icon color, icon background, active icon
   background and button background colors, including the home entry
 - per-entry reset action for returning one button to the global colors
-- YAML backup export from the Advanced tab
+- YAML backup export from the Backup tab
 - tab, text, hover, icon and background colors
 - tab/view borders with separate opacity controls and separate 3D frame colors
 - optional submenu for a selected main menu entry, rendered as compact icon
@@ -306,7 +306,7 @@ In the editor, the **Globale Farben verwenden** action clears only these six
 color fields for the selected Home, main menu or submenu button. It does not
 change the page, subpage, layout, icon, path or global colors.
 
-The **Dashboard YAML exportieren** action in the Advanced tab downloads the
+The **Dashboard YAML exportieren** action in the Backup tab downloads the
 current editor state as a `.yaml` backup file to the local computer. It does not
 write anything back to Home Assistant and is intended as a quick safety backup
 before testing larger menu, color or layout changes.

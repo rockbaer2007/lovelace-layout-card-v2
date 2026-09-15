@@ -13,7 +13,7 @@ const DEFAULT_HOLIDAY_ENTITY = "input_boolean.dashboard_holiday";
 const DEFAULT_BIRTHDAY_ENTITY = "input_boolean.dashboard_birthday";
 const DEFAULT_CHRISTMAS_ENTITY = "input_boolean.dashboard_christmas";
 
-type DashboardLayoutDialogTab = "menu" | "display" | "pages" | "submenu" | "messages" | "style" | "advanced";
+type DashboardLayoutDialogTab = "menu" | "display" | "pages" | "submenu" | "messages" | "style" | "backup" | "advanced";
 
 const defaultConfig = {
   inherit_theme: true,
@@ -1947,6 +1947,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           ${selectedSubpages.length ? this._renderTabButton("submenu", "Submenü") : nothing}
           ${this._renderTabButton("messages", "Meldungen")}
           ${this._renderTabButton("style", "Style")}
+          ${this._renderTabButton("backup", "Backup")}
           ${this._renderTabButton("advanced", "Erweitert")}
         </nav>
 
@@ -2925,12 +2926,17 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             </div>
           </details>
 
-          <details class="wide json-box settings-panel" data-tab="advanced" ?open=${this._jsonExpanded} @toggle=${(ev: Event) => (this._jsonExpanded = (ev.target as HTMLDetailsElement).open)}>
-            <summary>Spezialoptionen / JSON bearbeiten</summary>
+          <details class="wide json-box settings-panel" data-tab="backup" open>
+            <summary>Backup</summary>
             <p class="hint">
               Exportiert den aktuellen Editorstand als YAML-Datei auf deinen PC. Home Assistant wird dabei nicht verändert.
             </p>
             <button type="button" @click=${this._exportDashboardYaml}>Dashboard YAML exportieren</button>
+            <p class="hint">Ein YAML-Import kann später hier ergänzt werden.</p>
+          </details>
+
+          <details class="wide json-box settings-panel" data-tab="advanced" ?open=${this._jsonExpanded} @toggle=${(ev: Event) => (this._jsonExpanded = (ev.target as HTMLDetailsElement).open)}>
+            <summary>Spezialoptionen / JSON bearbeiten</summary>
             <textarea
               .value=${this._pagesText}
               @input=${(ev: Event) => this._setValue("pagesText", (ev.target as HTMLTextAreaElement).value)}
@@ -3050,6 +3056,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         .content[data-active-tab="submenu"] .settings-panel:not([data-tab="submenu"]),
         .content[data-active-tab="messages"] .settings-panel:not([data-tab="messages"]),
         .content[data-active-tab="style"] .settings-panel:not([data-tab="style"]),
+        .content[data-active-tab="backup"] .settings-panel:not([data-tab="backup"]),
         .content[data-active-tab="advanced"] .settings-panel:not([data-tab="advanced"]) {
           display: none;
         }
