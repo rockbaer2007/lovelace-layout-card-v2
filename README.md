@@ -12,11 +12,18 @@ layout-card without overwriting it.
 
 - Adds V2 view layouts for Masonry, Sections, Horizontal, Vertical and Grid.
 - Adds an optional left or right dashboard tab menu for view navigation.
+- Supports automatic mobile icon-only navigation and a manual icon-only mode
+  for kiosk/tablet dashboards.
 - At viewport widths up to 600px, navigation buttons show icons only; desktop
-  keeps text labels. Pages without an icon use a dashboard icon on mobile.
+  keeps text labels unless manual icon-only mode is enabled. Pages without an
+  icon use a dashboard icon.
+- Supports an optional icon-only submenu column for the currently selected main
+  menu entry. The first submenu button can act as the home button for that main
+  entry, or the main entry can jump directly to the first submenu page.
 - Supports non-clickable menu spacers and rounded divider bars.
 - Divider bars support their own color and optional 3D frame color.
-- Supports an optional notification box above the side-menu status values.
+- Supports an optional notification box above the side-menu status values, and
+  switches to a compact popup notification button in icon-only mode.
 - Supports an optional bottom menu status list with up to four read-only entity values.
 - Supports Home Assistant-style Sections views through `custom:sections-layout-v2`.
 - Supports moving Sections V2 sections in edit mode with the Home Assistant-style
@@ -27,10 +34,10 @@ layout-card without overwriting it.
 - Lets linked subviews inherit menu style through `inherits_from`.
 - Can apply the home view theme to linked subviews while saving.
 - Supports configurable tab colors, text colors, hover colors, icon color, icon
-  background color, icon shape, tab border, view card border, separate tab and
-  view 3D frames, menu background, digital or analog clock, optional analog
-  hour marks, minute marks and seconds hand, date display, weekday display,
-  clock size and date text size.
+  background color, icon shape, tab border, view card border, border opacity,
+  separate tab and view 3D frames, menu/submenu background, digital or analog
+  clock, optional analog hour marks, minute marks and seconds hand, date
+  display, weekday display, clock size and date text size.
 - Can optionally hide the Home Assistant sidebar/header for selected dashboard
   users while keeping it visible for admins.
 
@@ -50,6 +57,13 @@ After installation, make sure Home Assistant loads:
 
 If Home Assistant still shows an older version, refresh HACS repositories,
 clear the browser cache and reload the dashboard.
+
+## Open Source
+
+Dashboard Layout Card V2 is maintained as an open-source Home Assistant
+dashboard extension. Feedback, reproducible bug reports and practical
+improvement ideas are welcome in the GitHub repository, especially for kiosk,
+tablet and wall-display setups.
 
 ## Registered Types
 
@@ -114,6 +128,7 @@ views:
           position: left
           title: Haus
           show_home: true
+          icon_only: false
           home:
             title: Home
             path: home
@@ -150,8 +165,10 @@ views:
             inactive_tab_text_color: "#000000"
             hover_tab_text_color: "#000000"
             tab_border_color: "transparent"
+            tab_border_opacity: 100
             tab_shadow_frame_color: "transparent"
             card_border_color: "transparent"
+            card_border_opacity: 100
             shadow_frame_color: "transparent"
             shadow_frame_offset: 4px
             clock_size: 96px
@@ -160,6 +177,7 @@ views:
             background_mode: none
             background_color: ""
             background_image: ""
+            submenu_background_color: ""
         chrome:
           hide_ha_chrome: true
           admin_always_visible: true
@@ -226,7 +244,9 @@ dashboard settings are available from the view editor and allow editing:
 - moving Sections V2 sections with the three-line handle in edit mode
 - new divider entries inherit colors from the previous divider
 - tab, text, hover, icon and background colors
-- tab/view borders and separate 3D frame colors
+- tab/view borders with separate opacity controls and separate 3D frame colors
+- optional submenu for a selected main menu entry, rendered as compact icon
+  buttons next to the main menu
 - shared 3D frame offset from `3px` to `10px`
 - digital or analog clock
 - analog hour marks, minute marks and seconds hand
