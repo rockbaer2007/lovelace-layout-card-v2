@@ -249,6 +249,8 @@ export class BaseLayout extends LitElement {
       icon: menu.home?.icon ?? parentHome?.icon ?? parentView?.icon ?? currentView?.icon ?? "mdi:home",
       icon_color: menu.home?.icon_color ?? parentHome?.icon_color ?? homeSourcePage?.icon_color,
       icon_active_color: menu.home?.icon_active_color ?? parentHome?.icon_active_color ?? homeSourcePage?.icon_active_color,
+      icon_background_color: menu.home?.icon_background_color ?? parentHome?.icon_background_color ?? homeSourcePage?.icon_background_color,
+      icon_background_active_color: menu.home?.icon_background_active_color ?? parentHome?.icon_background_active_color ?? homeSourcePage?.icon_background_active_color,
       tab_color: menu.home?.tab_color ?? parentHome?.tab_color ?? homeSourcePage?.tab_color,
       active_tab_color: menu.home?.active_tab_color ?? parentHome?.active_tab_color ?? homeSourcePage?.active_tab_color,
       path: homePath,
@@ -281,6 +283,8 @@ export class BaseLayout extends LitElement {
       page?.active_tab_color ? `--dashboard-layout-v2-active-tab-color: ${page.active_tab_color}` : "",
       page?.icon_color ? `--dashboard-layout-v2-icon-color: ${page.icon_color}` : "",
       page?.icon_active_color ? `--dashboard-layout-v2-icon-active-color: ${page.icon_active_color}` : "",
+      page?.icon_background_color ? `--dashboard-layout-v2-icon-background-color: ${page.icon_background_color}` : "",
+      page?.icon_background_active_color ? `--dashboard-layout-v2-icon-background-active-color: ${page.icon_background_active_color}` : "",
     ].filter(Boolean).join(";");
   }
 
@@ -893,6 +897,10 @@ export class BaseLayout extends LitElement {
         color: var(
           --dashboard-layout-v2-icon-active-color,
           var(--dashboard-layout-v2-icon-color, var(--primary-color))
+        );
+        background: var(
+          --dashboard-layout-v2-icon-background-active-color,
+          var(--dashboard-layout-v2-icon-background-color, transparent)
         );
       }
 

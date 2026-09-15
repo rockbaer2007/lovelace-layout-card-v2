@@ -113,6 +113,8 @@ export interface DashboardLayoutMenuConfig {
     icon?: string;
     icon_color?: string;
     icon_active_color?: string;
+    icon_background_color?: string;
+    icon_background_active_color?: string;
     tab_color?: string;
     active_tab_color?: string;
   };
@@ -184,6 +186,8 @@ export interface DashboardLayoutPageConfig {
   icon?: string;
   icon_color?: string;
   icon_active_color?: string;
+  icon_background_color?: string;
+  icon_background_active_color?: string;
   tab_color?: string;
   active_tab_color?: string;
   subpages?: Array<DashboardLayoutPageConfig>;

@@ -278,6 +278,8 @@ function pageNavigationMetadata(page: any) {
     ...(page.icon ? { icon: page.icon } : {}),
     ...(page.icon_color ? { icon_color: page.icon_color } : {}),
     ...(page.icon_active_color ? { icon_active_color: page.icon_active_color } : {}),
+    ...(page.icon_background_color ? { icon_background_color: page.icon_background_color } : {}),
+    ...(page.icon_background_active_color ? { icon_background_active_color: page.icon_background_active_color } : {}),
     ...(page.tab_color ? { tab_color: page.tab_color } : {}),
     ...(page.active_tab_color ? { active_tab_color: page.active_tab_color } : {}),
     ...(Array.isArray(page.subpages) && page.subpages.length
@@ -398,6 +400,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _homeIcon = "mdi:home";
   @state() private _homeIconColor = "";
   @state() private _homeIconActiveColor = "";
+  @state() private _homeIconBackgroundColor = "";
+  @state() private _homeIconBackgroundActiveColor = "";
   @state() private _homeTabColor = "";
   @state() private _homeActiveTabColor = "";
   @state() private _homeMaxColumns = 4;
@@ -497,6 +501,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._homeIcon = homeEntry.icon;
     this._homeIconColor = homeEntry.icon_color;
     this._homeIconActiveColor = homeEntry.icon_active_color;
+    this._homeIconBackgroundColor = homeEntry.icon_background_color;
+    this._homeIconBackgroundActiveColor = homeEntry.icon_background_active_color;
     this._homeTabColor = homeEntry.tab_color;
     this._homeActiveTabColor = homeEntry.active_tab_color;
     this._homeMaxColumns = Number(params.viewConfig?.max_columns ?? 4);
@@ -632,6 +638,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "homeIcon") this._homeIcon = value;
     if (key === "homeIconColor") this._homeIconColor = value;
     if (key === "homeIconActiveColor") this._homeIconActiveColor = value;
+    if (key === "homeIconBackgroundColor") this._homeIconBackgroundColor = value;
+    if (key === "homeIconBackgroundActiveColor") this._homeIconBackgroundActiveColor = value;
     if (key === "homeTabColor") this._homeTabColor = value;
     if (key === "homeActiveTabColor") this._homeActiveTabColor = value;
     if (key === "homeMaxColumns") this._homeMaxColumns = value;
@@ -1020,6 +1028,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       icon: String(source?.icon ?? "mdi:home"),
       icon_color: String(source?.icon_color ?? ""),
       icon_active_color: String(source?.icon_active_color ?? ""),
+      icon_background_color: String(source?.icon_background_color ?? ""),
+      icon_background_active_color: String(source?.icon_background_active_color ?? ""),
       tab_color: String(source?.tab_color ?? ""),
       active_tab_color: String(source?.active_tab_color ?? ""),
     };
@@ -1542,6 +1552,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       icon: this._homeIcon,
       ...(this._homeIconColor ? { icon_color: this._homeIconColor } : {}),
       ...(this._homeIconActiveColor ? { icon_active_color: this._homeIconActiveColor } : {}),
+      ...(this._homeIconBackgroundColor ? { icon_background_color: this._homeIconBackgroundColor } : {}),
+      ...(this._homeIconBackgroundActiveColor ? { icon_background_active_color: this._homeIconBackgroundActiveColor } : {}),
       ...(this._homeTabColor ? { tab_color: this._homeTabColor } : {}),
       ...(this._homeActiveTabColor ? { active_tab_color: this._homeActiveTabColor } : {}),
     };
@@ -1885,6 +1897,13 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                 </label>
                 ${this._renderColorField("Icon Farbe", "homeIconColor", this._homeIconColor, "Global")}
                 ${this._renderColorField("Icon aktiv Farbe", "homeIconActiveColor", this._homeIconActiveColor, "Global")}
+                ${this._renderColorField("Icon Hintergrund", "homeIconBackgroundColor", this._homeIconBackgroundColor, "Global")}
+                ${this._renderColorField(
+                  "Icon Hintergrund aktiv",
+                  "homeIconBackgroundActiveColor",
+                  this._homeIconBackgroundActiveColor,
+                  "Global"
+                )}
                 ${this._renderColorField("Button Farbe", "homeTabColor", this._homeTabColor, "Global")}
                 ${this._renderColorField("Button aktiv Farbe", "homeActiveTabColor", this._homeActiveTabColor, "Global")}
               </fieldset>
@@ -2261,6 +2280,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       ${this._renderPageColorField("Icon aktiv Farbe", selectedPage, "icon_active_color", (value) =>
                         this._updatePage(this._selectedPageIndex, "icon_active_color", value)
                       )}
+                      ${this._renderPageColorField("Icon Hintergrund", selectedPage, "icon_background_color", (value) =>
+                        this._updatePage(this._selectedPageIndex, "icon_background_color", value)
+                      )}
+                      ${this._renderPageColorField("Icon Hintergrund aktiv", selectedPage, "icon_background_active_color", (value) =>
+                        this._updatePage(this._selectedPageIndex, "icon_background_active_color", value)
+                      )}
                       ${this._renderPageColorField("Button Farbe", selectedPage, "tab_color", (value) =>
                         this._updatePage(this._selectedPageIndex, "tab_color", value)
                       )}
@@ -2408,6 +2433,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                             )}
                             ${this._renderPageColorField("Icon aktiv Farbe", selectedSubPage, "icon_active_color", (value) =>
                               this._updateSubPage(this._selectedSubPageIndex, "icon_active_color", value)
+                            )}
+                            ${this._renderPageColorField("Icon Hintergrund", selectedSubPage, "icon_background_color", (value) =>
+                              this._updateSubPage(this._selectedSubPageIndex, "icon_background_color", value)
+                            )}
+                            ${this._renderPageColorField("Icon Hintergrund aktiv", selectedSubPage, "icon_background_active_color", (value) =>
+                              this._updateSubPage(this._selectedSubPageIndex, "icon_background_active_color", value)
                             )}
                             ${this._renderPageColorField("Button Farbe", selectedSubPage, "tab_color", (value) =>
                               this._updateSubPage(this._selectedSubPageIndex, "tab_color", value)

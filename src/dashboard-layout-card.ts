@@ -426,6 +426,8 @@ class DashboardLayoutCardV2 extends LitElement {
       page.active_tab_color ? `--dashboard-layout-v2-active-tab-color: ${page.active_tab_color}` : "",
       page.icon_color ? `--dashboard-layout-v2-icon-color: ${page.icon_color}` : "",
       page.icon_active_color ? `--dashboard-layout-v2-icon-active-color: ${page.icon_active_color}` : "",
+      page.icon_background_color ? `--dashboard-layout-v2-icon-background-color: ${page.icon_background_color}` : "",
+      page.icon_background_active_color ? `--dashboard-layout-v2-icon-background-active-color: ${page.icon_background_active_color}` : "",
     ].filter(Boolean).join(";");
   }
 
@@ -865,6 +867,10 @@ class DashboardLayoutCardV2 extends LitElement {
         color: var(
           --dashboard-layout-v2-icon-active-color,
           var(--dashboard-layout-v2-icon-color, var(--primary-color))
+        );
+        background: var(
+          --dashboard-layout-v2-icon-background-active-color,
+          var(--dashboard-layout-v2-icon-background-color, transparent)
         );
       }
 
