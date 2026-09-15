@@ -271,6 +271,15 @@ export class BaseLayout extends LitElement {
     return page?.path;
   }
 
+  _dashboardLayoutV2PageStyle(page: any) {
+    return [
+      page?.tab_color ? `--dashboard-layout-v2-inactive-tab-color: ${page.tab_color}` : "",
+      page?.active_tab_color ? `--dashboard-layout-v2-active-tab-color: ${page.active_tab_color}` : "",
+      page?.icon_color ? `--dashboard-layout-v2-icon-color: ${page.icon_color}` : "",
+      page?.icon_active_color ? `--dashboard-layout-v2-icon-active-color: ${page.icon_active_color}` : "",
+    ].filter(Boolean).join(";");
+  }
+
   _dashboardLayoutV2CurrentPath() {
     return decodeURIComponent(location.pathname.split("/").filter(Boolean).pop() ?? "");
   }
@@ -324,6 +333,7 @@ export class BaseLayout extends LitElement {
     return html`
       <button
         class=${dashboardLayoutV2PageMatchesPath(page, currentPath) ? "active" : ""}
+        style=${this._dashboardLayoutV2PageStyle(page)}
         aria-label=${dashboardLayoutV2PageTitle(page)}
         title=${dashboardLayoutV2PageTitle(page)}
         @click=${() => this._navigateDashboardLayoutV2Page(this._dashboardLayoutV2MenuTargetPath(page))}
@@ -341,6 +351,7 @@ export class BaseLayout extends LitElement {
     return html`
       <button
         class=${dashboardLayoutV2PagePath(page) === currentPath ? "active" : ""}
+        style=${this._dashboardLayoutV2PageStyle(page)}
         aria-label=${dashboardLayoutV2PageTitle(page)}
         title=${dashboardLayoutV2PageTitle(page)}
         @click=${() => this._navigateDashboardLayoutV2Page(page.path)}

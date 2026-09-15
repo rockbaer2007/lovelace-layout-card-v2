@@ -276,6 +276,10 @@ function pageNavigationMetadata(page: any) {
     title: pageTitle(page, 0),
     path: page.path,
     ...(page.icon ? { icon: page.icon } : {}),
+    ...(page.icon_color ? { icon_color: page.icon_color } : {}),
+    ...(page.icon_active_color ? { icon_active_color: page.icon_active_color } : {}),
+    ...(page.tab_color ? { tab_color: page.tab_color } : {}),
+    ...(page.active_tab_color ? { active_tab_color: page.active_tab_color } : {}),
     ...(Array.isArray(page.subpages) && page.subpages.length
       ? { subpages: page.subpages.map((subpage: any) => pageNavigationMetadata(subpage)) }
       : {}),
@@ -1022,6 +1026,30 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             .value=${colorPickerValue(value)}
             title=${`${label} auswählen`}
             @input=${(ev: Event) => this._setValue(key, (ev.target as HTMLInputElement).value)}
+          />
+        </div>
+      </label>
+    `;
+  }
+
+  private _renderPageColorField(label: string, page: any, key: string, update: (value: string) => void, placeholder = "Global") {
+    const value = String(page?.[key] ?? "");
+    return html`
+      <label>
+        ${label}
+        <div class="color-row">
+          <input
+            class="text"
+            placeholder=${placeholder}
+            .value=${value}
+            @input=${(ev: Event) => update((ev.target as HTMLInputElement).value)}
+          />
+          <input
+            class="color"
+            type="color"
+            .value=${colorPickerValue(value)}
+            title=${`${label} auswählen`}
+            @input=${(ev: Event) => update((ev.target as HTMLInputElement).value)}
           />
         </div>
       </label>
@@ -2203,6 +2231,18 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                             this._updatePage(this._selectedPageIndex, "icon", (ev.target as HTMLInputElement).value)}
                         />
                       </label>
+                      ${this._renderPageColorField("Icon Farbe", selectedPage, "icon_color", (value) =>
+                        this._updatePage(this._selectedPageIndex, "icon_color", value)
+                      )}
+                      ${this._renderPageColorField("Icon aktiv Farbe", selectedPage, "icon_active_color", (value) =>
+                        this._updatePage(this._selectedPageIndex, "icon_active_color", value)
+                      )}
+                      ${this._renderPageColorField("Button Farbe", selectedPage, "tab_color", (value) =>
+                        this._updatePage(this._selectedPageIndex, "tab_color", value)
+                      )}
+                      ${this._renderPageColorField("Button aktiv Farbe", selectedPage, "active_tab_color", (value) =>
+                        this._updatePage(this._selectedPageIndex, "active_tab_color", value)
+                      )}
                       <label>
                         Layout
                         <select
@@ -2339,6 +2379,18 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                                   this._updateSubPage(this._selectedSubPageIndex, "icon", (ev.target as HTMLInputElement).value)}
                               />
                             </label>
+                            ${this._renderPageColorField("Icon Farbe", selectedSubPage, "icon_color", (value) =>
+                              this._updateSubPage(this._selectedSubPageIndex, "icon_color", value)
+                            )}
+                            ${this._renderPageColorField("Icon aktiv Farbe", selectedSubPage, "icon_active_color", (value) =>
+                              this._updateSubPage(this._selectedSubPageIndex, "icon_active_color", value)
+                            )}
+                            ${this._renderPageColorField("Button Farbe", selectedSubPage, "tab_color", (value) =>
+                              this._updateSubPage(this._selectedSubPageIndex, "tab_color", value)
+                            )}
+                            ${this._renderPageColorField("Button aktiv Farbe", selectedSubPage, "active_tab_color", (value) =>
+                              this._updateSubPage(this._selectedSubPageIndex, "active_tab_color", value)
+                            )}
                             <label>
                               Layout
                               <select

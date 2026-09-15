@@ -178,6 +178,10 @@ export interface DashboardLayoutMenuConfig {
 export interface DashboardLayoutPageConfig {
   title?: string;
   icon?: string;
+  icon_color?: string;
+  icon_active_color?: string;
+  tab_color?: string;
+  active_tab_color?: string;
   subpages?: Array<DashboardLayoutPageConfig>;
   hide_submenu_parent?: boolean;
   type?: string;

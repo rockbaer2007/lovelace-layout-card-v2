@@ -420,6 +420,15 @@ class DashboardLayoutCardV2 extends LitElement {
     `;
   }
 
+  _pageStyle(page: DashboardLayoutPageConfig) {
+    return [
+      page.tab_color ? `--dashboard-layout-v2-inactive-tab-color: ${page.tab_color}` : "",
+      page.active_tab_color ? `--dashboard-layout-v2-active-tab-color: ${page.active_tab_color}` : "",
+      page.icon_color ? `--dashboard-layout-v2-icon-color: ${page.icon_color}` : "",
+      page.icon_active_color ? `--dashboard-layout-v2-icon-active-color: ${page.icon_active_color}` : "",
+    ].filter(Boolean).join(";");
+  }
+
   _renderMenuItem(page: DashboardLayoutPageConfig, index: number) {
     if (page.type === "spacer") {
       return html`<div class="menu-spacer" aria-hidden="true"></div>`;
@@ -441,6 +450,7 @@ class DashboardLayoutCardV2 extends LitElement {
     return html`
       <button
         class=${index === this._activePage && this._activeSubPage < 0 ? "active" : ""}
+        style=${this._pageStyle(page)}
         type="button"
         aria-label=${pageTitle(page)}
         title=${pageTitle(page)}
@@ -497,6 +507,7 @@ class DashboardLayoutCardV2 extends LitElement {
     return html`
       <button
         class=${(index === 0 && this._activeSubPage < 0) || index - 1 === this._activeSubPage ? "active" : ""}
+        style=${this._pageStyle(page)}
         type="button"
         aria-label=${pageTitle(page)}
         title=${pageTitle(page)}
