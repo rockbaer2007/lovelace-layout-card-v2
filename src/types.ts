@@ -111,6 +111,10 @@ export interface DashboardLayoutMenuConfig {
     title?: string;
     path?: string;
     icon?: string;
+    icon_color?: string;
+    icon_active_color?: string;
+    tab_color?: string;
+    active_tab_color?: string;
   };
   clock?: DashboardLayoutClockMode;
   analog_hour_marks?: boolean;

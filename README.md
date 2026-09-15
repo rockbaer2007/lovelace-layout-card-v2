@@ -23,6 +23,7 @@ layout-card without overwriting it.
 - Menu and submenu entries can override icon color, active icon color, inactive
   button background and active button background individually. Empty values
   keep using the global menu style.
+- The home menu entry supports the same individual color overrides.
 - Supports non-clickable menu spacers and rounded divider bars.
 - Divider bars support their own color, opacity and optional 3D frame color.
 - Supports an optional notification box above the side-menu status values, and
@@ -136,6 +137,10 @@ views:
             title: Home
             path: home
             icon: mdi:home
+            icon_color: "#fbff00"
+            icon_active_color: "#ffffff"
+            tab_color: ""
+            active_tab_color: "#333aff"
           clock: analog
           analog_hour_marks: false
           analog_minute_marks: false
@@ -252,7 +257,8 @@ dashboard settings are available from the view editor and allow editing:
 - moving Sections V2 sections with the three-line handle in edit mode
 - new divider entries inherit colors from the previous divider
 - divider entries support color, 3D frame color, opacity and height
-- optional per-entry icon color, active icon color and button background colors
+- optional per-entry icon color, active icon color and button background colors,
+  including the home entry
 - tab, text, hover, icon and background colors
 - tab/view borders with separate opacity controls and separate 3D frame colors
 - optional submenu for a selected main menu entry, rendered as compact icon

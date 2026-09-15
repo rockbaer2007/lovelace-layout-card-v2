@@ -396,6 +396,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _homeTitle = "Home";
   @state() private _homePath = "home";
   @state() private _homeIcon = "mdi:home";
+  @state() private _homeIconColor = "";
+  @state() private _homeIconActiveColor = "";
+  @state() private _homeTabColor = "";
+  @state() private _homeActiveTabColor = "";
   @state() private _homeMaxColumns = 4;
   @state() private _homeDenseSectionPlacement = false;
   @state() private _homeTopMargin = false;
@@ -491,6 +495,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._homeTitle = homeEntry.title;
     this._homePath = homeEntry.path;
     this._homeIcon = homeEntry.icon;
+    this._homeIconColor = homeEntry.icon_color;
+    this._homeIconActiveColor = homeEntry.icon_active_color;
+    this._homeTabColor = homeEntry.tab_color;
+    this._homeActiveTabColor = homeEntry.active_tab_color;
     this._homeMaxColumns = Number(params.viewConfig?.max_columns ?? 4);
     this._homeDenseSectionPlacement = params.viewConfig?.dense_section_placement === true;
     this._homeTopMargin = params.viewConfig?.top_margin === true;
@@ -622,6 +630,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "homeTitle") this._homeTitle = value;
     if (key === "homePath") this._homePath = value;
     if (key === "homeIcon") this._homeIcon = value;
+    if (key === "homeIconColor") this._homeIconColor = value;
+    if (key === "homeIconActiveColor") this._homeIconActiveColor = value;
+    if (key === "homeTabColor") this._homeTabColor = value;
+    if (key === "homeActiveTabColor") this._homeActiveTabColor = value;
     if (key === "homeMaxColumns") this._homeMaxColumns = value;
     if (key === "homeDenseSectionPlacement") this._homeDenseSectionPlacement = value;
     if (key === "homeTopMargin") this._homeTopMargin = value;
@@ -1006,6 +1018,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       title: String(source?.title ?? source?.path ?? "Home"),
       path: String(source?.path ?? "home"),
       icon: String(source?.icon ?? "mdi:home"),
+      icon_color: String(source?.icon_color ?? ""),
+      icon_active_color: String(source?.icon_active_color ?? ""),
+      tab_color: String(source?.tab_color ?? ""),
+      active_tab_color: String(source?.active_tab_color ?? ""),
     };
   }
 
@@ -1524,6 +1540,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       title: this._homeTitle,
       path: this._homePath,
       icon: this._homeIcon,
+      ...(this._homeIconColor ? { icon_color: this._homeIconColor } : {}),
+      ...(this._homeIconActiveColor ? { icon_active_color: this._homeIconActiveColor } : {}),
+      ...(this._homeTabColor ? { tab_color: this._homeTabColor } : {}),
+      ...(this._homeActiveTabColor ? { active_tab_color: this._homeActiveTabColor } : {}),
     };
 
     const dashboardLayoutV2 = {
@@ -1863,6 +1883,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                     @input=${(ev: Event) => this._setValue("homeIcon", (ev.target as HTMLInputElement).value)}
                   />
                 </label>
+                ${this._renderColorField("Icon Farbe", "homeIconColor", this._homeIconColor, "Global")}
+                ${this._renderColorField("Icon aktiv Farbe", "homeIconActiveColor", this._homeIconActiveColor, "Global")}
+                ${this._renderColorField("Button Farbe", "homeTabColor", this._homeTabColor, "Global")}
+                ${this._renderColorField("Button aktiv Farbe", "homeActiveTabColor", this._homeActiveTabColor, "Global")}
               </fieldset>
 
               <fieldset class="home-entry group wide">

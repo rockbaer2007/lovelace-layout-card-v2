@@ -247,6 +247,10 @@ export class BaseLayout extends LitElement {
       ...(homeSourcePage ?? {}),
       title: menu.home?.title ?? parentHome?.title ?? parentView?.title ?? currentView?.title ?? homePath ?? "Home",
       icon: menu.home?.icon ?? parentHome?.icon ?? parentView?.icon ?? currentView?.icon ?? "mdi:home",
+      icon_color: menu.home?.icon_color ?? parentHome?.icon_color ?? homeSourcePage?.icon_color,
+      icon_active_color: menu.home?.icon_active_color ?? parentHome?.icon_active_color ?? homeSourcePage?.icon_active_color,
+      tab_color: menu.home?.tab_color ?? parentHome?.tab_color ?? homeSourcePage?.tab_color,
+      active_tab_color: menu.home?.active_tab_color ?? parentHome?.active_tab_color ?? homeSourcePage?.active_tab_color,
       path: homePath,
     };
 
