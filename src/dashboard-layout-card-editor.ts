@@ -1,7 +1,13 @@
 import { CSSResultArray, css, html, LitElement } from "lit";
-import { property } from "lit/decorators.js";
+import { property, state } from "lit/decorators.js";
 import { DashboardLayoutCardConfig, DashboardLayoutMenuConfig } from "./types";
 import { loadHaForm } from "./helpers";
+import {
+  DashboardLayoutV2Language,
+  dashboardLayoutV2Translate,
+  resolveDashboardLayoutV2Language,
+  translateDashboardLayoutV2Dom,
+} from "./i18n";
 
 type DashboardLayoutEditorTab = "menu" | "pages" | "chrome" | "advanced";
 
@@ -9,6 +15,7 @@ class DashboardLayoutCardV2Editor extends LitElement {
   @property() _config: DashboardLayoutCardConfig;
   @property() hass;
   @property() _activeTab: DashboardLayoutEditorTab = "menu";
+  @state() private _language: DashboardLayoutV2Language = "en";
 
   _menuSchema = [
     {
@@ -48,6 +55,13 @@ class DashboardLayoutCardV2Editor extends LitElement {
       },
       pages: config.pages ?? [],
     };
+    this._language = resolveDashboardLayoutV2Language({ debugLanguage: this._config.debug?.language, hass: this.hass });
+  }
+
+  updated() {
+    const nextLanguage = resolveDashboardLayoutV2Language({ debugLanguage: this._config?.debug?.language, hass: this.hass });
+    if (this._language !== nextLanguage) this._language = nextLanguage;
+    translateDashboardLayoutV2Dom(this.shadowRoot, this._language);
   }
 
   async firstUpdated() {
@@ -55,7 +69,7 @@ class DashboardLayoutCardV2Editor extends LitElement {
   }
 
   _normalizeMenu(menu: DashboardLayoutCardConfig["menu"]): DashboardLayoutMenuConfig {
-    if (!menu) return { position: "left", title: "Haus", clock: "digital", date: true, weekday: "none", icon_only: false };
+    if (!menu) return { position: "left", title: "House", clock: "digital", date: true, weekday: "none", icon_only: false };
     if (typeof menu === "string") return { position: menu, icon_only: false };
     return { icon_only: false, ...menu };
   }
@@ -94,9 +108,9 @@ class DashboardLayoutCardV2Editor extends LitElement {
   }
 
   _computeLabel(schema) {
-    if (schema.name === "menu") return "Menu configuration";
-    if (schema.name === "chrome") return "HA interface";
-    if (schema.name === "pages") return "Pages";
+    if (schema.name === "menu") return dashboardLayoutV2Translate(this._language, "Menu configuration");
+    if (schema.name === "chrome") return dashboardLayoutV2Translate(this._language, "HA interface");
+    if (schema.name === "pages") return dashboardLayoutV2Translate(this._language, "Pages");
     return schema.name;
   }
 

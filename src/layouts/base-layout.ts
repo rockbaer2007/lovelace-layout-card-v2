@@ -10,6 +10,11 @@ import {
   ViewConfig,
 } from "../types";
 import { applyHaChromeVisibility } from "../ha-chrome";
+import {
+  DashboardLayoutV2Language,
+  resolveDashboardLayoutV2Language,
+  translateDashboardLayoutV2Dom,
+} from "../i18n";
 
 function isDashboardLayoutV2MenuOnlyPage(page: any) {
   return page?.type === "spacer" || page?.type === "divider";
@@ -92,6 +97,7 @@ export class BaseLayout extends LitElement {
   @property() lovelace: any;
   @property() _editMode: boolean = false;
   @state() private _dashboardLayoutV2NotifyOpen = false;
+  @state() private _dashboardLayoutV2Language: DashboardLayoutV2Language = "en";
   _editorLoaded = false;
 
   @property() _config: ViewConfig;
@@ -121,7 +127,13 @@ export class BaseLayout extends LitElement {
       this.cards.forEach((c) => (c.editMode = this.lovelace?.editMode));
       this._editMode = this.lovelace?.editMode ?? false;
     }
+    const nextLanguage = resolveDashboardLayoutV2Language({
+      debugLanguage: this._dashboardLayoutV2DebugLanguage(),
+      hass: this.hass,
+    });
+    if (this._dashboardLayoutV2Language !== nextLanguage) this._dashboardLayoutV2Language = nextLanguage;
     applyHaChromeVisibility(this.hass, this._dashboardLayoutV2Chrome());
+    translateDashboardLayoutV2Dom(this.shadowRoot, this._dashboardLayoutV2Language);
   }
 
   disconnectedCallback() {
@@ -200,7 +212,7 @@ export class BaseLayout extends LitElement {
     };
   }
 
-  _dashboardLayoutV2ParentConfig() {
+  _dashboardLayoutV2ParentView() {
     const localConfig = dashboardLayoutV2ConfigFromView(this._config) ?? {};
     const views = this.lovelace?.rawConfig?.views ?? this.lovelace?.config?.views ?? [];
     const currentView = this._config ?? this.lovelace?.config?.views?.[this.index];
@@ -210,18 +222,29 @@ export class BaseLayout extends LitElement {
     const referencedParent = inheritedPath
       ? views.find((view, index) => String(view?.path ?? index) === String(inheritedPath))
       : undefined;
-    if (referencedParent) {
-      return dashboardLayoutV2ConfigFromView(referencedParent);
-    }
+    if (referencedParent) return referencedParent;
 
-    const parentView = Array.isArray(views)
-      ? views.find((view, index) => {
-          if (index === this.index || view?.subview) return false;
-          const pages = dashboardLayoutV2ConfigFromView(view)?.pages ?? [];
-          return Array.isArray(pages) && pages.some((page) => dashboardLayoutV2PageMatchesPath(page, currentPath));
-        })
-      : undefined;
-    return dashboardLayoutV2ConfigFromView(parentView);
+    return views.find((view, index) => {
+      if (index === this.index || view?.subview) return false;
+      const pages = dashboardLayoutV2ConfigFromView(view)?.pages ?? [];
+      return Array.isArray(pages) && pages.some((page) => dashboardLayoutV2PageMatchesPath(page, currentPath));
+    });
+  }
+
+  _dashboardLayoutV2ParentConfig() {
+    return dashboardLayoutV2ConfigFromView(this._dashboardLayoutV2ParentView());
+  }
+
+  _dashboardLayoutV2DebugLanguage() {
+    const localConfig = dashboardLayoutV2ConfigFromView(this._config) ?? {};
+    const parentView = this._dashboardLayoutV2ParentView();
+    const parentConfig = dashboardLayoutV2ConfigFromView(parentView) ?? {};
+    return (
+      (this._config as any)?.debug?.language ??
+      localConfig.debug?.language ??
+      parentView?.debug?.language ??
+      parentConfig.debug?.language
+    );
   }
 
   _dashboardLayoutV2Chrome(): DashboardLayoutChromeConfig | undefined {
@@ -447,13 +470,13 @@ export class BaseLayout extends LitElement {
   _activeDashboardLayoutV2DaySymbol(menu: DashboardLayoutMenuConfig) {
     const config = menu.day_symbol ?? {};
     if (dashboardLayoutV2HelperActive(this.hass, config.birthday_entity)) {
-      return { icon: "mdi:cake-variant", color: "#ff80ab", label: "Geburtstag" };
+      return { icon: "mdi:cake-variant", color: "#ff80ab", label: "Birthday" };
     }
     if (dashboardLayoutV2HelperActive(this.hass, config.christmas_entity)) {
-      return { icon: "mdi:pine-tree", color: "#1faa59", label: "Weihnachten/Advent" };
+      return { icon: "mdi:pine-tree", color: "#1faa59", label: "Christmas/Advent" };
     }
     if (dashboardLayoutV2HelperActive(this.hass, config.holiday_entity)) {
-      return { icon: "mdi:calendar-star", color: "#ffd600", label: "Feiertag" };
+      return { icon: "mdi:calendar-star", color: "#ffd600", label: "Holiday" };
     }
     return undefined;
   }

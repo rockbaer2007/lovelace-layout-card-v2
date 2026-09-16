@@ -94,6 +94,18 @@ Cards and helpers:
 - `custom:layout-break-v2`
 - `custom:gap-card-v2`
 
+
+## YAML-only language override
+
+For documentation screenshots or language testing, the displayed UI language can be forced directly in YAML. This option is intentionally not shown in the editor.
+
+```yaml
+debug:
+  language: de # de, en or fr
+```
+
+Without `debug.language`, Dashboard Layout Card V2 uses the Home Assistant or browser language automatically and falls back to English.
+
 ## Dashboard View Example
 
 The home view stores the shared dashboard configuration. Linked subviews only

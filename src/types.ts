@@ -37,6 +37,7 @@ export interface ViewConfig {
   path?: string;
   type?: string;
   subview?: boolean;
+  debug?: DashboardLayoutV2DebugConfig;
   cards?: Array<CardConfig>;
   sections?: Array<Record<string, any>>;
   max_columns?: number;
@@ -51,6 +52,7 @@ export interface ViewConfig {
     dashboard_layout_v2?: {
       inherits_from?: string;
       inherit_theme?: boolean;
+      debug?: DashboardLayoutV2DebugConfig;
       menu?: DashboardLayoutMenuConfig;
       chrome?: DashboardLayoutChromeConfig;
       color_presets?: Array<DashboardLayoutColorPreset>;
@@ -96,6 +98,10 @@ export interface LayoutCardConfig {
 export type DashboardLayoutMenuPosition = "left" | "none" | "right";
 export type DashboardLayoutClockMode = "none" | "digital" | "analog";
 export type DashboardLayoutWeekdayMode = "none" | "short" | "long";
+
+export interface DashboardLayoutV2DebugConfig {
+  language?: string;
+}
 
 export interface DashboardLayoutColorPreset {
   name?: string;
@@ -220,6 +226,7 @@ export interface DashboardLayoutCardConfig {
   type: "custom:dashboard-layout-card-v2";
   menu?: DashboardLayoutMenuPosition | DashboardLayoutMenuConfig;
   chrome?: DashboardLayoutChromeConfig;
+  debug?: DashboardLayoutV2DebugConfig;
   color_presets?: Array<DashboardLayoutColorPreset>;
   pages?: Array<DashboardLayoutPageConfig>;
 }

@@ -119,6 +119,17 @@ Use this path in the editor:
 
 Please only use your own images or images with a compatible free/open-source license.
 
+## YAML-only language override
+
+For screenshots and language tests, the UI language can be forced in YAML only:
+
+```yaml
+debug:
+  language: de # de, en or fr
+```
+
+Without this entry, the card uses Home Assistant/browser language detection and falls back to English.
+
 ## Installation through HACS
 
 Add the repository as a custom frontend repository:

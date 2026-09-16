@@ -10,6 +10,11 @@ import {
   LovelaceCard,
 } from "./types";
 import { applyHaChromeVisibility } from "./ha-chrome";
+import {
+  DashboardLayoutV2Language,
+  resolveDashboardLayoutV2Language,
+  translateDashboardLayoutV2Dom,
+} from "./i18n";
 
 function normalizeLayoutType(layoutType?: string) {
   if (!layoutType) return "masonry-layout-v2";
@@ -106,6 +111,7 @@ class DashboardLayoutCardV2 extends LitElement {
   @state() _activeSubPage = -1;
   @state() _now = new Date();
   @state() _notifyOpen = false;
+  @state() _language: DashboardLayoutV2Language = "en";
 
   _clockTimer?: number;
 
@@ -127,6 +133,7 @@ class DashboardLayoutCardV2 extends LitElement {
           : undefined,
       })),
     };
+    this._language = resolveDashboardLayoutV2Language({ debugLanguage: this._config.debug?.language, hass: this.hass });
     this._activePage = Math.min(this._activePage, this._config.pages.length - 1);
     if (isMenuOnlyPage(this._config.pages[this._activePage])) {
       this._activePage = this._config.pages.findIndex((page) => !isMenuOnlyPage(page));
@@ -158,7 +165,10 @@ class DashboardLayoutCardV2 extends LitElement {
       });
       if (this._layoutElement) (this._layoutElement as any).hass = this.hass;
     }
+    const nextLanguage = resolveDashboardLayoutV2Language({ debugLanguage: this._config?.debug?.language, hass: this.hass });
+    if (this._language !== nextLanguage) this._language = nextLanguage;
     applyHaChromeVisibility(this.hass, this._config?.chrome);
+    translateDashboardLayoutV2Dom(this.shadowRoot, this._language);
   }
 
   get _pages() {
@@ -292,13 +302,13 @@ class DashboardLayoutCardV2 extends LitElement {
   _activeDaySymbol(menu: DashboardLayoutMenuConfig) {
     const config = menu.day_symbol ?? {};
     if (helperActive(this.hass, config.birthday_entity)) {
-      return { icon: "mdi:cake-variant", color: "#ff80ab", label: "Geburtstag" };
+      return { icon: "mdi:cake-variant", color: "#ff80ab", label: "Birthday" };
     }
     if (helperActive(this.hass, config.christmas_entity)) {
-      return { icon: "mdi:pine-tree", color: "#1faa59", label: "Weihnachten/Advent" };
+      return { icon: "mdi:pine-tree", color: "#1faa59", label: "Christmas/Advent" };
     }
     if (helperActive(this.hass, config.holiday_entity)) {
-      return { icon: "mdi:calendar-star", color: "#ffd600", label: "Feiertag" };
+      return { icon: "mdi:calendar-star", color: "#ffd600", label: "Holiday" };
     }
     return undefined;
   }
@@ -672,7 +682,7 @@ class DashboardLayoutCardV2 extends LitElement {
     return {
       menu: {
         position: "left",
-        title: "Haus",
+        title: "House",
         clock: "digital",
         date: true,
         weekday: "none",
@@ -685,7 +695,7 @@ class DashboardLayoutCardV2 extends LitElement {
       },
       pages: [
         {
-          title: "Keller",
+          title: "Basement",
           icon: "mdi:home-floor-negative-1",
           layout_type: "custom:grid-layout-v2",
           layout: {

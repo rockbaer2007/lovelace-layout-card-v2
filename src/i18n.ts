@@ -1,0 +1,308 @@
+export type DashboardLayoutV2Language = "de" | "en" | "fr";
+
+const SUPPORTED_LANGUAGES = new Set(["de", "en", "fr"]);
+
+const TRANSLATIONS: Record<Exclude<DashboardLayoutV2Language, "en">, Record<string, string>> = {
+  de: {
+    "Show messages": "Meldungen anzeigen",
+    "Messages": "Meldungen",
+    "Message": "Meldung",
+    "Close": "Schließen",
+    "House": "Haus",
+    "Basement": "Keller",
+    "Birthday": "Geburtstag",
+    "Christmas/Advent": "Weihnachten/Advent",
+    "Holiday": "Feiertag",
+    "Holiday helper": "Feiertag Helper",
+    "Birthday helper": "Geburtstag Helper",
+    "Christmas/Advent helper": "Weihnachten/Advent Helper",
+    "Menu configuration": "Menü-Konfiguration",
+    "HA interface": "HA-Oberfläche",
+    "Pages": "Seiten",
+    "Show only icons in the menu": "Nur Icons im Menü anzeigen",
+    "Forces compact menu mode on desktop. Without this option, automatic mobile icon mode still applies.": "Erzwingt den kompakten Menümodus auch auf Desktop. Ohne Haken greift weiterhin automatisch der mobile Icon-Modus.",
+    "Main pages, dividers, spacers and later submenus stay together here.": "Hier bleiben Hauptseiten, Trenner, Abstandshalter und später Untermenüs zusammen.",
+    "Advanced menu / submenu": "Erweitertes Menü / Submenü",
+    "This area is prepared for the next expansion step: submenus per main menu button,": "Dieser Bereich ist für die nächste Ausbaustufe vorbereitet: Submenüs pro Hauptmenü-Button,",
+    "fixed or selected position and dedicated pages per submenu entry.": "feste oder ausgewählte Position und eigene Seiten je Submenü-Eintrag.",
+    "Configure Dashboard Layout Card V2. The settings are split into tabs,": "Dashboard Layout Card V2 konfigurieren. Die Einstellungen sind in Reiter aufgeteilt,",
+    "so new menu and submenu features stay manageable.": "damit neue Menü- und Submenü-Funktionen übersichtlich bleiben.",
+    "Dashboard Layout Card V2 settings": "Dashboard Layout Card V2 Einstellungen",
+    "Menu": "Menü",
+    "Advanced": "Erweitert",
+    "Display": "Anzeige",
+    "Submenu": "Submenü",
+    "Colors": "Farben",
+    "Choose favorite": "Favorit wählen",
+    "No entity found": "Keine Entität gefunden",
+    "Reset the home button colors to global values?": "Farben des Home-Buttons auf globale Werte zurücksetzen?",
+    "Reset this button colors to global values?": "Farben dieses Buttons auf globale Werte zurücksetzen?",
+    "Reset this subbutton colors to global values?": "Farben dieses Subbuttons auf globale Werte zurücksetzen?",
+    "Colors could not be saved: current view not found.": "Farben konnten nicht gespeichert werden: aktuelle View nicht gefunden.",
+    "Colors saved.": "Farben gespeichert.",
+    "Double-click: toggle dialog width": "Doppelklick: Fensterbreite umschalten",
+    "Menu position": "Menüposition",
+    "Menu title": "Menütitel",
+    "Home page": "Hauptseite",
+    "Show home page as first menu item": "Hauptseite als ersten Menüpunkt anzeigen",
+    "Home page field": "Hauptseitefeld",
+    "Title": "Titel",
+    "Path": "Pfad",
+    "Icon color": "Icon Farbe",
+    "Active icon color": "Icon aktiv Farbe",
+    "Icon background": "Icon Hintergrund",
+    "Active icon background": "Icon Hintergrund aktiv",
+    "Button color": "Button Farbe",
+    "Active button color": "Button aktiv Farbe",
+    "Use global colors": "Globale Farben verwenden",
+    "Sections view": "Abschnittsansicht",
+    "Maximum number of sections in width": "Maximalzahl von Abschnitten in der Breite",
+    "Dense section placement": "Dichte Abschnittsplatzierung",
+    "Add extra top spacing": "Zusätzlichen Platz oben hinzufügen",
+    "Inherit theme from home view": "Theme von Hauptansicht übernehmen",
+    "Clock": "Uhr",
+    "Display selection": "Anzeigeauswahl",
+    "Date": "Datum",
+    "Weekday": "Wochentag",
+    "Short label": "Kürzel",
+    "Sat / Sun color": "Sa / So Farbe",
+    "Clock/ring color": "Uhr-/Ringfarbe",
+    "Minute mark color": "Minutenteilung Farbe",
+    "Hour mark color": "Stundenteilung Farbe",
+    "Hour hand color": "Stundenzeiger Farbe",
+    "Minute hand color": "Minutenzeiger Farbe",
+    "Second hand color": "Sekundenzeiger Farbe",
+    "Symbol size": "Symbolgröße",
+    "Priority: birthday before Christmas/Advent before holiday. Empty or inactive helpers show no symbol.": "Priorität: Geburtstag vor Weihnachten/Advent vor Feiertag. Leere oder inaktive Helper zeigen kein Symbol.",
+    "Hide HA sidebar and HA header for users that are not allowed": "HA-Sidebar und HA-Header für nicht erlaubte Benutzer ausblenden",
+    "Visible users": "Sichtbare Benutzer",
+    "An empty list hides the HA interface for all non-admins once the option is active.": "Leere Liste blendet die HA-Oberfläche für alle Nicht-Admins aus, sobald die Option aktiv ist.",
+    "Divider": "Trenner",
+    "Divider color": "Trennerfarbe",
+    "Divider 3D effect": "3D-Effekt Trenner",
+    "Divider opacity": "Trenner Opacity",
+    "Divider height": "Trennerhöhe",
+    "Sections V2": "Abschnitte V2",
+    "Has submenu": "Hat Submenü",
+    "Do not show home page as first subbutton": "Hauptseite nicht als ersten Subbutton anzeigen",
+    "Edit submenu": "Submenü bearbeiten",
+    "Add": "Hinzufügen",
+    "Delete": "Löschen",
+    "Subbuttons inherit colors and style from the selected main button.": "Subbuttons erben Farben und Stil vom ausgewählten Hauptbutton.",
+    "Enable “Has submenu” on a page to create subbuttons.": "Aktiviere bei einer Seite „Hat Submenü“, um Subbuttons anzulegen.",
+    "Notification": "Benachrichtigung",
+    "Show notification": "Benachrichtigung anzeigen",
+    "Border color": "Rahmenfarbe",
+    "Border opacity": "Rahmen Opacity",
+    "Create a text helper in Home Assistant with the entity": "Erstelle in Home Assistant einen Text-Helfer mit der Entity",
+    "Path: Settings > Devices & services > Helpers > Create helper > Text.": "Pfad: Einstellungen > Geräte & Dienste > Helfer > Helfer erstellen > Text.",
+    "If the text stays empty, the notification is hidden.": "Bleibt der Text leer, wird die Benachrichtigung ausgeblendet.",
+    "The box only appears when the entity contains text. Empty, unknown and unavailable": "Die Box erscheint nur, wenn die Entity einen Text enthält. Leer, unknown und unavailable",
+    "Status values": "Statuswerte",
+    "Show status values": "Statuswerte anzeigen",
+    "Clock size": "Größe Uhr",
+    "Date size": "Größe Datum",
+    "Line break from": "Zeilenumbruch ab",
+    "Hover color": "Hover Farbe",
+    "Menu border opacity": "Menü-Rahmen Opacity",
+    "Icon size": "Icon-Größe",
+    "Icon field color": "Icon-Feld Farbe",
+    "Active icon field color": "Icon-Feld aktiv Farbe",
+    "Background": "Hintergrund",
+    "Color": "Farbe",
+    "Background color": "Hintergrundfarbe",
+    "Background color opacity": "Hintergrundfarbe Opacity",
+    "Submenu background": "Submenü Hintergrund",
+    "like menu": "wie Menü",
+    "Submenu background opacity": "Submenü Hintergrund Opacity",
+    "Up to 20 color favorites for all color fields. Empty slots are not saved.": "Bis zu 20 Farbfavoriten für alle Farbfelder. Leere Plätze werden nicht gespeichert.",
+    "Save colors": "Farben speichern",
+    "Export dashboard YAML": "Dashboard YAML exportieren",
+    "Exports the current editor state as a YAML file to your PC. Home Assistant is not changed.": "Exportiert den aktuellen Editorstand als YAML-Datei auf deinen PC. Home Assistant wird dabei nicht verändert.",
+    "A YAML import can be added here later.": "Ein YAML-Import kann später hier ergänzt werden.",
+    "Apply JSON": "JSON übernehmen",
+    "Cancel": "Abbrechen",
+    "Save": "Speichern",
+    "Header settings": "Kopfzeilen-Einstellungen",
+    "Footer settings": "Fußzeilen-Einstellungen",
+    "Add title": "Titel hinzufügen",
+    "Add badge": "Badge hinzufügen",
+    "Add footer": "Fußzeile hinzufügen",
+    "Add section": "Abschnitt hinzufügen"
+  },
+  fr: {
+    "Show messages": "Afficher les messages",
+    "Messages": "Messages",
+    "Message": "Message",
+    "Close": "Fermer",
+    "House": "Maison",
+    "Basement": "Sous-sol",
+    "Birthday": "Anniversaire",
+    "Christmas/Advent": "Noël/Avent",
+    "Holiday": "Jour férié",
+    "Holiday helper": "Helper jour férié",
+    "Birthday helper": "Helper anniversaire",
+    "Christmas/Advent helper": "Helper Noël/Avent",
+    "Menu configuration": "Configuration du menu",
+    "HA interface": "Interface HA",
+    "Pages": "Pages",
+    "Show only icons in the menu": "Afficher uniquement les icônes dans le menu",
+    "Forces compact menu mode on desktop. Without this option, automatic mobile icon mode still applies.": "Force le mode menu compact sur ordinateur. Sans cette option, le mode icônes mobile automatique reste actif.",
+    "Main pages, dividers, spacers and later submenus stay together here.": "Les pages principales, séparateurs, espaces et futurs sous-menus restent regroupés ici.",
+    "Advanced menu / submenu": "Menu avancé / sous-menu",
+    "This area is prepared for the next expansion step: submenus per main menu button,": "Cette zone est préparée pour la prochaine étape : sous-menus par bouton principal,",
+    "fixed or selected position and dedicated pages per submenu entry.": "position fixe ou sélectionnée et pages dédiées par entrée de sous-menu.",
+    "Configure Dashboard Layout Card V2. The settings are split into tabs,": "Configurer Dashboard Layout Card V2. Les réglages sont répartis en onglets,",
+    "so new menu and submenu features stay manageable.": "afin que les nouvelles fonctions de menu et de sous-menu restent lisibles.",
+    "Dashboard Layout Card V2 settings": "Réglages Dashboard Layout Card V2",
+    "Menu": "Menu",
+    "Advanced": "Avancé",
+    "Display": "Affichage",
+    "Submenu": "Sous-menu",
+    "Colors": "Couleurs",
+    "Choose favorite": "Choisir un favori",
+    "No entity found": "Aucune entité trouvée",
+    "Double-click: toggle dialog width": "Double-clic : changer la largeur de la fenêtre",
+    "Menu position": "Position du menu",
+    "Menu title": "Titre du menu",
+    "Home page": "Page d'accueil",
+    "Show home page as first menu item": "Afficher la page d'accueil comme premier élément du menu",
+    "Home page field": "Champ de page d'accueil",
+    "Title": "Titre",
+    "Path": "Chemin",
+    "Icon color": "Couleur de l'icône",
+    "Active icon color": "Couleur de l'icône active",
+    "Icon background": "Arrière-plan de l'icône",
+    "Active icon background": "Arrière-plan de l'icône active",
+    "Button color": "Couleur du bouton",
+    "Active button color": "Couleur du bouton actif",
+    "Use global colors": "Utiliser les couleurs globales",
+    "Sections view": "Vue Sections",
+    "Maximum number of sections in width": "Nombre maximal de sections en largeur",
+    "Dense section placement": "Placement dense des sections",
+    "Add extra top spacing": "Ajouter un espace en haut",
+    "Inherit theme from home view": "Hériter du thème de la vue d'accueil",
+    "Clock": "Horloge",
+    "Display selection": "Sélection d'affichage",
+    "Date": "Date",
+    "Weekday": "Jour de la semaine",
+    "Short label": "Libellé court",
+    "Sat / Sun color": "Couleur sam./dim.",
+    "Clock/ring color": "Couleur horloge/anneau",
+    "Minute mark color": "Couleur des repères minutes",
+    "Hour mark color": "Couleur des repères heures",
+    "Hour hand color": "Couleur de l'aiguille des heures",
+    "Minute hand color": "Couleur de l'aiguille des minutes",
+    "Second hand color": "Couleur de l'aiguille des secondes",
+    "Symbol size": "Taille du symbole",
+    "Priority: birthday before Christmas/Advent before holiday. Empty or inactive helpers show no symbol.": "Priorité : anniversaire avant Noël/Avent avant jour férié. Les helpers vides ou inactifs n'affichent aucun symbole.",
+    "Hide HA sidebar and HA header for users that are not allowed": "Masquer la barre latérale et l'en-tête HA pour les utilisateurs non autorisés",
+    "Visible users": "Utilisateurs visibles",
+    "An empty list hides the HA interface for all non-admins once the option is active.": "Une liste vide masque l'interface HA pour tous les non-administrateurs lorsque l'option est active.",
+    "Divider": "Séparateur",
+    "Divider color": "Couleur du séparateur",
+    "Divider 3D effect": "Effet 3D du séparateur",
+    "Divider opacity": "Opacité du séparateur",
+    "Divider height": "Hauteur du séparateur",
+    "Sections V2": "Sections V2",
+    "Has submenu": "Avec sous-menu",
+    "Do not show home page as first subbutton": "Ne pas afficher la page d'accueil comme premier sous-bouton",
+    "Edit submenu": "Modifier le sous-menu",
+    "Add": "Ajouter",
+    "Delete": "Supprimer",
+    "Subbuttons inherit colors and style from the selected main button.": "Les sous-boutons héritent des couleurs et du style du bouton principal sélectionné.",
+    "Enable “Has submenu” on a page to create subbuttons.": "Activez « Avec sous-menu » sur une page pour créer des sous-boutons.",
+    "Notification": "Notification",
+    "Show notification": "Afficher la notification",
+    "Border color": "Couleur de bordure",
+    "Border opacity": "Opacité de bordure",
+    "Create a text helper in Home Assistant with the entity": "Créez un helper texte dans Home Assistant avec l'entité",
+    "Path: Settings > Devices & services > Helpers > Create helper > Text.": "Chemin : Paramètres > Appareils et services > Helpers > Créer un helper > Texte.",
+    "If the text stays empty, the notification is hidden.": "Si le texte reste vide, la notification est masquée.",
+    "The box only appears when the entity contains text. Empty, unknown and unavailable": "La boîte apparaît uniquement si l'entité contient du texte. Vide, unknown et unavailable",
+    "Status values": "Valeurs d'état",
+    "Show status values": "Afficher les valeurs d'état",
+    "Clock size": "Taille de l'horloge",
+    "Date size": "Taille de la date",
+    "Line break from": "Retour à la ligne à partir de",
+    "Hover color": "Couleur au survol",
+    "Menu border opacity": "Opacité de la bordure du menu",
+    "Icon size": "Taille de l'icône",
+    "Icon field color": "Couleur du champ icône",
+    "Active icon field color": "Couleur du champ icône actif",
+    "Background": "Arrière-plan",
+    "Color": "Couleur",
+    "Background color": "Couleur d'arrière-plan",
+    "Background color opacity": "Opacité de l'arrière-plan",
+    "Submenu background": "Arrière-plan du sous-menu",
+    "like menu": "comme le menu",
+    "Submenu background opacity": "Opacité de l'arrière-plan du sous-menu",
+    "Up to 20 color favorites for all color fields. Empty slots are not saved.": "Jusqu'à 20 couleurs favorites pour tous les champs de couleur. Les emplacements vides ne sont pas enregistrés.",
+    "Save colors": "Enregistrer les couleurs",
+    "Export dashboard YAML": "Exporter le YAML du dashboard",
+    "Exports the current editor state as a YAML file to your PC. Home Assistant is not changed.": "Exporte l'état actuel de l'éditeur comme fichier YAML sur votre PC. Home Assistant n'est pas modifié.",
+    "A YAML import can be added here later.": "Un import YAML pourra être ajouté ici plus tard.",
+    "Apply JSON": "Appliquer le JSON",
+    "Cancel": "Annuler",
+    "Save": "Enregistrer",
+    "Header settings": "Réglages de l'en-tête",
+    "Footer settings": "Réglages du pied de page",
+    "Add title": "Ajouter un titre",
+    "Add badge": "Ajouter un badge",
+    "Add footer": "Ajouter un pied de page",
+    "Add section": "Ajouter une section"
+  }
+};
+
+export function normalizeDashboardLayoutV2Language(value?: string): DashboardLayoutV2Language | undefined {
+  const lang = String(value ?? "").trim().toLowerCase().split("-")[0];
+  return SUPPORTED_LANGUAGES.has(lang) ? (lang as DashboardLayoutV2Language) : undefined;
+}
+
+export function resolveDashboardLayoutV2Language(options: {
+  debugLanguage?: string;
+  hass?: any;
+  fallback?: DashboardLayoutV2Language;
+} = {}): DashboardLayoutV2Language {
+  const forced = normalizeDashboardLayoutV2Language(options.debugLanguage);
+  if (forced) return forced;
+  const hassLanguage = normalizeDashboardLayoutV2Language(
+    options.hass?.language ?? options.hass?.locale?.language ?? options.hass?.selectedLanguage
+  );
+  if (hassLanguage) return hassLanguage;
+  const browserLanguage = normalizeDashboardLayoutV2Language(globalThis.navigator?.language);
+  return browserLanguage ?? options.fallback ?? "en";
+}
+
+export function dashboardLayoutV2Translate(language: DashboardLayoutV2Language, value: string): string {
+  if (language === "en") return value;
+  return TRANSLATIONS[language]?.[value] ?? value;
+}
+
+function translateTextPreservingWhitespace(language: DashboardLayoutV2Language, value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return value;
+  const translated = dashboardLayoutV2Translate(language, trimmed);
+  if (translated === trimmed) return value;
+  return value.replace(trimmed, translated);
+}
+
+export function translateDashboardLayoutV2Dom(root: ParentNode | null | undefined, language: DashboardLayoutV2Language) {
+  if (!root || language === "en") return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const textNodes: Text[] = [];
+  while (walker.nextNode()) textNodes.push(walker.currentNode as Text);
+  textNodes.forEach((node) => {
+    node.nodeValue = translateTextPreservingWhitespace(language, node.nodeValue ?? "");
+  });
+
+  const elements = "querySelectorAll" in root ? Array.from(root.querySelectorAll("*")) : [];
+  elements.forEach((element) => {
+    ["title", "aria-label", "placeholder"].forEach((attr) => {
+      const value = element.getAttribute(attr);
+      if (value) element.setAttribute(attr, translateTextPreservingWhitespace(language, value));
+    });
+    const shadowRoot = (element as HTMLElement).shadowRoot;
+    if (shadowRoot) translateDashboardLayoutV2Dom(shadowRoot, language);
+  });
+}

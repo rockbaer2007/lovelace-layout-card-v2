@@ -1,5 +1,11 @@
 import { CSSResultArray, LitElement, css, html, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
+import {
+  DashboardLayoutV2Language,
+  dashboardLayoutV2Translate,
+  resolveDashboardLayoutV2Language,
+  translateDashboardLayoutV2Dom,
+} from "./i18n";
 
 type DashboardLayoutV2DialogParams = {
   hass: any;
@@ -24,7 +30,7 @@ const defaultConfig = {
   inherit_theme: true,
   menu: {
     position: "left",
-    title: "Haus",
+    title: "House",
     show_home: true,
     icon_only: false,
     home: {},
@@ -490,7 +496,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @property({ attribute: false }) viewConfig: any;
 
   @state() private _menuPosition = "left";
-  @state() private _menuTitle = "Haus";
+  @state() private _menuTitle = "House";
   @state() private _showHome = true;
   @state() private _iconOnly = false;
   @state() private _homeTitle = "Home";
@@ -578,6 +584,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _error = "";
   @state() private _activeTab: DashboardLayoutDialogTab = "menu";
   @state() private _wideDialog = false;
+  @state() private _language: DashboardLayoutV2Language = "en";
 
   showDialog(params: DashboardLayoutV2DialogParams) {
     this.hass = params.hass;
@@ -588,6 +595,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const currentViewConfig = rawViews?.[params.viewIndex] ?? params.viewConfig ?? {};
     this.viewConfig = currentViewConfig;
     const currentDashboardLayoutV2 = dashboardLayoutV2ConfigFromView(currentViewConfig);
+    this._language = resolveDashboardLayoutV2Language({
+      debugLanguage: currentViewConfig?.debug?.language ?? currentDashboardLayoutV2?.debug?.language,
+      hass: this.hass,
+    });
+
     const config = normalizeConfig({
       ...currentViewConfig,
       layout: {
@@ -598,7 +610,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       },
     });
     this._menuPosition = config.menu.position ?? "left";
-    this._menuTitle = config.menu.title ?? "Haus";
+    this._menuTitle = config.menu.title ?? "House";
     this._showHome = config.menu.show_home !== false;
     this._iconOnly = config.menu.icon_only === true;
     const homeEntry = this._homeEntryFromView(config.menu.home);
@@ -2073,6 +2085,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._wideDialog = !this._wideDialog;
   }
 
+  private _tr(value: string) {
+    return dashboardLayoutV2Translate(this._language, value);
+  }
+
+  updated() {
+    translateDashboardLayoutV2Dom(this.shadowRoot, this._language);
+  }
+
   private _renderTabButton(tab: DashboardLayoutDialogTab, label: string) {
     const active = this._activeTab === tab;
     return html`
@@ -2349,15 +2369,15 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               <fieldset class="day-symbol-options group wide">
                 <legend>Tages-Symbol</legend>
                 <label>
-                  Feiertag Helper
+                  Holiday helper
                   ${this._renderDaySymbolEntityPicker("holiday")}
                 </label>
                 <label>
-                  Geburtstag Helper
+                  Birthday helper
                   ${this._renderDaySymbolEntityPicker("birthday")}
                 </label>
                 <label>
-                  Weihnachten/Advent Helper
+                  Christmas/Advent helper
                   ${this._renderDaySymbolEntityPicker("christmas")}
                 </label>
                 <label class="wide-style">
