@@ -1,6 +1,6 @@
 # Dashboard Layout Card V2
 
-[English](README.md) | Français
+[English](README.md) | [Deutsch](README.de.md) | Français
 
 Fork V2 installable en parallèle de [thomasloven/lovelace-layout-card](https://github.com/thomasloven/lovelace-layout-card), avec des fonctions supplémentaires pour créer des tableaux de bord Home Assistant.
 
