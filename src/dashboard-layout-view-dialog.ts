@@ -498,28 +498,6 @@ function iconForExistingPage(page: any, existingView: any) {
   return page.icon;
 }
 
-function pageNavigationMetadataForSave(page: any, existingViewsByPath: Map<string, { view: any; index: number }>) {
-  if (isMenuOnlyPage(page)) return pageNavigationMetadata(page);
-  const existingView = existingViewsByPath.get(String(page.path))?.view;
-  const nextPage = {
-    ...page,
-    icon: iconForExistingPage(page, existingView),
-    ...(Array.isArray(page.subpages) && page.subpages.length
-      ? {
-          subpages: page.subpages.map((subpage: any) => {
-            if (isMenuOnlyPage(subpage)) return subpage;
-            const existingSubView = existingViewsByPath.get(String(subpage.path))?.view;
-            return {
-              ...subpage,
-              icon: iconForExistingPage(subpage, existingSubView),
-            };
-          }),
-        }
-      : {}),
-  };
-  return pageNavigationMetadata(nextPage);
-}
-
 function stableViewEditorChrome(view: any) {
   const header = view?.header ?? {};
   const footer = view?.footer ?? {};
@@ -1957,7 +1935,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         visible_users: this._visibleUsers,
       },
       color_presets: this._colorPresetsForSave(),
-      pages: [],
+      pages: normalizedPages.map((page) => pageNavigationMetadata(page)),
     };
 
     const currentPath = String(views[this.viewIndex].path ?? this.viewIndex);
@@ -1965,7 +1943,6 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const existingViewsByPath = new Map(
       views.map((view, index) => [String(view.path ?? index), { view, index }])
     );
-    dashboardLayoutV2.pages = normalizedPages.map((page) => pageNavigationMetadataForSave(page, existingViewsByPath));
     const homeTheme = existingViewsByPath.get(homePath)?.view.theme ?? views[this.viewIndex].theme;
     const applyInheritedTheme = (view: any, viewPath: string) => {
       if (!this._inheritTheme || viewPath === homePath) return view;
@@ -2027,10 +2004,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       return applyHomeSectionsOptions(applyInheritedTheme(nextView, isHomeView ? homePath : viewPath), isHomeView);
     });
 
+    const writtenViewPaths = new Set<string>();
     for (const { page, sourcePath } of normalizedPageEntries) {
       if (isMenuOnlyPage(page)) continue;
 
       const pagePath = String(page.path);
+      const writeKeys = Array.from(new Set([sourcePath, pagePath].filter(Boolean).map(String)));
+      if (writeKeys.some((key) => writtenViewPaths.has(key))) continue;
+      writeKeys.forEach((key) => writtenViewPaths.add(key));
       const existing = sourcePath
         ? existingViewsByPath.get(sourcePath) ?? existingViewsByPath.get(pagePath)
         : existingViewsByPath.get(pagePath);
