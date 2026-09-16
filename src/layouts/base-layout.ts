@@ -475,10 +475,14 @@ export class BaseLayout extends LitElement {
     const message = dashboardLayoutV2NotifyMessage(stateObj?.state);
     if (!message) return html``;
 
+    const borderColor = dashboardLayoutV2ColorWithOpacity(
+      this._dashboardLayoutV2NotifyBorderColor(menu),
+      notify.border_opacity
+    );
     return html`
       <div
         class="dashboard-layout-v2-menu-notify"
-        style=${`--dashboard-layout-v2-notify-border-color: ${this._dashboardLayoutV2NotifyBorderColor(menu)}`}
+        style=${`--dashboard-layout-v2-notify-border-color: ${borderColor}`}
       >
         ${message}
       </div>
@@ -492,7 +496,10 @@ export class BaseLayout extends LitElement {
     const stateObj = this.hass?.states?.[entityId];
     const message = dashboardLayoutV2NotifyMessage(stateObj?.state);
     if (!message) return html``;
-    const borderColor = this._dashboardLayoutV2NotifyBorderColor(menu);
+    const borderColor = dashboardLayoutV2ColorWithOpacity(
+      this._dashboardLayoutV2NotifyBorderColor(menu),
+      notify.border_opacity
+    );
 
     return html`
       <div
@@ -538,10 +545,14 @@ export class BaseLayout extends LitElement {
     const items = (status.items ?? []).filter((item) => item?.entity);
     if (!items.length) return html``;
 
+    const borderColor = dashboardLayoutV2ColorWithOpacity(
+      this._dashboardLayoutV2StatusBorderColor(menu),
+      status.border_opacity
+    );
     return html`
       <div
         class="dashboard-layout-v2-menu-status"
-        style=${`--dashboard-layout-v2-status-border-color: ${this._dashboardLayoutV2StatusBorderColor(menu)}`}
+        style=${`--dashboard-layout-v2-status-border-color: ${borderColor}`}
       >
         ${items.slice(0, 4).map((item) => {
           const stateObj = this.hass?.states?.[item.entity ?? ""];

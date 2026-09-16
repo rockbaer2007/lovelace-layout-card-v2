@@ -161,9 +161,11 @@ views:
             enabled: true
             entity: input_text.dashboard_notification
             border_color: ""
+            border_opacity: 100
           status:
             enabled: true
             border_color: ""
+            border_opacity: 100
             items:
               - entity: sensor.outdoor_temperature
                 label: Außen
@@ -284,6 +286,7 @@ dashboard settings are available from the view editor and allow editing:
 - wider 80vw editor window with 95vw double-click expansion
 - separate Farben tab with up to 20 reusable color favorites for all color fields
 - tab, text, hover, icon, active icon field and background colors
+- notification and status border opacity
 - menu and submenu background color opacity
 - tab/view borders with separate opacity controls and separate 3D frame colors
 - optional submenu for a selected main menu entry, rendered as compact icon

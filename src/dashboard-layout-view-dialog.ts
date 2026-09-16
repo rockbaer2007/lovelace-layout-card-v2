@@ -44,10 +44,12 @@ const defaultConfig = {
       enabled: false,
       entity: DEFAULT_NOTIFY_ENTITY,
       border_color: "",
+      border_opacity: 100,
     },
     status: {
       enabled: false,
       border_color: "",
+      border_opacity: 100,
       items: [],
     },
     style: {
@@ -495,8 +497,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _notifyEnabled = false;
   @state() private _notifyEntity = DEFAULT_NOTIFY_ENTITY;
   @state() private _notifyBorderColor = "";
+  @state() private _notifyBorderOpacity = 100;
   @state() private _statusEnabled = false;
   @state() private _statusBorderColor = "";
+  @state() private _statusBorderOpacity = 100;
   @state() private _statusItems: Array<{ entity?: string; label?: string; unit?: string }> = [];
   @state() private _iconColor = "";
   @state() private _iconActiveColor = "";
@@ -600,8 +604,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._notifyEnabled = config.menu.notify?.enabled === true;
     this._notifyEntity = config.menu.notify?.entity ?? DEFAULT_NOTIFY_ENTITY;
     this._notifyBorderColor = config.menu.notify?.border_color ?? "";
+    this._notifyBorderOpacity = normalizedOpacity(config.menu.notify?.border_opacity);
     this._statusEnabled = config.menu.status?.enabled === true;
     this._statusBorderColor = config.menu.status?.border_color ?? "";
+    this._statusBorderOpacity = normalizedOpacity(config.menu.status?.border_opacity);
     this._statusItems = this._normalizeStatusItems(config.menu.status?.items);
     this._iconColor = config.menu.style?.icon_color ?? "";
     this._iconActiveColor = config.menu.style?.icon_active_color ?? "";
@@ -741,8 +747,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "notifyEnabled") this._notifyEnabled = value;
     if (key === "notifyEntity") this._notifyEntity = value;
     if (key === "notifyBorderColor") this._notifyBorderColor = value;
+    if (key === "notifyBorderOpacity") this._notifyBorderOpacity = normalizedOpacity(value);
     if (key === "statusEnabled") this._statusEnabled = value;
     if (key === "statusBorderColor") this._statusBorderColor = value;
+    if (key === "statusBorderOpacity") this._statusBorderOpacity = normalizedOpacity(value);
     if (key === "iconColor") this._iconColor = value;
     if (key === "iconActiveColor") this._iconActiveColor = value;
     if (key === "iconBackgroundColor") this._iconBackgroundColor = value;
@@ -1759,10 +1767,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           enabled: this._notifyEnabled,
           entity: (this._notifyEntity || DEFAULT_NOTIFY_ENTITY).trim(),
           border_color: this._notifyBorderColor,
+          border_opacity: this._notifyBorderOpacity,
         },
         status: {
           enabled: this._statusEnabled,
           border_color: this._statusBorderColor,
+          border_opacity: this._statusBorderOpacity,
           items: this._statusItemsForSave(),
         },
         style: {
@@ -2806,6 +2816,21 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       this._notifyBorderColor,
                       "leer = rot"
                     )}
+                    <label class="wide-style">
+                      Rahmen Opacity
+                      <div class="range-row">
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          step="1"
+                          .value=${String(this._notifyBorderOpacity)}
+                          @input=${(ev: Event) =>
+                            this._setValue("notifyBorderOpacity", (ev.target as HTMLInputElement).value)}
+                        />
+                        <span>${this._notifyBorderOpacity}%</span>
+                      </div>
+                    </label>
                     ${this._notifyEntityMissing()
                       ? html`
                           <div class="helper-hint">
@@ -2850,6 +2875,21 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       this._statusBorderColor,
                       "leer = Tabumrandung, sonst #ffffff"
                     )}
+                    <label class="wide-style">
+                      Rahmen Opacity
+                      <div class="range-row">
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          step="1"
+                          .value=${String(this._statusBorderOpacity)}
+                          @input=${(ev: Event) =>
+                            this._setValue("statusBorderOpacity", (ev.target as HTMLInputElement).value)}
+                        />
+                        <span>${this._statusBorderOpacity}%</span>
+                      </div>
+                    </label>
                     <div class="status-items">
                       <span>Entity</span>
                       <span>Label</span>

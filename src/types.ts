@@ -140,10 +140,12 @@ export interface DashboardLayoutMenuConfig {
     enabled?: boolean;
     entity?: string;
     border_color?: string;
+    border_opacity?: number;
   };
   status?: {
     enabled?: boolean;
     border_color?: string;
+    border_opacity?: number;
     items?: Array<{
       entity?: string;
       label?: string;
