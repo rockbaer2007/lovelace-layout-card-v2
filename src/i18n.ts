@@ -128,7 +128,10 @@ const TRANSLATIONS: Record<Exclude<DashboardLayoutV2Language, "en">, Record<stri
     "Add title": "Titel hinzufügen",
     "Add badge": "Badge hinzufügen",
     "Add footer": "Fußzeile hinzufügen",
-    "Add section": "Abschnitt hinzufügen"
+    "Add section": "Abschnitt hinzufügen",
+    "Image": "Bild",
+    "Picker": "Auswahl",
+    "Configure Dashboard Layout V2": "Dashboard Layout V2 konfigurieren",
   },
   fr: {
     "Show messages": "Afficher les messages",
@@ -250,7 +253,10 @@ const TRANSLATIONS: Record<Exclude<DashboardLayoutV2Language, "en">, Record<stri
     "Add title": "Ajouter un titre",
     "Add badge": "Ajouter un badge",
     "Add footer": "Ajouter un pied de page",
-    "Add section": "Ajouter une section"
+    "Add section": "Ajouter une section",
+    "Image": "Image",
+    "Picker": "Sélecteur",
+    "Configure Dashboard Layout V2": "Configurer Dashboard Layout V2"
   }
 };
 

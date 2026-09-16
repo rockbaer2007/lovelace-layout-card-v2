@@ -3162,7 +3162,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                 >
                   <option value="none">Keine</option>
                   <option value="color">Color</option>
-                  <option value="image">Bild</option>
+                  <option value="image">Image</option>
                 </select>
               </label>
               ${this._backgroundMode === "color"
@@ -3193,7 +3193,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               ${this._backgroundMode === "image"
                 ? html`
                     <label>
-                      Bild
+                      Image
                       <input
                         placeholder="/local/background.jpg"
                         .value=${this._backgroundImage}
@@ -3206,7 +3206,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                 "Submenu Background",
                 "submenuBackgroundColor",
                 this._submenuBackgroundColor,
-                "wie Menu"
+                "like menu"
               )}
               <label class="wide-style">
                 Submenu Background Opacity
@@ -3232,13 +3232,13 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               Up to 20 color favorites for all color fields. Empty slots are not saved.
             </p>
             <div class="colors-actions">
-              <button type="button" class="primary" @click=${this._saveColorPresets}>Colors speichern</button>
+              <button type="button" class="primary" @click=${this._saveColorPresets}>Save colors</button>
             </div>
             <div class="color-presets-grid">
               <span>Nr.</span>
               <span>Name</span>
               <span>Color</span>
-              <span>Auswahl</span>
+              <span>Picker</span>
               ${normalizeColorPresets(this._colorPresets).map(
                 (preset, index) => html`
                   <span class="preset-index">${index + 1}</span>

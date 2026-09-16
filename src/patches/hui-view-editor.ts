@@ -150,12 +150,12 @@ function patchHuiRootClass() {
         slot="actionItems"
         id="dashboard-layout-v2-button"
         .path=${dashboardLayoutCardV2Icon}
-        .label=${"Dashboard Layout V2 konfigurieren"}
+        .label=${"Configure Dashboard Layout V2"}
         hide-title
         @click=${() => openDashboardLayoutV2Dialog(this)}
       ></ha-icon-button>
       <ha-tooltip placement="bottom" for="dashboard-layout-v2-button">
-        Dashboard Layout V2 konfigurieren
+        Configure Dashboard Layout V2
       </ha-tooltip>
     `;
   };
