@@ -467,6 +467,31 @@ function sectionsFromExistingData(page: any, existingView: any) {
   return cards.length ? [{ type: "grid", cards }] : defaultSections();
 }
 
+function isDefaultEmptySections(value: any) {
+  return Array.isArray(value) && value.length === 1 && value[0]?.type === "grid" && Array.isArray(value[0]?.cards) && value[0].cards.length === 0;
+}
+
+function pageSectionsForSave(page: any, existingView: any) {
+  if (Array.isArray(existingView?.sections) && existingView.sections.length && isDefaultEmptySections(page.sections)) {
+    return existingView.sections;
+  }
+  if (Array.isArray(existingView?.cards) && existingView.cards.length && isDefaultEmptySections(page.sections)) {
+    return [{ type: "grid", cards: existingView.cards }];
+  }
+  return sectionsFromExistingData(page, existingView);
+}
+
+function pageCardsForSave(page: any, existingView: any) {
+  if (Array.isArray(existingView?.cards) && existingView.cards.length && Array.isArray(page.cards) && page.cards.length === 0) {
+    return existingView.cards;
+  }
+  return Array.isArray(page.cards)
+    ? page.cards
+    : Array.isArray(existingView?.cards)
+      ? existingView.cards
+      : [];
+}
+
 function stableViewEditorChrome(view: any) {
   const header = view?.header ?? {};
   const footer = view?.footer ?? {};
@@ -1986,14 +2011,8 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         dashboard_layout_v2: dashboardLayoutV2Reference(homePath),
       };
       const type = pageLayoutType(page);
-      const sections = Array.isArray(page.sections)
-        ? page.sections
-        : sectionsFromExistingData(page, existing?.view);
-      const cards = Array.isArray(page.cards)
-        ? page.cards
-        : Array.isArray(existing?.view.cards)
-          ? existing.view.cards
-          : [];
+      const sections = pageSectionsForSave(page, existing?.view);
+      const cards = pageCardsForSave(page, existing?.view);
 
       if (existing) {
         const updatedView = applyInheritedTheme({
