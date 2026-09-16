@@ -166,6 +166,13 @@ const TRANSLATIONS: Record<Exclude<DashboardLayoutV2Language, "en">, Record<stri
     "3D offset": "3D-Versatz",
     "Special options / edit JSON": "Spezialoptionen / JSON bearbeiten",
     "Default": "Standard",
+    "Debug": "Debug",
+    "Language": "Sprache",
+    "Default (automatic like browser)": "Default (automatisch wie Browser)",
+    "German": "Deutsch",
+    "English": "Englisch",
+    "French": "Französisch",
+    "Writes debug.language for test screenshots. Default keeps automatic detection.": "Schreibt debug.language für Test-Screenshots. Default behält die automatische Erkennung.",
   },
   fr: {
     "Show messages": "Afficher les messages",
@@ -329,7 +336,14 @@ const TRANSLATIONS: Record<Exclude<DashboardLayoutV2Language, "en">, Record<stri
     "Card 3D effect": "Effet 3D de la carte",
     "3D offset": "Décalage 3D",
     "Special options / edit JSON": "Options spéciales / modifier le JSON",
-    "Default": "Standard"
+    "Default": "Standard",
+    "Debug": "Debug",
+    "Language": "Langue",
+    "Default (automatic like browser)": "Default (automatique comme le navigateur)",
+    "German": "Allemand",
+    "English": "Anglais",
+    "French": "Français",
+    "Writes debug.language for test screenshots. Default keeps automatic detection.": "Écrit debug.language pour les captures d'écran de test. Default conserve la détection automatique."
   }
 };
 

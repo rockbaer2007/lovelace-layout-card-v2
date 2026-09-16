@@ -95,16 +95,16 @@ Cards and helpers:
 - `custom:gap-card-v2`
 
 
-## YAML-only language override
+## Debug language override
 
-For documentation screenshots or language testing, the displayed UI language can be forced directly in YAML. This option is intentionally not shown in the editor.
+For documentation screenshots or language testing, the displayed UI language can be forced in the editor under **Advanced > Special options / edit JSON > Debug** or directly in YAML.
 
 ```yaml
 debug:
-  language: de # de, en or fr
+  language: de # empty/default, de, en or fr
 ```
 
-Without `debug.language`, Dashboard Layout Card V2 uses the Home Assistant or browser language automatically and falls back to English. When the view editor opens and the entry is missing, it writes an empty placeholder so it can be filled directly in YAML.
+With an empty `debug.language`, Dashboard Layout Card V2 uses the Home Assistant or browser language automatically and falls back to English. When the view editor opens and the entry is missing, it writes an empty placeholder so it can be filled directly in YAML or selected in the Debug block.
 
 ## Dashboard View Example
 

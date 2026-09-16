@@ -3,6 +3,7 @@ import { property, state } from "lit/decorators.js";
 import {
   DashboardLayoutV2Language,
   dashboardLayoutV2Translate,
+  normalizeDashboardLayoutV2Language,
   resolveDashboardLayoutV2Language,
   translateDashboardLayoutV2Dom,
 } from "./i18n";
@@ -585,6 +586,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _activeTab: DashboardLayoutDialogTab = "menu";
   @state() private _wideDialog = false;
   @state() private _language: DashboardLayoutV2Language = "en";
+  @state() private _debugLanguage = "";
 
   private _viewWithDebugLanguagePlaceholder(view: any) {
     if (view?.debug && Object.prototype.hasOwnProperty.call(view.debug, "language")) return view;
@@ -622,8 +624,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this.viewConfig = currentViewConfig;
     void this._ensureDebugLanguagePlaceholder(params, originalViewConfig);
     const currentDashboardLayoutV2 = dashboardLayoutV2ConfigFromView(currentViewConfig);
+    this._debugLanguage = normalizeDashboardLayoutV2Language(
+      currentViewConfig?.debug?.language ?? currentDashboardLayoutV2?.debug?.language
+    ) ?? "";
     this._language = resolveDashboardLayoutV2Language({
-      debugLanguage: currentViewConfig?.debug?.language ?? currentDashboardLayoutV2?.debug?.language,
+      debugLanguage: this._debugLanguage,
       hass: this.hass,
     });
 
@@ -857,6 +862,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "hideHaChrome") this._hideHaChrome = value;
     if (key === "adminAlwaysVisible") this._adminAlwaysVisible = value;
     if (key === "visibleUsers") this._visibleUsers = value;
+    if (key === "debugLanguage") {
+      this._debugLanguage = normalizeDashboardLayoutV2Language(value) ?? "";
+      this._language = resolveDashboardLayoutV2Language({ debugLanguage: this._debugLanguage, hass: this.hass });
+    }
     if (key === "pagesText") this._pagesText = value;
   }
 
@@ -1791,6 +1800,13 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     return pagesForSave;
   }
 
+  private _debugConfigForSave(view: any = {}) {
+    return {
+      ...(view?.debug ?? {}),
+      language: this._debugLanguage,
+    };
+  }
+
   private _buildExportConfig(pagesForSave = this._pages) {
     const rawConfig = this.lovelace?.rawConfig ?? this.lovelace?.config;
     const views = rawConfig?.views;
@@ -1947,7 +1963,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             }
           : {}),
         ...stableViewEditorChrome(view),
-        ...(isHomeView ? { debug: this._viewWithDebugLanguagePlaceholder(view).debug } : {}),
+        ...(isHomeView ? { debug: this._debugConfigForSave(view) } : {}),
         layout: {
           ...(layoutWithoutDashboardLayoutV2(view.layout) ?? {}),
           dashboard_layout_v2: nextDashboardLayoutV2,
@@ -3279,6 +3295,53 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
           <details class="wide json-box settings-panel" data-tab="advanced" ?open=${this._jsonExpanded} @toggle=${(ev: Event) => (this._jsonExpanded = (ev.target as HTMLDetailsElement).open)}>
             <summary>Special options / edit JSON</summary>
+            <fieldset class="group wide debug-language-options">
+              <legend>Debug</legend>
+              <span class="field-label">Language</span>
+              <div class="radio-grid">
+                <label class="check compact-check">
+                  <input
+                    type="radio"
+                    name="dashboard-layout-v2-debug-language"
+                    value=""
+                    .checked=${!this._debugLanguage}
+                    @change=${() => this._setValue("debugLanguage", "")}
+                  />
+                  Default (automatic like browser)
+                </label>
+                <label class="check compact-check">
+                  <input
+                    type="radio"
+                    name="dashboard-layout-v2-debug-language"
+                    value="de"
+                    .checked=${this._debugLanguage === "de"}
+                    @change=${() => this._setValue("debugLanguage", "de")}
+                  />
+                  German
+                </label>
+                <label class="check compact-check">
+                  <input
+                    type="radio"
+                    name="dashboard-layout-v2-debug-language"
+                    value="en"
+                    .checked=${this._debugLanguage === "en"}
+                    @change=${() => this._setValue("debugLanguage", "en")}
+                  />
+                  English
+                </label>
+                <label class="check compact-check">
+                  <input
+                    type="radio"
+                    name="dashboard-layout-v2-debug-language"
+                    value="fr"
+                    .checked=${this._debugLanguage === "fr"}
+                    @change=${() => this._setValue("debugLanguage", "fr")}
+                  />
+                  French
+                </label>
+              </div>
+              <p class="hint">Writes debug.language for test screenshots. Default keeps automatic detection.</p>
+            </fieldset>
             <textarea
               .value=${this._pagesText}
               @input=${(ev: Event) => this._setValue("pagesText", (ev.target as HTMLTextAreaElement).value)}
