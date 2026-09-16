@@ -2419,7 +2419,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         ? html`
                             <label class="divider-color-field">
                               Trennerfarbe
-                              <div class="color-row">
+                              <div class=${`color-row${this._activeColorPresets().length ? " has-presets" : ""}`}>
                                 <input
                                   class="text"
                                   .value=${selectedPage.color ?? "#ffffff"}
@@ -2435,11 +2435,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                                   @input=${(ev: Event) =>
                                     this._updatePage(this._selectedPageIndex, "color", (ev.target as HTMLInputElement).value)}
                                 />
+                                ${this._renderColorPresetSelect("Trennerfarbe", (value) =>
+                                  this._updatePage(this._selectedPageIndex, "color", value)
+                                )}
                               </div>
                             </label>
                             <label class="divider-color-field">
                               3D-Effekt Trenner
-                              <div class="color-row">
+                              <div class=${`color-row${this._activeColorPresets().length ? " has-presets" : ""}`}>
                                 <input
                                   class="text"
                                   .value=${selectedPage.shadow_frame_color ?? "transparent"}
@@ -2463,6 +2466,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                                       (ev.target as HTMLInputElement).value
                                     )}
                                 />
+                                ${this._renderColorPresetSelect("3D-Effekt Trenner", (value) =>
+                                  this._updatePage(this._selectedPageIndex, "shadow_frame_color", value)
+                                )}
                               </div>
                             </label>
                             <label class="wide-style">

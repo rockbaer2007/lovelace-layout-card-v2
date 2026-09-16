@@ -303,7 +303,7 @@ Normal tab changes should be done through the form fields.
 
 The **Farben** tab stores up to 20 reusable color favorites separately from
 **Styles Global**. Each favorite can have a name and a color value. Every color
-field keeps direct text input and the normal color picker, and additionally shows
+field, including divider colors, keeps direct text input and the normal color picker, and additionally shows
 a favorite dropdown as soon as at least one favorite color is defined. The
 **Farben speichern** button writes only the color favorites, without saving other
 open editor changes.
