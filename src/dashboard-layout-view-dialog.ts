@@ -1965,6 +1965,47 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._close();
   }
 
+  private async _saveColorPresets() {
+    const rawConfig = this.lovelace?.rawConfig ?? this.lovelace?.config;
+    const views = rawConfig?.views;
+    if (!Array.isArray(views) || !views[this.viewIndex]) {
+      this._error = "Farben konnten nicht gespeichert werden: aktuelle View nicht gefunden.";
+      return;
+    }
+
+    const currentView = views[this.viewIndex];
+    const currentLayoutConfig = currentView?.layout?.dashboard_layout_v2 ?? currentView?.dashboard_layout_v2;
+    const targetPath = currentLayoutConfig?.inherits_from ?? this._homePath ?? currentView?.path ?? this.viewIndex;
+    const targetIndex = views.findIndex((view: any, index: number) => String(view?.path ?? index) === String(targetPath));
+    const saveIndex = targetIndex >= 0 ? targetIndex : this.viewIndex;
+    const targetView = views[saveIndex];
+    const existingDashboardLayoutV2 =
+      targetView?.layout?.dashboard_layout_v2 ??
+      targetView?.dashboard_layout_v2 ??
+      currentLayoutConfig ??
+      {};
+    const nextDashboardLayoutV2 = {
+      ...existingDashboardLayoutV2,
+      color_presets: this._colorPresetsForSave(),
+    };
+    const nextViews = views.map((view: any, index: number) => {
+      if (index !== saveIndex) return view;
+      return {
+        ...view,
+        layout: {
+          ...(view.layout ?? {}),
+          dashboard_layout_v2: nextDashboardLayoutV2,
+        },
+      };
+    });
+
+    await this.lovelace.saveConfig({
+      ...rawConfig,
+      views: nextViews,
+    });
+    this._error = "Farben gespeichert.";
+  }
+
   private _exportDashboardYaml() {
     try {
       const exportConfig = this._buildExportConfig(this._pagesForCurrentEditorState());
@@ -3054,6 +3095,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             <p class="hint">
               Bis zu 20 Farbfavoriten für alle Farbfelder. Leere Plätze werden nicht gespeichert.
             </p>
+            <div class="colors-actions">
+              <button type="button" class="primary" @click=${this._saveColorPresets}>Farben speichern</button>
+            </div>
             <div class="color-presets-grid">
               <span>Nr.</span>
               <span>Name</span>
@@ -3282,6 +3326,16 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           width: 100%;
           min-width: 0;
           box-sizing: border-box;
+        }
+
+        .colors-actions {
+          display: flex;
+          justify-content: flex-end;
+          margin-bottom: 12px;
+        }
+
+        .colors-actions button {
+          width: auto;
         }
 
         .color-presets-grid {
