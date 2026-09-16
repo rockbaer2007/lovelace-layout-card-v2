@@ -104,7 +104,7 @@ debug:
   language: de # de, en or fr
 ```
 
-Without `debug.language`, Dashboard Layout Card V2 uses the Home Assistant or browser language automatically and falls back to English.
+Without `debug.language`, Dashboard Layout Card V2 uses the Home Assistant or browser language automatically and falls back to English. When the view editor opens and the entry is missing, it writes an empty placeholder so it can be filled directly in YAML.
 
 ## Dashboard View Example
 

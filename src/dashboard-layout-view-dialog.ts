@@ -586,14 +586,41 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _wideDialog = false;
   @state() private _language: DashboardLayoutV2Language = "en";
 
+  private _viewWithDebugLanguagePlaceholder(view: any) {
+    if (view?.debug && Object.prototype.hasOwnProperty.call(view.debug, "language")) return view;
+    return {
+      ...view,
+      debug: {
+        ...(view?.debug ?? {}),
+        language: "",
+      },
+    };
+  }
+
+  private async _ensureDebugLanguagePlaceholder(params: DashboardLayoutV2DialogParams, viewConfig: any) {
+    if (viewConfig?.debug && Object.prototype.hasOwnProperty.call(viewConfig.debug, "language")) return;
+    const rawConfig = params.lovelace?.rawConfig ?? params.lovelace?.config;
+    const views = rawConfig?.views;
+    if (!Array.isArray(views) || !views[params.viewIndex] || typeof params.lovelace?.saveConfig !== "function") return;
+    const nextViews = views.map((view: any, index: number) =>
+      index === params.viewIndex ? this._viewWithDebugLanguagePlaceholder(view) : view
+    );
+    await params.lovelace.saveConfig({
+      ...rawConfig,
+      views: nextViews,
+    });
+  }
+
   showDialog(params: DashboardLayoutV2DialogParams) {
     this.hass = params.hass;
     this.lovelace = params.lovelace;
     this.viewIndex = params.viewIndex;
 
     const rawViews = params.lovelace?.rawConfig?.views ?? params.lovelace?.config?.views ?? [];
-    const currentViewConfig = rawViews?.[params.viewIndex] ?? params.viewConfig ?? {};
+    const originalViewConfig = rawViews?.[params.viewIndex] ?? params.viewConfig ?? {};
+    const currentViewConfig = this._viewWithDebugLanguagePlaceholder(originalViewConfig);
     this.viewConfig = currentViewConfig;
+    void this._ensureDebugLanguagePlaceholder(params, originalViewConfig);
     const currentDashboardLayoutV2 = dashboardLayoutV2ConfigFromView(currentViewConfig);
     this._language = resolveDashboardLayoutV2Language({
       debugLanguage: currentViewConfig?.debug?.language ?? currentDashboardLayoutV2?.debug?.language,
@@ -1920,6 +1947,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             }
           : {}),
         ...stableViewEditorChrome(view),
+        ...(isHomeView ? { debug: this._viewWithDebugLanguagePlaceholder(view).debug } : {}),
         layout: {
           ...(layoutWithoutDashboardLayoutV2(view.layout) ?? {}),
           dashboard_layout_v2: nextDashboardLayoutV2,

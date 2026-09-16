@@ -128,7 +128,7 @@ debug:
   language: de # de, en or fr
 ```
 
-Without this entry, the card uses Home Assistant/browser language detection and falls back to English.
+Without this entry, the card uses Home Assistant/browser language detection and falls back to English. When the view editor opens and the entry is missing, it writes an empty placeholder so it can be filled directly in YAML.
 
 ## Installation through HACS
 
