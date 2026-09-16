@@ -328,15 +328,20 @@ export class BaseLayout extends LitElement {
 
   _dashboardLayoutV2IconInlineStyle() {
     const size = dashboardLayoutV2IconSize(this._dashboardLayoutV2Menu().style?.icon_size);
+    const numericSize = Number(size.replace(/[^\d.]/g, "")) || 20;
+    const scale = Math.max(0.58, Math.min(2.67, numericSize / 24));
     return [
       `--dashboard-layout-v2-icon-size: ${size}`,
-      `--mdc-icon-size: ${size}`,
-      `--ha-icon-size: ${size}`,
-      `--iron-icon-width: ${size}`,
-      `--iron-icon-height: ${size}`,
-      `width: ${size}`,
-      `height: ${size}`,
-      `font-size: ${size}`,
+      "--mdc-icon-size: 24px",
+      "--ha-icon-size: 24px",
+      "--iron-icon-width: 24px",
+      "--iron-icon-height: 24px",
+      "width: 24px !important",
+      "height: 24px !important",
+      "min-width: 24px !important",
+      "font-size: 24px",
+      `transform: scale(${scale})`,
+      "transform-origin: center",
     ].join(";");
   }
 
