@@ -562,7 +562,7 @@ export class BaseLayout extends LitElement {
   _dashboardLayoutV2MenuStyle(menu: DashboardLayoutMenuConfig, submenu = false) {
     const style = menu.style ?? {};
     const background = submenu && style.submenu_background_color
-      ? style.submenu_background_color
+      ? dashboardLayoutV2ColorWithOpacity(style.submenu_background_color, style.submenu_background_opacity)
       : style.background_mode === "color" && style.background_color
         ? dashboardLayoutV2ColorWithOpacity(style.background_color, style.background_opacity)
         : style.background_mode === "image" && style.background_image

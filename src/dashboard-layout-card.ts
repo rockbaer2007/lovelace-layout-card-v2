@@ -485,13 +485,21 @@ class DashboardLayoutCardV2 extends LitElement {
   }
 
   _renderSubMenu() {
+    const menu = normalizeMenu(this._config.menu);
+    const style = menu.style ?? {};
     const mainPage = this._activeMainPageConfig;
     const subpages = this._activeSubPages();
+    const submenuBackground = style.submenu_background_color
+      ? colorWithOpacity(style.submenu_background_color, style.submenu_background_opacity)
+      : "";
     return html`
       <nav
         class="submenu"
         aria-label=${`${pageTitle(mainPage)} Untermenü`}
-        style=${`--dashboard-layout-v2-submenu-offset: ${this._subMenuOffset()}px`}
+        style=${[
+          `--dashboard-layout-v2-submenu-offset: ${this._subMenuOffset()}px`,
+          submenuBackground ? `--dashboard-layout-v2-menu-background: ${submenuBackground}` : "",
+        ].filter(Boolean).join(";")}
       >
         ${subpages.length
           ? html`

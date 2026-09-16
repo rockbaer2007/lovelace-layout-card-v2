@@ -80,6 +80,7 @@ const defaultConfig = {
       background_opacity: 100,
       background_image: "",
       submenu_background_color: "",
+      submenu_background_opacity: 100,
     },
   },
   chrome: {
@@ -516,6 +517,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _backgroundOpacity = 100;
   @state() private _backgroundImage = "";
   @state() private _submenuBackgroundColor = "";
+  @state() private _submenuBackgroundOpacity = 100;
   @state() private _hideHaChrome = false;
   @state() private _adminAlwaysVisible = true;
   @state() private _visibleUsers = "";
@@ -619,6 +621,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._backgroundOpacity = normalizedOpacity(config.menu.style?.background_opacity);
     this._backgroundImage = config.menu.style?.background_image ?? "";
     this._submenuBackgroundColor = config.menu.style?.submenu_background_color ?? "";
+    this._submenuBackgroundOpacity = normalizedOpacity(config.menu.style?.submenu_background_opacity);
     this._hideHaChrome = config.chrome?.hide_ha_chrome === true;
     this._adminAlwaysVisible = config.chrome?.admin_always_visible !== false;
     this._visibleUsers = Array.isArray(config.chrome?.visible_users)
@@ -757,6 +760,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "backgroundOpacity") this._backgroundOpacity = normalizedOpacity(value);
     if (key === "backgroundImage") this._backgroundImage = value;
     if (key === "submenuBackgroundColor") this._submenuBackgroundColor = value;
+    if (key === "submenuBackgroundOpacity") this._submenuBackgroundOpacity = normalizedOpacity(value);
     if (key === "hideHaChrome") this._hideHaChrome = value;
     if (key === "adminAlwaysVisible") this._adminAlwaysVisible = value;
     if (key === "visibleUsers") this._visibleUsers = value;
@@ -1726,6 +1730,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           background_opacity: this._backgroundOpacity,
           background_image: this._backgroundImage,
           submenu_background_color: this._submenuBackgroundColor,
+          submenu_background_opacity: this._submenuBackgroundOpacity,
         },
       },
       chrome: {
@@ -2954,6 +2959,21 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                 this._submenuBackgroundColor,
                 "wie Menü"
               )}
+              <label class="wide-style">
+                Submenü Hintergrund Opacity
+                <div class="range-row">
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="1"
+                    .value=${String(this._submenuBackgroundOpacity)}
+                    @input=${(ev: Event) =>
+                      this._setValue("submenuBackgroundOpacity", (ev.target as HTMLInputElement).value)}
+                  />
+                  <span>${this._submenuBackgroundOpacity}%</span>
+                </div>
+              </label>
             </div>
           </details>
 

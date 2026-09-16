@@ -45,7 +45,7 @@ layout-card without overwriting it.
 - Supports configurable tab colors, text colors, hover colors, icon color, icon
   background color, active icon background color, icon shape, tab border, view
   card border, border opacity, separate tab and view 3D frames, menu/submenu
-  background, background color opacity, digital or analog clock, optional analog
+  background, menu and submenu background opacity, digital or analog clock, optional analog
   hour marks, minute marks and seconds hand, date display, weekday display,
   clock size and date text size.
 - Can optionally hide the Home Assistant sidebar/header for selected dashboard
@@ -196,6 +196,7 @@ views:
             background_opacity: 100
             background_image: ""
             submenu_background_color: ""
+            submenu_background_opacity: 100
         chrome:
           hide_ha_chrome: true
           admin_always_visible: true
@@ -274,7 +275,7 @@ dashboard settings are available from the view editor and allow editing:
 - per-entry reset action for returning one button to the global colors
 - YAML backup export from the Backup tab
 - tab, text, hover, icon, active icon field and background colors
-- menu background color opacity
+- menu and submenu background color opacity
 - tab/view borders with separate opacity controls and separate 3D frame colors
 - optional submenu for a selected main menu entry, rendered as compact icon
   buttons next to the main menu

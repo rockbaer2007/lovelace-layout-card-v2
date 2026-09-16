@@ -180,6 +180,7 @@ export interface DashboardLayoutMenuConfig {
     background_opacity?: number;
     background_image?: string;
     submenu_background_color?: string;
+    submenu_background_opacity?: number;
   };
 }
 
