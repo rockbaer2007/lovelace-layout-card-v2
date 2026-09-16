@@ -304,6 +304,23 @@ dashboard settings are available from the view editor and allow editing:
 The JSON section in the editor is optional and meant for advanced page edits.
 Normal tab changes should be done through the form fields.
 
+### Current editor options
+
+The Dashboard Layout V2 view dialog is organized into tabs:
+
+| Tab | Options |
+| --- | --- |
+| Menü | Menu position (`left`, `none`, `right`), menu title and global icon-only mode for kiosk/tablet layouts. |
+| Hauptseite | Show or hide the home entry, home title, path, icon, per-home icon/button colors, maximum Sections V2 columns, dense section placement, extra top spacing and theme inheritance from the home view. |
+| Anzeige | Clock mode (`none`, `digital`, `analog`), analog hour marks, minute marks and seconds hand, date visibility, weekday mode (`none`, `short`, `long`), weekend color, clock/ring color, analog mark and hand colors, holiday/birthday/christmas helper entities and day-symbol size. |
+| Seiten | Main menu pages, spacers and dividers; title, path, icon, layout type, maximum columns, per-entry colors, reset to global colors, first submenu button behavior, divider color, divider 3D frame color, divider opacity and divider height. |
+| Submenü | Subpages for the selected main page with title, path, icon, layout type, maximum columns, per-entry colors and reset to global colors. The submenu tab appears when the selected main entry has subpages. |
+| Meldungen | Optional notification popup based on a text helper, notification border color and opacity, optional status values with up to four entity rows, labels, units, status border color and status border opacity. |
+| Styles Global | Clock size, date size, weekday wrap size, tab/text/hover colors, menu border color and opacity, tab 3D frame color, card/content border color and opacity, card 3D frame color, shared 3D offset, icon color, active icon color, icon field color, active icon field color, icon shape, icon size, menu background mode (`none`, `color`, `image`), menu background color and opacity, menu background image, submenu background color and submenu background opacity. |
+| Farben | Up to 20 reusable color favorites. The dedicated **Farben speichern** button saves only the favorites. |
+| Backup | Export the current dashboard editor state as YAML to the local computer. |
+| Erweitert | Home Assistant chrome settings, optional always-visible admin controls, visible user list and advanced JSON editing for page data. |
+
 ## Color favorites
 
 The **Farben** tab stores up to 20 reusable color favorites separately from
