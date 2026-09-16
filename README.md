@@ -29,6 +29,8 @@ layout-card without overwriting it.
   entry.
 - The editor can export the current dashboard configuration as a YAML backup
   file without writing anything back to Home Assistant.
+- A separate Farben tab can store up to 20 reusable color favorites for all
+  color fields without mixing them into Styles Global.
 - Supports non-clickable menu spacers and rounded divider bars.
 - Divider bars support their own color, opacity and optional 3D frame color.
 - Supports an optional notification box above the side-menu status values, and
@@ -197,6 +199,11 @@ views:
             background_image: ""
             submenu_background_color: ""
             submenu_background_opacity: 100
+        color_presets:
+          - name: Blau aktiv
+            value: "#333aff"
+          - name: Icon gelb
+            value: "#fbff00"
         chrome:
           hide_ha_chrome: true
           admin_always_visible: true
@@ -274,6 +281,7 @@ dashboard settings are available from the view editor and allow editing:
   background and button background colors, including the home entry
 - per-entry reset action for returning one button to the global colors
 - YAML backup export from the Backup tab
+- separate Farben tab with up to 20 reusable color favorites for all color fields
 - tab, text, hover, icon, active icon field and background colors
 - menu and submenu background color opacity
 - tab/view borders with separate opacity controls and separate 3D frame colors
@@ -290,6 +298,23 @@ dashboard settings are available from the view editor and allow editing:
 
 The JSON section in the editor is optional and meant for advanced page edits.
 Normal tab changes should be done through the form fields.
+
+## Color favorites
+
+The **Farben** tab stores up to 20 reusable color favorites separately from
+**Styles Global**. Each favorite can have a name and a color value. Every color
+field keeps direct text input and the normal color picker, and additionally shows
+a favorite dropdown as soon as at least one favorite color is defined.
+
+Example:
+
+```yaml
+color_presets:
+  - name: Blau aktiv
+    value: "#333aff"
+  - name: Icon gelb
+    value: "#fbff00"
+```
 
 ## Per-entry menu colors and YAML backup
 

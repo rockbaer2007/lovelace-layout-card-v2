@@ -53,6 +53,7 @@ export interface ViewConfig {
       inherit_theme?: boolean;
       menu?: DashboardLayoutMenuConfig;
       chrome?: DashboardLayoutChromeConfig;
+      color_presets?: Array<DashboardLayoutColorPreset>;
       pages?: Array<DashboardLayoutPageConfig & { path?: string }>;
     };
   };
@@ -95,6 +96,11 @@ export interface LayoutCardConfig {
 export type DashboardLayoutMenuPosition = "left" | "none" | "right";
 export type DashboardLayoutClockMode = "none" | "digital" | "analog";
 export type DashboardLayoutWeekdayMode = "none" | "short" | "long";
+
+export interface DashboardLayoutColorPreset {
+  name?: string;
+  value?: string;
+}
 
 export interface DashboardLayoutChromeConfig {
   hide_ha_chrome?: boolean;
@@ -212,5 +218,6 @@ export interface DashboardLayoutCardConfig {
   type: "custom:dashboard-layout-card-v2";
   menu?: DashboardLayoutMenuPosition | DashboardLayoutMenuConfig;
   chrome?: DashboardLayoutChromeConfig;
+  color_presets?: Array<DashboardLayoutColorPreset>;
   pages?: Array<DashboardLayoutPageConfig>;
 }

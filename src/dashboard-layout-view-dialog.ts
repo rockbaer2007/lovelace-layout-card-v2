@@ -13,7 +13,12 @@ const DEFAULT_HOLIDAY_ENTITY = "input_boolean.dashboard_holiday";
 const DEFAULT_BIRTHDAY_ENTITY = "input_boolean.dashboard_birthday";
 const DEFAULT_CHRISTMAS_ENTITY = "input_boolean.dashboard_christmas";
 
-type DashboardLayoutDialogTab = "menu" | "display" | "pages" | "submenu" | "messages" | "style" | "backup" | "advanced";
+type DashboardLayoutDialogTab = "menu" | "display" | "pages" | "submenu" | "messages" | "style" | "colors" | "backup" | "advanced";
+
+type DashboardLayoutColorPreset = {
+  name?: string;
+  value?: string;
+};
 
 const defaultConfig = {
   inherit_theme: true,
@@ -88,6 +93,7 @@ const defaultConfig = {
     admin_always_visible: true,
     visible_users: "",
   },
+  color_presets: [],
   pages: [],
 };
 
@@ -101,6 +107,7 @@ const DASHBOARD_LAYOUT_V2_VIEW_TYPES = new Set([
 ]);
 const MENU_ONLY_PAGE_TYPES = new Set(["spacer", "divider"]);
 const STATUS_LABEL_MAX_LENGTH = 18;
+const COLOR_PRESET_COUNT = 20;
 const PAGE_COLOR_KEYS = [
   "icon_color",
   "icon_active_color",
@@ -308,6 +315,14 @@ function pageNavigationMetadata(page: any) {
 
 function colorPickerValue(value: string) {
   return /^#[0-9a-f]{6}$/i.test(value) ? value : "#000000";
+}
+
+function normalizeColorPresets(presets: any[] = []): DashboardLayoutColorPreset[] {
+  const source = Array.isArray(presets) ? presets : [];
+  return Array.from({ length: COLOR_PRESET_COUNT }, (_, index) => ({
+    name: String(source[index]?.name ?? ""),
+    value: String(source[index]?.value ?? ""),
+  }));
 }
 
 function normalizedTitle(value: any) {
@@ -522,6 +537,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _adminAlwaysVisible = true;
   @state() private _visibleUsers = "";
   @state() private _pages: any[] = [];
+  @state() private _colorPresets: DashboardLayoutColorPreset[] = normalizeColorPresets();
   private _pageSourcePaths: Array<string | undefined> = [];
   @state() private _selectedPageIndex = 0;
   @state() private _selectedSubPageIndex = 0;
@@ -627,6 +643,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._visibleUsers = Array.isArray(config.chrome?.visible_users)
       ? config.chrome.visible_users.join(", ")
       : config.chrome?.visible_users ?? "";
+    this._colorPresets = normalizeColorPresets(config.color_presets);
     const viewsByPath = new Map(
       Array.isArray(rawViews)
         ? rawViews.map((view, index) => [String(view.path ?? index), view])
@@ -801,6 +818,56 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         unit: item.unit?.trim() ?? "",
       }))
       .filter((item) => item.entity);
+  }
+
+  private _activeColorPresets() {
+    return normalizeColorPresets(this._colorPresets).filter((preset) => preset.value?.trim());
+  }
+
+  private _colorPresetsForSave() {
+    return normalizeColorPresets(this._colorPresets)
+      .map((preset) => ({
+        name: preset.name?.trim() ?? "",
+        value: preset.value?.trim() ?? "",
+      }))
+      .filter((preset) => preset.name || preset.value);
+  }
+
+  private _updateColorPreset(index: number, key: "name" | "value", value: string) {
+    const presets = normalizeColorPresets(this._colorPresets);
+    presets[index] = {
+      ...presets[index],
+      [key]: value,
+    };
+    this._colorPresets = presets;
+  }
+
+  private _renderColorPresetSelect(label: string, apply: (value: string) => void) {
+    const presets = this._activeColorPresets();
+    if (!presets.length) return nothing;
+    return html`
+      <select
+        class="color-preset"
+        title=${`${label}: Farbfavorit wählen`}
+        .value=${""}
+        @change=${(ev: Event) => {
+          const select = ev.target as HTMLSelectElement;
+          if (select.value) {
+            apply(select.value);
+            select.value = "";
+          }
+        }}
+      >
+        <option value="">Favorit wählen</option>
+        ${presets.map(
+          (preset, index) => html`
+            <option value=${preset.value ?? ""}>
+              ${preset.name?.trim() || `Farbe ${index + 1}`} · ${preset.value}
+            </option>
+          `
+        )}
+      </select>
+    `;
   }
 
   private _tooLongStatusLabels() {
@@ -1104,23 +1171,25 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   }
 
   private _renderColorField(label: string, key: string, value: string, placeholder: string) {
+    const apply = (nextValue: string) => this._setValue(key, nextValue);
     return html`
       <label>
         ${label}
-        <div class="color-row">
+        <div class=${`color-row${this._activeColorPresets().length ? " has-presets" : ""}`}>
           <input
             class="text"
             placeholder=${placeholder}
             .value=${value}
-            @input=${(ev: Event) => this._setValue(key, (ev.target as HTMLInputElement).value)}
+            @input=${(ev: Event) => apply((ev.target as HTMLInputElement).value)}
           />
           <input
             class="color"
             type="color"
             .value=${colorPickerValue(value)}
             title=${`${label} auswählen`}
-            @input=${(ev: Event) => this._setValue(key, (ev.target as HTMLInputElement).value)}
+            @input=${(ev: Event) => apply((ev.target as HTMLInputElement).value)}
           />
+          ${this._renderColorPresetSelect(label, apply)}
         </div>
       </label>
     `;
@@ -1131,7 +1200,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     return html`
       <label>
         ${label}
-        <div class="color-row">
+        <div class=${`color-row${this._activeColorPresets().length ? " has-presets" : ""}`}>
           <input
             class="text"
             placeholder=${placeholder}
@@ -1145,6 +1214,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             title=${`${label} auswählen`}
             @input=${(ev: Event) => update((ev.target as HTMLInputElement).value)}
           />
+          ${this._renderColorPresetSelect(label, update)}
         </div>
       </label>
     `;
@@ -1738,6 +1808,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         admin_always_visible: this._adminAlwaysVisible,
         visible_users: this._visibleUsers,
       },
+      color_presets: this._colorPresetsForSave(),
       pages: normalizedPages.map((page) => pageNavigationMetadata(page)),
     };
 
@@ -1962,6 +2033,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           ${selectedSubpages.length ? this._renderTabButton("submenu", "Submenü") : nothing}
           ${this._renderTabButton("messages", "Meldungen")}
           ${this._renderTabButton("style", "Styles Global")}
+          ${this._renderTabButton("colors", "Farben")}
           ${this._renderTabButton("backup", "Backup")}
           ${this._renderTabButton("advanced", "Erweitert")}
         </nav>
@@ -2977,6 +3049,45 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             </div>
           </details>
 
+          <details class="wide collapsible-group settings-panel" data-tab="colors" open>
+            <summary>Farben</summary>
+            <p class="hint">
+              Bis zu 20 Farbfavoriten für alle Farbfelder. Leere Plätze werden nicht gespeichert.
+            </p>
+            <div class="color-presets-grid">
+              <span>Nr.</span>
+              <span>Name</span>
+              <span>Farbe</span>
+              <span>Auswahl</span>
+              ${normalizeColorPresets(this._colorPresets).map(
+                (preset, index) => html`
+                  <span class="preset-index">${index + 1}</span>
+                  <input
+                    placeholder=${`Farbe ${index + 1}`}
+                    .value=${preset.name ?? ""}
+                    @input=${(ev: Event) =>
+                      this._updateColorPreset(index, "name", (ev.target as HTMLInputElement).value)}
+                  />
+                  <input
+                    class="text"
+                    placeholder="#33ffe7"
+                    .value=${preset.value ?? ""}
+                    @input=${(ev: Event) =>
+                      this._updateColorPreset(index, "value", (ev.target as HTMLInputElement).value)}
+                  />
+                  <input
+                    class="color"
+                    type="color"
+                    .value=${colorPickerValue(preset.value ?? "")}
+                    title=${`Farbe ${index + 1} auswählen`}
+                    @input=${(ev: Event) =>
+                      this._updateColorPreset(index, "value", (ev.target as HTMLInputElement).value)}
+                  />
+                `
+              )}
+            </div>
+          </details>
+
           <details class="wide json-box settings-panel" data-tab="backup" open>
             <summary>Backup</summary>
             <p class="hint">
@@ -3107,6 +3218,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         .content[data-active-tab="submenu"] .settings-panel:not([data-tab="submenu"]),
         .content[data-active-tab="messages"] .settings-panel:not([data-tab="messages"]),
         .content[data-active-tab="style"] .settings-panel:not([data-tab="style"]),
+        .content[data-active-tab="colors"] .settings-panel:not([data-tab="colors"]),
         .content[data-active-tab="backup"] .settings-panel:not([data-tab="backup"]),
         .content[data-active-tab="advanced"] .settings-panel:not([data-tab="advanced"]) {
           display: none;
@@ -3161,8 +3273,36 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           align-items: center;
         }
 
-        .color-row .text {
+        .color-row.has-presets {
+          grid-template-columns: minmax(0, 1fr) 48px minmax(120px, 0.65fr);
+        }
+
+        .color-row .text,
+        .color-row .color-preset {
           width: 100%;
+          min-width: 0;
+          box-sizing: border-box;
+        }
+
+        .color-presets-grid {
+          display: grid;
+          grid-template-columns: 44px minmax(120px, 1fr) minmax(120px, 1fr) 56px;
+          gap: 8px;
+          align-items: center;
+        }
+
+        .color-presets-grid > span {
+          color: var(--secondary-text-color);
+          font-size: 12px;
+          font-weight: 700;
+        }
+
+        .color-presets-grid .preset-index {
+          text-align: center;
+          font-size: 14px;
+        }
+
+        .color-presets-grid input {
           min-width: 0;
           box-sizing: border-box;
         }
