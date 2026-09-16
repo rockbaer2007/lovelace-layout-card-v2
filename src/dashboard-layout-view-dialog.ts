@@ -507,7 +507,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _iconBackgroundColor = "";
   @state() private _iconBackgroundActiveColor = "";
   @state() private _iconShape = "rounded-square";
-  @state() private _iconSize = "20px";
+  @state() private _iconSize = "20";
   @state() private _activeTabColor = "";
   @state() private _inactiveTabColor = "";
   @state() private _hoverTabColor = "";
@@ -614,7 +614,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._iconBackgroundColor = config.menu.style?.icon_background_color ?? config.menu.style?.icon_circle_color ?? "";
     this._iconBackgroundActiveColor = config.menu.style?.icon_background_active_color ?? "";
     this._iconShape = config.menu.style?.icon_shape ?? "rounded-square";
-    this._iconSize = normalizedIconSize(config.menu.style?.icon_size ?? "20px");
+    this._iconSize = clockSizeInputValue(config.menu.style?.icon_size ?? "20px");
     this._activeTabColor = config.menu.style?.active_tab_color ?? "";
     this._inactiveTabColor = config.menu.style?.inactive_tab_color ?? "";
     this._hoverTabColor = config.menu.style?.hover_tab_color ?? "";
@@ -756,7 +756,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "iconBackgroundColor") this._iconBackgroundColor = value;
     if (key === "iconBackgroundActiveColor") this._iconBackgroundActiveColor = value;
     if (key === "iconShape") this._iconShape = value;
-    if (key === "iconSize") this._iconSize = normalizedIconSize(value);
+    if (key === "iconSize") this._iconSize = value;
     if (key === "activeTabColor") this._activeTabColor = value;
     if (key === "inactiveTabColor") this._inactiveTabColor = value;
     if (key === "hoverTabColor") this._hoverTabColor = value;
@@ -1781,7 +1781,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           icon_background_color: this._iconBackgroundColor,
           icon_background_active_color: this._iconBackgroundActiveColor,
           icon_shape: this._iconShape,
-          icon_size: this._iconSize,
+          icon_size: normalizedIconSize(this._iconSize),
           active_tab_color: this._activeTabColor,
           inactive_tab_color: this._inactiveTabColor,
           hover_tab_color: this._hoverTabColor,
@@ -3046,10 +3046,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         min="14"
                         max="64"
                         step="1"
-                        .value=${clockSizeInputValue(this._iconSize)}
+                        .value=${this._iconSize}
                         @input=${(ev: Event) => this._setValue("iconSize", (ev.target as HTMLInputElement).value)}
                       />
-                      <span>${this._iconSize}</span>
+                      <span>${normalizedIconSize(this._iconSize)}</span>
                     </div>
                   </label>
                 </div>
