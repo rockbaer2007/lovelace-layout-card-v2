@@ -1,5 +1,7 @@
 # Dashboard Layout Card V2
 
+English | [Français](README.fr.md)
+
 Parallel installable V2 fork of
 [thomasloven/lovelace-layout-card](https://github.com/thomasloven/lovelace-layout-card)
 with additional dashboard-view features for Home Assistant.
