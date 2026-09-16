@@ -1342,7 +1342,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const nextIndex = index + 1;
     return {
       title: `${titlePrefix} ${nextIndex}`,
-      path: `${slugifyPath(titlePrefix) || "unterseite"}-${nextIndex}`,
+      path: `${slugifyPath(titlePrefix) || "subpage"}-${nextIndex}`,
       icon: "mdi:view-dashboard",
       type: SECTIONS_LAYOUT_V2,
       layout_type: SECTIONS_LAYOUT_V2,
@@ -1529,7 +1529,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       const nextIndex = index + 1;
       return {
         title: `Unterseite ${nextIndex}`,
-        path: `unterseite-${nextIndex}`,
+        path: `subpage-${nextIndex}`,
         icon: "mdi:view-dashboard",
         type: SECTIONS_LAYOUT_V2,
         layout_type: SECTIONS_LAYOUT_V2,
@@ -1544,7 +1544,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const nextIndex = this._pages.length + 1;
     const page = {
       title: `Unterseite ${nextIndex}`,
-      path: `unterseite-${nextIndex}`,
+      path: `subpage-${nextIndex}`,
       icon: "mdi:view-dashboard",
       type: SECTIONS_LAYOUT_V2,
       layout_type: SECTIONS_LAYOUT_V2,
@@ -1593,7 +1593,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         ? {}
         : {
             title: `${page.title ?? "Unterseite"} Kopie`,
-            path: `${page.path ?? "unterseite"}-kopie`,
+            path: `${page.path ?? "subpage"}-copy`,
           }),
     };
     this._pages = [
@@ -1736,7 +1736,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const copy = {
       ...page,
       title: `${page.title ?? "Subseite"} Kopie`,
-      path: `${page.path ?? "subseite"}-kopie`,
+      path: `${page.path ?? "subseite"}-copy`,
     };
     const next = [
       ...subpages.slice(0, this._selectedSubPageIndex + 1),
@@ -2171,19 +2171,19 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             <summary>Menu</summary>
             <div class="section-grid">
               <label>
-                Menuposition
+                Menu position
                 <select
                   .value=${this._menuPosition}
                   @change=${(ev: Event) => this._setValue("menuPosition", (ev.target as HTMLSelectElement).value)}
                 >
-                  <option value="left">Links</option>
-                  <option value="none">Keine</option>
-                  <option value="right">Rechts</option>
+                  <option value="left">Left</option>
+                  <option value="none">None</option>
+                  <option value="right">Right</option>
                 </select>
               </label>
 
               <label>
-                Menutitel
+                Menu title
                 <input
                   .value=${this._menuTitle}
                   @input=${(ev: Event) => this._setValue("menuTitle", (ev.target as HTMLInputElement).value)}
@@ -2196,7 +2196,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   .checked=${this._iconOnly}
                   @change=${(ev: Event) => this._setValue("iconOnly", (ev.target as HTMLInputElement).checked)}
                 />
-                Nur Icons im Menu anzeigen
+                Show only icons in the menu
               </label>
             </div>
           </details>
@@ -2210,7 +2210,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   .checked=${this._showHome}
                   @change=${(ev: Event) => this._setValue("showHome", (ev.target as HTMLInputElement).checked)}
                 />
-                Home page als ersten Menupunkt anzeigen
+                Show home page as first menu item
               </label>
 
               <fieldset class="home-entry group wide">
@@ -2311,7 +2311,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               </label>
 
               <fieldset class="display-options group">
-                <legend>Displayauswahl</legend>
+                <legend>Display selection</legend>
                 ${this._clock === "analog"
                   ? html`
                     <label class="check compact-check">
@@ -2321,7 +2321,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         @change=${(ev: Event) =>
                           this._setValue("analogHourMarks", (ev.target as HTMLInputElement).checked)}
                       />
-                      Stunden
+                      Hours
                     </label>
                     <label class="check compact-check">
                       <input
@@ -2330,7 +2330,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         @change=${(ev: Event) =>
                           this._setValue("analogMinuteMarks", (ev.target as HTMLInputElement).checked)}
                       />
-                      Minuten
+                      Minutes
                     </label>
                     <label class="check compact-check">
                       <input
@@ -2339,7 +2339,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         @change=${(ev: Event) =>
                           this._setValue("analogSeconds", (ev.target as HTMLInputElement).checked)}
                       />
-                      Sekundenzeiger
+                      Seconds hand
                     </label>
                   `
                   : nothing}
@@ -2364,7 +2364,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                     .checked=${this._weekday === "none"}
                     @change=${() => this._setValue("weekday", "none")}
                   />
-                  Kein
+                  None
                 </label>
                 <label class="check">
                   <input
@@ -2384,18 +2384,18 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                     .checked=${this._weekday === "long"}
                     @change=${() => this._setValue("weekday", "long")}
                   />
-                  Ausgeschrieben
+                  Long label
                 </label>
-                ${this._renderColorField("Sat / Sun color", "weekendColor", this._weekendColor, "Standard")}
+                ${this._renderColorField("Sat / Sun color", "weekendColor", this._weekendColor, "Default")}
               </fieldset>
-              ${this._renderColorField("Clock-/Ringfarbe", "clockColor", this._clockColor, "Standard")}
-              ${this._renderColorField("Minute mark color", "analogMinuteMarkColor", this._analogMinuteMarkColor, "Standard")}
-              ${this._renderColorField("Hour mark color", "analogHourMarkColor", this._analogHourMarkColor, "Standard")}
-              ${this._renderColorField("Hour hand color", "analogHourHandColor", this._analogHourHandColor, "Standard")}
-              ${this._renderColorField("Minute hand color", "analogMinuteHandColor", this._analogMinuteHandColor, "Standard")}
-              ${this._renderColorField("Second hand color", "analogSecondHandColor", this._analogSecondHandColor, "Standard")}
+              ${this._renderColorField("Clock/ring color", "clockColor", this._clockColor, "Default")}
+              ${this._renderColorField("Minute mark color", "analogMinuteMarkColor", this._analogMinuteMarkColor, "Default")}
+              ${this._renderColorField("Hour mark color", "analogHourMarkColor", this._analogHourMarkColor, "Default")}
+              ${this._renderColorField("Hour hand color", "analogHourHandColor", this._analogHourHandColor, "Default")}
+              ${this._renderColorField("Minute hand color", "analogMinuteHandColor", this._analogMinuteHandColor, "Default")}
+              ${this._renderColorField("Second hand color", "analogSecondHandColor", this._analogSecondHandColor, "Default")}
               <fieldset class="day-symbol-options group wide">
-                <legend>Tages-Symbol</legend>
+                <legend>Day symbol</legend>
                 <label>
                   Holiday helper
                   ${this._renderDaySymbolEntityPicker("holiday")}
@@ -2446,12 +2446,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   .checked=${this._adminAlwaysVisible}
                   @change=${(ev: Event) => this._setValue("adminAlwaysVisible", (ev.target as HTMLInputElement).checked)}
                 />
-                Admin immer sichtbar lassen
+                Keep admin always visible
               </label>
               <label class="wide">
                 Visible users
                 <input
-                  placeholder="Name oder User-ID, getrennt mit Komma"
+                  placeholder="Name or user ID, separated by comma"
                   .value=${this._visibleUsers}
                   @input=${(ev: Event) => this._setValue("visibleUsers", (ev.target as HTMLInputElement).value)}
                 />
@@ -2463,7 +2463,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           </details>
 
           <details class="wide collapsible-group settings-panel" data-tab="pages" open>
-            <summary>Tabs / Unterseiten</summary>
+            <summary>Tabs / Subpages</summary>
             <div class="page-editor">
               <div class="page-list">
                 ${this._pages.map(
@@ -2474,14 +2474,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                     >
                       <span>
                         ${page.type === "spacer"
-                          ? "Abstand"
+                          ? "Spacer"
                           : page.type === "divider"
                             ? "Divider"
                             : pageTitle(page, index)}
                       </span>
                       ${page.type === "divider"
                         ? nothing
-                        : html`<small>${page.type === "spacer" ? "leer" : page.path ?? ""}</small>`}
+                        : html`<small>${page.type === "spacer" ? "empty" : page.path ?? ""}</small>`}
                     </button>
                   `
                 )}
@@ -2491,14 +2491,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                 ${selectedPage
                   ? html`
                       <label>
-                        Typ
+                        Type
                         <select
                           .value=${selectedPageItemType}
                           @change=${(ev: Event) =>
                             this._updatePageItemType(this._selectedPageIndex, (ev.target as HTMLSelectElement).value)}
                         >
-                          <option value="page" ?selected=${selectedPageItemType === "page"}>Seite</option>
-                          <option value="spacer" ?selected=${selectedPageItemType === "spacer"}>Abstand</option>
+                          <option value="page" ?selected=${selectedPageItemType === "page"}>Page</option>
+                          <option value="spacer" ?selected=${selectedPageItemType === "spacer"}>Spacer</option>
                           <option value="divider" ?selected=${selectedPageItemType === "divider"}>Divider</option>
                         </select>
                       </label>
@@ -2528,7 +2528,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                               </div>
                             </label>
                             <label class="divider-color-field">
-                              3D-Effekt Divider
+                              Divider 3D effect
                               <div class=${`color-row${this._activeColorPresets().length ? " has-presets" : ""}`}>
                                 <input
                                   class="text"
@@ -2545,7 +2545,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                                   class="color"
                                   type="color"
                                   .value=${colorPickerValue(selectedPage.shadow_frame_color ?? "transparent")}
-                                  title="3D-Effekt Divider choose"
+                                  title="Divider 3D effect choose"
                                   @input=${(ev: Event) =>
                                     this._updatePage(
                                       this._selectedPageIndex,
@@ -2553,7 +2553,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                                       (ev.target as HTMLInputElement).value
                                     )}
                                 />
-                                ${this._renderColorPresetSelect("3D-Effekt Divider", (value) =>
+                                ${this._renderColorPresetSelect("Divider 3D effect", (value) =>
                                   this._updatePage(this._selectedPageIndex, "shadow_frame_color", value)
                                 )}
                               </div>
@@ -2674,7 +2674,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       ${isSectionsPage(selectedPage)
                         ? html`
                             <label>
-                              Max. Spalten
+                              Max. columns
                               <input
                                 type="number"
                                 min="1"
@@ -2716,7 +2716,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                           `
                         : nothing}
                       ${selectedSubpages.length
-                        ? html`<button type="button" @click=${() => this._selectTab("submenu")}>Submenu bearbeiten</button>`
+                        ? html`<button type="button" @click=${() => this._selectTab("submenu")}>Edit submenu</button>`
                         : nothing}
                         `
                         : nothing}
@@ -2727,11 +2727,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
             <div class="actions">
               <button @click=${this._addPage}>Add</button>
-              <button @click=${this._addSpacer}>Abstand</button>
+              <button @click=${this._addSpacer}>Spacer</button>
               <button @click=${this._addDivider}>Divider</button>
-              <button @click=${this._duplicatePage} ?disabled=${!selectedPage}>Duplizieren</button>
-              <button @click=${() => this._movePage(-1)} ?disabled=${this._selectedPageIndex <= 0}>Hoch</button>
-              <button @click=${() => this._movePage(1)} ?disabled=${this._selectedPageIndex >= this._pages.length - 1}>Runter</button>
+              <button @click=${this._duplicatePage} ?disabled=${!selectedPage}>Duplicate</button>
+              <button @click=${() => this._movePage(-1)} ?disabled=${this._selectedPageIndex <= 0}>Up</button>
+              <button @click=${() => this._movePage(1)} ?disabled=${this._selectedPageIndex >= this._pages.length - 1}>Down</button>
               <button class="danger" @click=${this._deletePage} ?disabled=${!selectedPage}>Delete</button>
             </div>
           </details>
@@ -2833,7 +2833,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                             ${isSectionsPage(selectedSubPage)
                               ? html`
                                   <label>
-                                    Max. Spalten
+                                    Max. columns
                                     <input
                                       type="number"
                                       min="1"
@@ -2856,18 +2856,18 @@ class DashboardLayoutV2ViewDialog extends LitElement {
 
                   <div class="actions">
                     <button @click=${this._addSubPage}>Add</button>
-                    <button @click=${this._duplicateSubPage} ?disabled=${!selectedSubPage}>Duplizieren</button>
-                    <button @click=${() => this._moveSubPage(-1)} ?disabled=${this._selectedSubPageIndex <= 0}>Hoch</button>
+                    <button @click=${this._duplicateSubPage} ?disabled=${!selectedSubPage}>Duplicate</button>
+                    <button @click=${() => this._moveSubPage(-1)} ?disabled=${this._selectedSubPageIndex <= 0}>Up</button>
                     <button
                       @click=${() => this._moveSubPage(1)}
                       ?disabled=${this._selectedSubPageIndex >= selectedSubpages.length - 1}
                     >
-                      Runter
+                      Down
                     </button>
                     <button class="danger" @click=${this._deleteSubPage} ?disabled=${!selectedSubPage}>Delete</button>
                   </div>
                 `
-              : html`<p class="empty">Aktiviere bei einer Seite „Hat Submenu“, um Subbuttons anzulegen.</p>`}
+              : html`<p class="empty">Enable “Has submenu” on a page to create subbuttons.</p>`}
           </details>
 
           <details class="wide collapsible-group settings-panel" data-tab="messages" open>
@@ -2879,7 +2879,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   .checked=${this._notifyEnabled}
                   @change=${(ev: Event) => this._setValue("notifyEnabled", (ev.target as HTMLInputElement).checked)}
                 />
-                Notification anzeigen
+                Show notification
               </label>
               ${this._notifyEnabled
                 ? html`
@@ -2891,7 +2891,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       "Border color",
                       "notifyBorderColor",
                       this._notifyBorderColor,
-                      "leer = rot"
+                      "empty = red"
                     )}
                     <label class="wide-style">
                       Border opacity
@@ -2918,14 +2918,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                             </p>
                             <p>
                               Path: Settings &gt; Devices &amp; services &gt; Helpers &gt; Create helper &gt; Text.
-                              Bleibt der Text leer, wird die Notification ausgeblendet.
+                              If the text stays empty, the notification is hidden.
                             </p>
                           </div>
                         `
                       : html`
                           <p class="hint">
                             The box only appears when the entity contains text. Empty, unknown and unavailable
-                            werden ausgeblendet.
+                            are hidden.
                           </p>
                         `}
                   `
@@ -2942,7 +2942,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   .checked=${this._statusEnabled}
                   @change=${(ev: Event) => this._setValue("statusEnabled", (ev.target as HTMLInputElement).checked)}
                 />
-                Status values anzeigen
+                Show status values
               </label>
               ${this._statusEnabled
                 ? html`
@@ -2950,7 +2950,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       "Border color",
                       "statusBorderColor",
                       this._statusBorderColor,
-                      "leer = Tabumrandung, sonst #ffffff"
+                      "empty = tab border, otherwise #ffffff"
                     )}
                     <label class="wide-style">
                       Border opacity
@@ -3039,13 +3039,13 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                     <span class="style-empty" aria-hidden="true"></span>
                   `
                 : nothing}
-              ${this._renderColorField("Tab aktiv", "activeTabColor", this._activeTabColor, "var(--primary-color)")}
-              ${this._renderColorField("Text aktiv", "activeTabTextColor", this._activeTabTextColor, "var(--text-primary-color)")}
-              ${this._renderColorField("Tab inaktiv", "inactiveTabColor", this._inactiveTabColor, "transparent")}
-              ${this._renderColorField("Text inaktiv", "inactiveTabTextColor", this._inactiveTabTextColor, "var(--primary-text-color)")}
+              ${this._renderColorField("Active tab", "activeTabColor", this._activeTabColor, "var(--primary-color)")}
+              ${this._renderColorField("Active text", "activeTabTextColor", this._activeTabTextColor, "var(--text-primary-color)")}
+              ${this._renderColorField("Inactive tab", "inactiveTabColor", this._inactiveTabColor, "transparent")}
+              ${this._renderColorField("Inactive text", "inactiveTabTextColor", this._inactiveTabTextColor, "var(--primary-text-color)")}
               ${this._renderColorField("Hover color", "hoverTabColor", this._hoverTabColor, "var(--secondary-background-color)")}
               ${this._renderColorField("Hover Text", "hoverTabTextColor", this._hoverTabTextColor, "var(--primary-text-color)")}
-              ${this._renderColorField("Tabumrandung", "tabBorderColor", this._tabBorderColor, "transparent")}
+              ${this._renderColorField("Tab border", "tabBorderColor", this._tabBorderColor, "transparent")}
               <label class="wide-style">
                 Menu-Border opacity
                 <div class="range-row">
@@ -3060,10 +3060,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   <span>${this._tabBorderOpacity}%</span>
                 </div>
               </label>
-              ${this._renderColorField("3D-Effekt Tab", "tabShadowFrameColor", this._tabShadowFrameColor, "transparent")}
-              ${this._renderColorField("Cardumrandung", "cardBorderColor", this._cardBorderColor, "transparent")}
+              ${this._renderColorField("Tab 3D effect", "tabShadowFrameColor", this._tabShadowFrameColor, "transparent")}
+              ${this._renderColorField("Card border", "cardBorderColor", this._cardBorderColor, "transparent")}
               <label class="wide-style">
-                Card-/Inhaltsrahmen Opacity
+                Card/content border opacity
                 <div class="range-row">
                   <input
                     type="range"
@@ -3076,9 +3076,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   <span>${this._cardBorderOpacity}%</span>
                 </div>
               </label>
-              ${this._renderColorField("3D-Effekt Card", "shadowFrameColor", this._shadowFrameColor, "transparent")}
+              ${this._renderColorField("Card 3D effect", "shadowFrameColor", this._shadowFrameColor, "transparent")}
               <label class="wide-style">
-                3D-Versatz
+                3D offset
                 <div class="range-row">
                   <input
                     type="range"
@@ -3160,7 +3160,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   .value=${this._backgroundMode}
                   @change=${(ev: Event) => this._setValue("backgroundMode", (ev.target as HTMLSelectElement).value)}
                 >
-                  <option value="none">Keine</option>
+                  <option value="none">None</option>
                   <option value="color">Color</option>
                   <option value="image">Image</option>
                 </select>
@@ -3278,7 +3278,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           </details>
 
           <details class="wide json-box settings-panel" data-tab="advanced" ?open=${this._jsonExpanded} @toggle=${(ev: Event) => (this._jsonExpanded = (ev.target as HTMLDetailsElement).open)}>
-            <summary>Spezialoptionen / JSON bearbeiten</summary>
+            <summary>Special options / edit JSON</summary>
             <textarea
               .value=${this._pagesText}
               @input=${(ev: Event) => this._setValue("pagesText", (ev.target as HTMLTextAreaElement).value)}
