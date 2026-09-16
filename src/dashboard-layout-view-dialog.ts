@@ -1,5 +1,6 @@
 import { CSSResultArray, LitElement, css, html, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
+import { keyed } from "lit/directives/keyed.js";
 import {
   DashboardLayoutV2Language,
   dashboardLayoutV2Translate,
@@ -2162,7 +2163,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const selectedSubPageLayout = selectedSubPage ? pageLayoutType(selectedSubPage) : "";
     const statusLabelError = this._statusLabelError();
 
-    return html`
+    return keyed(this._language, html`
       <div class="scrim" @click=${this._close}></div>
       <section class=${`dialog${this._wideDialog ? " wide-dialog" : ""}`} role="dialog" aria-modal="true">
         <header @dblclick=${this._toggleDialogWidth} title="Double-click: toggle dialog width">
@@ -3357,7 +3358,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           <button class="primary" @click=${this._save} ?disabled=${Boolean(statusLabelError)}>Save</button>
         </footer>
       </section>
-    `;
+    `);
   }
 
   static get styles(): CSSResultArray {
