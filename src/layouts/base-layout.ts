@@ -70,6 +70,20 @@ function dashboardLayoutV2IconSize(value?: string | number) {
   return `${Math.max(14, Math.min(64, numericValue))}px`;
 }
 
+function dashboardLayoutV2ConfigFromView(view?: any) {
+  const layout = view?.layout;
+  const explicitConfig = layout?.dashboard_layout_v2 ?? view?.dashboard_layout_v2;
+  if (explicitConfig) return explicitConfig;
+  if (layout?.menu || layout?.pages || layout?.chrome || layout?.color_presets || layout?.inherit_theme !== undefined) {
+    return layout;
+  }
+  return undefined;
+}
+
+function dashboardLayoutV2MenuIconSize(menu?: any) {
+  return menu?.style?.icon_size ?? menu?.icon_size;
+}
+
 export class BaseLayout extends LitElement {
   @property() cards: Array<LovelaceCard | HuiCard> = [];
   @property() index: number;
@@ -160,7 +174,7 @@ export class BaseLayout extends LitElement {
   _dashboardLayoutV2Menu(): DashboardLayoutMenuConfig {
     const parentConfig = this._dashboardLayoutV2ParentConfig();
     const usesParentConfig = Boolean(parentConfig && this._config.subview);
-    const localMenu = usesParentConfig ? {} : this._config.layout?.dashboard_layout_v2?.menu ?? {};
+    const localMenu = usesParentConfig ? {} : dashboardLayoutV2ConfigFromView(this._config)?.menu ?? {};
     const parentMenu = parentConfig?.menu ?? {};
 
     return {
@@ -187,7 +201,7 @@ export class BaseLayout extends LitElement {
   }
 
   _dashboardLayoutV2ParentConfig() {
-    const localConfig = this._config.layout?.dashboard_layout_v2 ?? {};
+    const localConfig = dashboardLayoutV2ConfigFromView(this._config) ?? {};
     const views = this.lovelace?.rawConfig?.views ?? this.lovelace?.config?.views ?? [];
     const currentView = this._config ?? this.lovelace?.config?.views?.[this.index];
     const currentPath = String(currentView?.path ?? this.index ?? "");
@@ -197,23 +211,23 @@ export class BaseLayout extends LitElement {
       ? views.find((view, index) => String(view?.path ?? index) === String(inheritedPath))
       : undefined;
     if (referencedParent) {
-      return referencedParent?.layout?.dashboard_layout_v2 ?? referencedParent?.dashboard_layout_v2;
+      return dashboardLayoutV2ConfigFromView(referencedParent);
     }
 
     const parentView = Array.isArray(views)
       ? views.find((view, index) => {
           if (index === this.index || view?.subview) return false;
-          const pages = view?.layout?.dashboard_layout_v2?.pages ?? view?.dashboard_layout_v2?.pages ?? [];
+          const pages = dashboardLayoutV2ConfigFromView(view)?.pages ?? [];
           return Array.isArray(pages) && pages.some((page) => dashboardLayoutV2PageMatchesPath(page, currentPath));
         })
       : undefined;
-    return parentView?.layout?.dashboard_layout_v2 ?? parentView?.dashboard_layout_v2;
+    return dashboardLayoutV2ConfigFromView(parentView);
   }
 
   _dashboardLayoutV2Chrome(): DashboardLayoutChromeConfig | undefined {
     const parentConfig = this._dashboardLayoutV2ParentConfig();
     if (parentConfig && this._config.subview) return parentConfig.chrome;
-    return this._config.layout?.dashboard_layout_v2?.chrome ?? parentConfig?.chrome;
+    return dashboardLayoutV2ConfigFromView(this._config)?.chrome ?? parentConfig?.chrome;
   }
 
   _dashboardLayoutV2Pages() {
@@ -221,7 +235,7 @@ export class BaseLayout extends LitElement {
     const configuredPages =
       parentConfig && this._config.subview
         ? parentConfig.pages
-        : this._config.layout?.dashboard_layout_v2?.pages ?? parentConfig?.pages;
+        : dashboardLayoutV2ConfigFromView(this._config)?.pages ?? parentConfig?.pages;
     const sourcePages = configuredPages?.length
       ? configuredPages
       : (this.lovelace?.config?.views ?? [])
@@ -240,11 +254,11 @@ export class BaseLayout extends LitElement {
     const parentView = Array.isArray(views)
       ? views.find((view, index) => {
           if (index === this.index || view?.subview) return false;
-          const pages = view?.layout?.dashboard_layout_v2?.pages ?? view?.dashboard_layout_v2?.pages ?? [];
+          const pages = dashboardLayoutV2ConfigFromView(view)?.pages ?? [];
           return Array.isArray(pages) && pages.some((page) => dashboardLayoutV2PageMatchesPath(page, currentPath));
         })
       : undefined;
-    const parentMenu = parentView?.layout?.dashboard_layout_v2?.menu ?? parentView?.dashboard_layout_v2?.menu;
+    const parentMenu = dashboardLayoutV2ConfigFromView(parentView)?.menu;
     const parentHome = parentMenu?.home;
     const homePath = String(
       menu.home?.path ?? parentHome?.path ?? parentView?.path ?? currentView?.path ?? this.index ?? "home"
@@ -327,7 +341,7 @@ export class BaseLayout extends LitElement {
   }
 
   _dashboardLayoutV2IconInlineStyle() {
-    const size = dashboardLayoutV2IconSize(this._dashboardLayoutV2Menu().style?.icon_size);
+    const size = dashboardLayoutV2IconSize(dashboardLayoutV2MenuIconSize(this._dashboardLayoutV2Menu()));
     const numericSize = Number(size.replace(/[^\d.]/g, "")) || 20;
     const scale = Math.max(0.58, Math.min(2.67, numericSize / 24));
     return [
@@ -614,7 +628,7 @@ export class BaseLayout extends LitElement {
         : "",
       style.icon_background_active_color ? `--dashboard-layout-v2-icon-background-active-color: ${style.icon_background_active_color}` : "",
       style.icon_shape === "circle" ? "--dashboard-layout-v2-icon-radius: 50%" : "--dashboard-layout-v2-icon-radius: 8px",
-      style.icon_size ? `--dashboard-layout-v2-icon-size: ${dashboardLayoutV2IconSize(style.icon_size)}` : "",
+      dashboardLayoutV2MenuIconSize(menu) ? `--dashboard-layout-v2-icon-size: ${dashboardLayoutV2IconSize(dashboardLayoutV2MenuIconSize(menu))}` : "",
       "--dashboard-layout-v2-icon-column-width: max(64px, calc(var(--dashboard-layout-v2-icon-size, 20px) + 36px))",
       style.active_tab_color ? `--dashboard-layout-v2-active-tab-color: ${style.active_tab_color}` : "",
       style.inactive_tab_color ? `--dashboard-layout-v2-inactive-tab-color: ${style.inactive_tab_color}` : "",
@@ -698,7 +712,7 @@ export class BaseLayout extends LitElement {
       style.card_border_color ? `--ha-card-border-color: ${dashboardLayoutV2ColorWithOpacity(style.card_border_color, style.card_border_opacity)}` : "",
       style.card_border_color ? "--ha-card-border-width: 1px" : "",
       "--dashboard-layout-v2-icon-column-width: max(64px, calc(var(--dashboard-layout-v2-icon-size, 20px) + 36px))",
-      style.icon_size ? `--dashboard-layout-v2-icon-size: ${dashboardLayoutV2IconSize(style.icon_size)}` : "",
+      dashboardLayoutV2MenuIconSize(menu) ? `--dashboard-layout-v2-icon-size: ${dashboardLayoutV2IconSize(dashboardLayoutV2MenuIconSize(menu))}` : "",
       style.shadow_frame_color ? `--dashboard-layout-v2-shadow-frame-color: ${style.shadow_frame_color}` : "",
       style.shadow_frame_offset ? `--dashboard-layout-v2-shadow-frame-offset: ${style.shadow_frame_offset}` : "",
       style.shadow_frame_color

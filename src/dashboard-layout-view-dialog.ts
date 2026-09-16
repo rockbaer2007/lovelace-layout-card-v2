@@ -127,11 +127,19 @@ function slugifyPath(value: string) {
     .replace(/^-+|-+$/g, "");
 }
 
+function dashboardLayoutV2ConfigFromLayoutFallback(layout: any) {
+  if (!layout || typeof layout !== "object") return undefined;
+  if (layout.menu || layout.pages || layout.chrome || layout.color_presets || layout.inherit_theme !== undefined) {
+    return layout;
+  }
+  return undefined;
+}
+
 function dashboardLayoutConfigFrom(viewConfig: any) {
   return (
     viewConfig?.layout?.dashboard_layout_v2 ??
     viewConfig?.dashboard_layout_v2 ??
-    viewConfig?.layout ??
+    dashboardLayoutV2ConfigFromLayoutFallback(viewConfig?.layout) ??
     {}
   );
 }
@@ -161,7 +169,11 @@ function normalizeConfig(viewConfig: any) {
 }
 
 function dashboardLayoutV2ConfigFromView(viewConfig: any) {
-  return viewConfig?.layout?.dashboard_layout_v2 ?? viewConfig?.dashboard_layout_v2;
+  return (
+    viewConfig?.layout?.dashboard_layout_v2 ??
+    viewConfig?.dashboard_layout_v2 ??
+    dashboardLayoutV2ConfigFromLayoutFallback(viewConfig?.layout)
+  );
 }
 
 function dashboardLayoutV2PageContainsPath(page: any, path: string) {
@@ -408,6 +420,16 @@ function normalizedIconSize(value: string) {
   return `${Math.max(14, Math.min(64, size))}px`;
 }
 
+function iconSizeInputValue(value: string | number | undefined) {
+  const size = Number(clockSizeInputValue(String(value ?? "20px")));
+  if (!Number.isFinite(size) || size <= 0) return "20";
+  return String(Math.max(14, Math.min(64, size)));
+}
+
+function configIconSize(config: any) {
+  return config?.menu?.style?.icon_size ?? config?.menu?.icon_size ?? "20px";
+}
+
 function normalizedOpacity(value: any) {
   const opacity = Number(String(value ?? 100).replace(/[^\d.]/g, ""));
   if (!Number.isFinite(opacity)) return 100;
@@ -614,7 +636,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._iconBackgroundColor = config.menu.style?.icon_background_color ?? config.menu.style?.icon_circle_color ?? "";
     this._iconBackgroundActiveColor = config.menu.style?.icon_background_active_color ?? "";
     this._iconShape = config.menu.style?.icon_shape ?? "rounded-square";
-    this._iconSize = clockSizeInputValue(config.menu.style?.icon_size ?? "20px");
+    this._iconSize = iconSizeInputValue(configIconSize(config));
     this._activeTabColor = config.menu.style?.active_tab_color ?? "";
     this._inactiveTabColor = config.menu.style?.inactive_tab_color ?? "";
     this._hoverTabColor = config.menu.style?.hover_tab_color ?? "";
@@ -756,7 +778,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "iconBackgroundColor") this._iconBackgroundColor = value;
     if (key === "iconBackgroundActiveColor") this._iconBackgroundActiveColor = value;
     if (key === "iconShape") this._iconShape = value;
-    if (key === "iconSize") this._iconSize = value;
+    if (key === "iconSize") this._iconSize = iconSizeInputValue(value);
     if (key === "activeTabColor") this._activeTabColor = value;
     if (key === "inactiveTabColor") this._inactiveTabColor = value;
     if (key === "hoverTabColor") this._hoverTabColor = value;
@@ -3046,8 +3068,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         min="14"
                         max="64"
                         step="1"
+                        value=${this._iconSize}
                         .value=${this._iconSize}
                         @input=${(ev: Event) => this._setValue("iconSize", (ev.target as HTMLInputElement).value)}
+                        @change=${(ev: Event) => this._setValue("iconSize", (ev.target as HTMLInputElement).value)}
                       />
                       <span>${normalizedIconSize(this._iconSize)}</span>
                     </div>

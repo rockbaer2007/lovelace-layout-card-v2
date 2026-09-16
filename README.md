@@ -295,7 +295,7 @@ dashboard settings are available from the view editor and allow editing:
 - digital or analog clock
 - analog hour marks, minute marks and seconds hand
 - weekday display: none, short or long
-- icon size from `14px` to `64px`; the editor reads saved `menu.style.icon_size` values back into the slider and saves them as normalized px values and applies them by forced visual scaling to menu and submenu icons
+- icon size from `14px` to `64px`; the editor reads saved `menu.style.icon_size` values and legacy `menu.icon_size` values back into the slider, saves normalized px values and applies them by forced visual scaling to menu and submenu icons
 - clock size from `24px` to `128px`
 - date text size from `8px` to `48px`
 - long weekday line break threshold from `12px` to `48px`

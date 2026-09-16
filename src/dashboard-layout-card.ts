@@ -29,7 +29,14 @@ function normalizeLayoutType(layoutType?: string) {
 function normalizeMenu(menu?: DashboardLayoutCardConfig["menu"]): DashboardLayoutMenuConfig {
   if (!menu) return { position: "left", clock: "digital", date: true };
   if (typeof menu === "string") return { position: menu };
-  return menu;
+  const legacyIconSize = (menu as any).icon_size;
+  return {
+    ...menu,
+    style: {
+      ...(menu.style ?? {}),
+      ...(legacyIconSize && !menu.style?.icon_size ? { icon_size: legacyIconSize } : {}),
+    },
+  };
 }
 
 function normalizeChrome(chrome?: DashboardLayoutChromeConfig): DashboardLayoutChromeConfig {
