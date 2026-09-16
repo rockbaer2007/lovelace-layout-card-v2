@@ -67,7 +67,7 @@ function dashboardLayoutV2IconSize(value?: string | number) {
   const rawValue = String(value ?? "").trim();
   const numericValue = Number(rawValue.replace(/[^\d.]/g, ""));
   if (!Number.isFinite(numericValue) || numericValue <= 0) return "20px";
-  return `${Math.max(14, Math.min(36, numericValue))}px`;
+  return `${Math.max(14, Math.min(64, numericValue))}px`;
 }
 
 export class BaseLayout extends LitElement {
@@ -326,6 +326,20 @@ export class BaseLayout extends LitElement {
     return 50;
   }
 
+  _dashboardLayoutV2IconInlineStyle() {
+    const size = dashboardLayoutV2IconSize(this._dashboardLayoutV2Menu().style?.icon_size);
+    return [
+      `--dashboard-layout-v2-icon-size: ${size}`,
+      `--mdc-icon-size: ${size}`,
+      `--ha-icon-size: ${size}`,
+      `--iron-icon-width: ${size}`,
+      `--iron-icon-height: ${size}`,
+      `width: ${size}`,
+      `height: ${size}`,
+      `font-size: ${size}`,
+    ].join(";");
+  }
+
   _renderDashboardLayoutV2MenuItem(page: any) {
     if (page?.type === "spacer") {
       return html`<div class="dashboard-layout-v2-menu-spacer" aria-hidden="true"></div>`;
@@ -354,8 +368,8 @@ export class BaseLayout extends LitElement {
         @click=${() => this._navigateDashboardLayoutV2Page(this._dashboardLayoutV2MenuTargetPath(page))}
       >
         ${page.icon
-          ? html`<span class="dashboard-layout-v2-menu-icon-field"><ha-icon class="dashboard-layout-v2-menu-icon" .icon=${page.icon}></ha-icon></span>`
-          : html`<span class="dashboard-layout-v2-menu-icon-field mobile-fallback-icon"><ha-icon class="dashboard-layout-v2-menu-icon" .icon=${"mdi:view-dashboard"}></ha-icon></span>`}
+          ? html`<span class="dashboard-layout-v2-menu-icon-field"><ha-icon class="dashboard-layout-v2-menu-icon" style=${this._dashboardLayoutV2IconInlineStyle()} .icon=${page.icon}></ha-icon></span>`
+          : html`<span class="dashboard-layout-v2-menu-icon-field mobile-fallback-icon"><ha-icon class="dashboard-layout-v2-menu-icon" style=${this._dashboardLayoutV2IconInlineStyle()} .icon=${"mdi:view-dashboard"}></ha-icon></span>`}
         <span class="dashboard-layout-v2-page-label">${dashboardLayoutV2PageTitle(page)}</span>
       </button>
     `;
@@ -372,8 +386,8 @@ export class BaseLayout extends LitElement {
         @click=${() => this._navigateDashboardLayoutV2Page(page.path)}
       >
         ${page.icon
-          ? html`<span class="dashboard-layout-v2-menu-icon-field"><ha-icon class="dashboard-layout-v2-menu-icon" .icon=${page.icon}></ha-icon></span>`
-          : html`<span class="dashboard-layout-v2-menu-icon-field mobile-fallback-icon"><ha-icon class="dashboard-layout-v2-menu-icon" .icon=${"mdi:view-dashboard"}></ha-icon></span>`}
+          ? html`<span class="dashboard-layout-v2-menu-icon-field"><ha-icon class="dashboard-layout-v2-menu-icon" style=${this._dashboardLayoutV2IconInlineStyle()} .icon=${page.icon}></ha-icon></span>`
+          : html`<span class="dashboard-layout-v2-menu-icon-field mobile-fallback-icon"><ha-icon class="dashboard-layout-v2-menu-icon" style=${this._dashboardLayoutV2IconInlineStyle()} .icon=${"mdi:view-dashboard"}></ha-icon></span>`}
         <span class="dashboard-layout-v2-page-label">${dashboardLayoutV2PageTitle(page)}</span>
       </button>
     `;

@@ -85,7 +85,7 @@ function iconSizeValue(value?: string | number) {
   const rawValue = String(value ?? "").trim();
   const numericValue = Number(rawValue.replace(/[^\d.]/g, ""));
   if (!Number.isFinite(numericValue) || numericValue <= 0) return "20px";
-  return `${Math.max(14, Math.min(36, numericValue))}px`;
+  return `${Math.max(14, Math.min(64, numericValue))}px`;
 }
 
 class DashboardLayoutCardV2 extends LitElement {
@@ -468,8 +468,8 @@ class DashboardLayoutCardV2 extends LitElement {
         @click=${() => this._selectPage(index)}
       >
         ${page.icon
-          ? html`<span class="menu-icon-field"><ha-icon class="menu-icon" .icon=${page.icon}></ha-icon></span>`
-          : html`<span class="menu-icon-field mobile-fallback-icon"><ha-icon class="menu-icon" .icon=${"mdi:view-dashboard"}></ha-icon></span>`}
+          ? html`<span class="menu-icon-field"><ha-icon class="menu-icon" style=${this._iconInlineStyle()} .icon=${page.icon}></ha-icon></span>`
+          : html`<span class="menu-icon-field mobile-fallback-icon"><ha-icon class="menu-icon" style=${this._iconInlineStyle()} .icon=${"mdi:view-dashboard"}></ha-icon></span>`}
         <span class="menu-page-label">${pageTitle(page)}</span>
       </button>
     `;
@@ -491,6 +491,21 @@ class DashboardLayoutCardV2 extends LitElement {
     if (hasClock) return 200;
     if (hasDate) return 150;
     return 50;
+  }
+
+  _iconInlineStyle() {
+    const menu = normalizeMenu(this._config.menu);
+    const size = iconSizeValue(menu.style?.icon_size);
+    return [
+      `--dashboard-layout-v2-icon-size: ${size}`,
+      `--mdc-icon-size: ${size}`,
+      `--ha-icon-size: ${size}`,
+      `--iron-icon-width: ${size}`,
+      `--iron-icon-height: ${size}`,
+      `width: ${size}`,
+      `height: ${size}`,
+      `font-size: ${size}`,
+    ].join(";");
   }
 
   _renderSubMenu() {
@@ -533,8 +548,8 @@ class DashboardLayoutCardV2 extends LitElement {
         @click=${() => (index === 0 ? this._selectPage(this._activePage) : this._selectSubPage(index - 1))}
       >
         ${page.icon
-          ? html`<span class="menu-icon-field"><ha-icon class="menu-icon" .icon=${page.icon}></ha-icon></span>`
-          : html`<span class="menu-icon-field mobile-fallback-icon"><ha-icon class="menu-icon" .icon=${"mdi:view-dashboard"}></ha-icon></span>`}
+          ? html`<span class="menu-icon-field"><ha-icon class="menu-icon" style=${this._iconInlineStyle()} .icon=${page.icon}></ha-icon></span>`
+          : html`<span class="menu-icon-field mobile-fallback-icon"><ha-icon class="menu-icon" style=${this._iconInlineStyle()} .icon=${"mdi:view-dashboard"}></ha-icon></span>`}
         <span class="menu-page-label">${pageTitle(page)}</span>
       </button>
     `;

@@ -405,7 +405,7 @@ function normalizedDaySymbolSize(value: string) {
 function normalizedIconSize(value: string) {
   const size = Number(clockSizeInputValue(value));
   if (!Number.isFinite(size) || size <= 0) return "20px";
-  return `${Math.max(14, Math.min(36, size))}px`;
+  return `${Math.max(14, Math.min(64, size))}px`;
 }
 
 function normalizedOpacity(value: any) {
@@ -3044,7 +3044,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       <input
                         type="range"
                         min="14"
-                        max="36"
+                        max="64"
                         step="1"
                         .value=${this._iconSize}
                         @input=${(ev: Event) => this._setValue("iconSize", (ev.target as HTMLInputElement).value)}
