@@ -583,16 +583,18 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this.hass = params.hass;
     this.lovelace = params.lovelace;
     this.viewIndex = params.viewIndex;
-    this.viewConfig = params.viewConfig;
 
     const rawViews = params.lovelace?.rawConfig?.views ?? params.lovelace?.config?.views ?? [];
+    const currentViewConfig = rawViews?.[params.viewIndex] ?? params.viewConfig ?? {};
+    this.viewConfig = currentViewConfig;
+    const currentDashboardLayoutV2 = dashboardLayoutV2ConfigFromView(currentViewConfig);
     const config = normalizeConfig({
-      ...params.viewConfig,
+      ...currentViewConfig,
       layout: {
-        ...(params.viewConfig?.layout ?? {}),
+        ...(currentViewConfig?.layout ?? {}),
         dashboard_layout_v2:
-          referencedDashboardLayoutV2Config(params.viewConfig, rawViews, params.viewIndex) ??
-          params.viewConfig?.layout?.dashboard_layout_v2,
+          referencedDashboardLayoutV2Config(currentViewConfig, rawViews, params.viewIndex) ??
+          currentDashboardLayoutV2,
       },
     });
     this._menuPosition = config.menu.position ?? "left";
@@ -609,9 +611,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._homeIconBackgroundActiveColor = homeEntry.icon_background_active_color;
     this._homeTabColor = homeEntry.tab_color;
     this._homeActiveTabColor = homeEntry.active_tab_color;
-    this._homeMaxColumns = Number(params.viewConfig?.max_columns ?? 4);
-    this._homeDenseSectionPlacement = params.viewConfig?.dense_section_placement === true;
-    this._homeTopMargin = params.viewConfig?.top_margin === true;
+    this._homeMaxColumns = Number(currentViewConfig?.max_columns ?? 4);
+    this._homeDenseSectionPlacement = currentViewConfig?.dense_section_placement === true;
+    this._homeTopMargin = currentViewConfig?.top_margin === true;
     this._inheritTheme = config.inherit_theme !== false;
     this._clock = config.menu.clock ?? "digital";
     this._analogHourMarks = config.menu.analog_hour_marks === true;
@@ -736,6 +738,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   private _close() {
     this.dispatchEvent(new CustomEvent("dialog-closed", { bubbles: true, composed: true }));
     this.remove();
+  }
+
+  private _setIconSizeEvent(ev: Event) {
+    ev.stopPropagation();
+    this._setValue("iconSize", (ev.currentTarget as HTMLInputElement).value);
   }
 
   private _setValue(key: string, value: any) {
@@ -3060,9 +3067,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       </button>
                     </div>
                   </label>
-                  <label>
+                  <label class="wide-style">
                     Icon-Größe
-                    <div class="range-row">
+                    <div class="range-row icon-size-row" @input=${(ev: Event) => ev.stopPropagation()} @change=${(ev: Event) => ev.stopPropagation()}>
                       <input
                         type="range"
                         min="14"
@@ -3070,8 +3077,19 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         step="1"
                         value=${this._iconSize}
                         .value=${this._iconSize}
-                        @input=${(ev: Event) => this._setValue("iconSize", (ev.target as HTMLInputElement).value)}
-                        @change=${(ev: Event) => this._setValue("iconSize", (ev.target as HTMLInputElement).value)}
+                        @input=${this._setIconSizeEvent}
+                        @change=${this._setIconSizeEvent}
+                      />
+                      <input
+                        class="number-input"
+                        type="number"
+                        min="14"
+                        max="64"
+                        step="1"
+                        value=${this._iconSize}
+                        .value=${this._iconSize}
+                        @input=${this._setIconSizeEvent}
+                        @change=${this._setIconSizeEvent}
                       />
                       <span>${normalizedIconSize(this._iconSize)}</span>
                     </div>
@@ -3744,6 +3762,15 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           grid-template-columns: minmax(0, 1fr) 48px;
           align-items: center;
           gap: 10px;
+        }
+
+        .icon-size-row {
+          grid-template-columns: minmax(0, 1fr) 76px 48px;
+        }
+
+        .number-input {
+          min-width: 0;
+          text-align: center;
         }
 
         .range-row span {
