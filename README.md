@@ -127,6 +127,22 @@ label from the entity's friendly name. Status labels are limited to 18
 characters to keep the menu layout stable. Numeric status values are displayed
 with at most one decimal place.
 
+
+### Helpers used by the dashboard menu
+
+Only the features you enable need helpers. Create them in Home Assistant under
+Settings > Devices & services > Helpers.
+
+| Entity | Helper type | Needed for | Required? |
+| --- | --- | --- | --- |
+| `input_text.dashboard_notification` | Text | Optional dashboard notification text. Empty, `unknown` and `unavailable` hide the notification. | Only when `menu.notify.enabled` is used. |
+| `input_boolean.dashboard_holiday` | Toggle | Optional day-symbol indicator for holidays. | Only when the day-symbol holiday feature should react to a helper. |
+| `input_boolean.dashboard_birthday` | Toggle | Optional day-symbol indicator for birthdays. | Only when the day-symbol birthday feature should react to a helper. |
+| `input_boolean.dashboard_christmas` | Toggle | Optional day-symbol indicator for Advent/Christmas. | Only when the day-symbol Christmas feature should react to a helper. |
+
+Status values do not require special helpers. They can use any readable Home
+Assistant entity, for example sensors, binary sensors or template sensors.
+
 ```yaml
 views:
   - type: custom:sections-layout-v2
