@@ -295,7 +295,7 @@ dashboard settings are available from the view editor and allow editing:
 - digital or analog clock
 - analog hour marks, minute marks and seconds hand
 - weekday display: none, short or long
-- icon size from `14px` to `64px`; the editor reads saved `menu.style.icon_size` values and legacy `menu.icon_size` values from the current raw Lovelace view back into the slider and number field, saves normalized px values and applies them by forced visual scaling to menu and submenu icons
+- icon size from `14px` to `64px`; the editor reads saved `menu.style.icon_size` values such as `48px` and legacy `menu.icon_size` values from the current raw Lovelace view back into the slider and number field, saves normalized px values and applies them by forced visual scaling to menu and submenu icons
 - clock size from `24px` to `128px`
 - date text size from `8px` to `48px`
 - long weekday line break threshold from `12px` to `48px`
@@ -347,6 +347,11 @@ The **Dashboard YAML exportieren** action in the Backup tab downloads the
 current editor state as a `.yaml` backup file to the local computer. It does not
 write anything back to Home Assistant and is intended as a quick safety backup
 before testing larger menu, color or layout changes.
+
+For the global icon size, the editor now loads the saved px value from the
+current Lovelace view into both the slider and the number field. A stored value
+like `menu.style.icon_size: 48px` is shown as `48` in the editor and saved back
+as normalized px YAML.
 
 ## Background Images
 
