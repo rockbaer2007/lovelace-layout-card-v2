@@ -281,6 +281,7 @@ dashboard settings are available from the view editor and allow editing:
   background and button background colors, including the home entry
 - per-entry reset action for returning one button to the global colors
 - YAML backup export from the Backup tab
+- wider 80vw editor window with 95vw double-click expansion
 - separate Farben tab with up to 20 reusable color favorites for all color fields
 - tab, text, hover, icon, active icon field and background colors
 - menu and submenu background color opacity

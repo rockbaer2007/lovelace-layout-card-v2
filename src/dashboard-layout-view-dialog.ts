@@ -3189,7 +3189,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           top: 16px;
           left: 50%;
           transform: translateX(-50%);
-          width: min(760px, calc(100vw - 32px));
+          width: min(80vw, 1180px);
           height: min(920px, calc(100vh - 32px));
           transition: width 160ms ease;
           display: grid;
@@ -3202,7 +3202,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         }
 
         .dialog.wide-dialog {
-          width: min(1180px, calc(100vw - 32px));
+          width: min(95vw, 1500px);
         }
 
         header,
