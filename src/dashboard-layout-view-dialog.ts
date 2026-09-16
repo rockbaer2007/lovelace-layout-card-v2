@@ -20,6 +20,7 @@ const DEFAULT_NOTIFY_ENTITY = "input_text.dashboard_notification";
 const DEFAULT_HOLIDAY_ENTITY = "input_boolean.dashboard_holiday";
 const DEFAULT_BIRTHDAY_ENTITY = "input_boolean.dashboard_birthday";
 const DEFAULT_CHRISTMAS_ENTITY = "input_boolean.dashboard_christmas";
+const DEFAULT_PAGE_ICON = "mdi:view-dashboard";
 
 type DashboardLayoutDialogTab = "menu" | "display" | "pages" | "submenu" | "messages" | "style" | "colors" | "backup" | "advanced";
 
@@ -490,6 +491,33 @@ function pageCardsForSave(page: any, existingView: any) {
     : Array.isArray(existingView?.cards)
       ? existingView.cards
       : [];
+}
+
+function iconForExistingPage(page: any, existingView: any) {
+  if ((!page.icon || page.icon === DEFAULT_PAGE_ICON) && existingView?.icon) return existingView.icon;
+  return page.icon;
+}
+
+function pageNavigationMetadataForSave(page: any, existingViewsByPath: Map<string, { view: any; index: number }>) {
+  if (isMenuOnlyPage(page)) return pageNavigationMetadata(page);
+  const existingView = existingViewsByPath.get(String(page.path))?.view;
+  const nextPage = {
+    ...page,
+    icon: iconForExistingPage(page, existingView),
+    ...(Array.isArray(page.subpages) && page.subpages.length
+      ? {
+          subpages: page.subpages.map((subpage: any) => {
+            if (isMenuOnlyPage(subpage)) return subpage;
+            const existingSubView = existingViewsByPath.get(String(subpage.path))?.view;
+            return {
+              ...subpage,
+              icon: iconForExistingPage(subpage, existingSubView),
+            };
+          }),
+        }
+      : {}),
+  };
+  return pageNavigationMetadata(nextPage);
 }
 
 function stableViewEditorChrome(view: any) {
@@ -1378,7 +1406,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     return {
       title: `${titlePrefix} ${nextIndex}`,
       path: `${slugifyPath(titlePrefix) || "subpage"}-${nextIndex}`,
-      icon: "mdi:view-dashboard",
+      icon: DEFAULT_PAGE_ICON,
       type: SECTIONS_LAYOUT_V2,
       layout_type: SECTIONS_LAYOUT_V2,
       max_columns: 4,
@@ -1565,7 +1593,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       return {
         title: `Unterseite ${nextIndex}`,
         path: `subpage-${nextIndex}`,
-        icon: "mdi:view-dashboard",
+        icon: DEFAULT_PAGE_ICON,
         type: SECTIONS_LAYOUT_V2,
         layout_type: SECTIONS_LAYOUT_V2,
         max_columns: 4,
@@ -1580,7 +1608,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const page = {
       title: `Unterseite ${nextIndex}`,
       path: `subpage-${nextIndex}`,
-      icon: "mdi:view-dashboard",
+      icon: DEFAULT_PAGE_ICON,
       type: SECTIONS_LAYOUT_V2,
       layout_type: SECTIONS_LAYOUT_V2,
       max_columns: 4,
@@ -1929,7 +1957,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         visible_users: this._visibleUsers,
       },
       color_presets: this._colorPresetsForSave(),
-      pages: normalizedPages.map((page) => pageNavigationMetadata(page)),
+      pages: [],
     };
 
     const currentPath = String(views[this.viewIndex].path ?? this.viewIndex);
@@ -1937,6 +1965,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const existingViewsByPath = new Map(
       views.map((view, index) => [String(view.path ?? index), { view, index }])
     );
+    dashboardLayoutV2.pages = normalizedPages.map((page) => pageNavigationMetadataForSave(page, existingViewsByPath));
     const homeTheme = existingViewsByPath.get(homePath)?.view.theme ?? views[this.viewIndex].theme;
     const applyInheritedTheme = (view: any, viewPath: string) => {
       if (!this._inheritTheme || viewPath === homePath) return view;
@@ -2019,7 +2048,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           ...existing.view,
           title: page.title,
           path: pagePath,
-          ...(page.icon ? { icon: page.icon } : {}),
+          ...(iconForExistingPage(page, existing.view) ? { icon: iconForExistingPage(page, existing.view) } : {}),
           type,
           subview: isCurrentView ? existing.view.subview : true,
           layout: pageLayout,
