@@ -906,6 +906,9 @@ export class BaseLayout extends LitElement {
       }
 
       .dashboard-layout-v2-menu-icon-field {
+        --mdc-icon-size: var(--dashboard-layout-v2-icon-size, 20px);
+        --iron-icon-width: var(--dashboard-layout-v2-icon-size, 20px);
+        --iron-icon-height: var(--dashboard-layout-v2-icon-size, 20px);
         display: inline-grid;
         place-items: center;
         width: calc(var(--dashboard-layout-v2-icon-size, 20px) + 10px);
@@ -916,13 +919,20 @@ export class BaseLayout extends LitElement {
         border-radius: var(--dashboard-layout-v2-icon-radius, 8px);
         background: var(--dashboard-layout-v2-icon-background-color, transparent);
         color: var(--dashboard-layout-v2-icon-color, var(--primary-color));
+        font-size: var(--dashboard-layout-v2-icon-size, 20px);
+        line-height: 1;
       }
 
       .dashboard-layout-v2-menu-icon {
         --mdc-icon-size: var(--dashboard-layout-v2-icon-size, 20px);
-        width: var(--dashboard-layout-v2-icon-size, 20px);
-        height: var(--dashboard-layout-v2-icon-size, 20px);
+        --iron-icon-width: var(--dashboard-layout-v2-icon-size, 20px);
+        --iron-icon-height: var(--dashboard-layout-v2-icon-size, 20px);
+        width: var(--dashboard-layout-v2-icon-size, 20px) !important;
+        height: var(--dashboard-layout-v2-icon-size, 20px) !important;
+        min-width: var(--dashboard-layout-v2-icon-size, 20px);
         color: currentColor;
+        font-size: var(--dashboard-layout-v2-icon-size, 20px);
+        line-height: 1;
       }
 
       .dashboard-layout-v2-menu-bottom {
