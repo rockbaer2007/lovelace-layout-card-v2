@@ -63,6 +63,13 @@ function dashboardLayoutV2ColorWithOpacity(color?: string, opacity?: number) {
   return `color-mix(in srgb, ${value} ${percent}%, transparent)`;
 }
 
+function dashboardLayoutV2IconSize(value?: string | number) {
+  const rawValue = String(value ?? "").trim();
+  const numericValue = Number(rawValue.replace(/[^\d.]/g, ""));
+  if (!Number.isFinite(numericValue) || numericValue <= 0) return "20px";
+  return `${Math.max(14, Math.min(36, numericValue))}px`;
+}
+
 export class BaseLayout extends LitElement {
   @property() cards: Array<LovelaceCard | HuiCard> = [];
   @property() index: number;
@@ -588,7 +595,7 @@ export class BaseLayout extends LitElement {
         : "",
       style.icon_background_active_color ? `--dashboard-layout-v2-icon-background-active-color: ${style.icon_background_active_color}` : "",
       style.icon_shape === "circle" ? "--dashboard-layout-v2-icon-radius: 50%" : "--dashboard-layout-v2-icon-radius: 8px",
-      style.icon_size ? `--dashboard-layout-v2-icon-size: ${style.icon_size}` : "",
+      style.icon_size ? `--dashboard-layout-v2-icon-size: ${dashboardLayoutV2IconSize(style.icon_size)}` : "",
       "--dashboard-layout-v2-icon-column-width: max(64px, calc(var(--dashboard-layout-v2-icon-size, 20px) + 36px))",
       style.active_tab_color ? `--dashboard-layout-v2-active-tab-color: ${style.active_tab_color}` : "",
       style.inactive_tab_color ? `--dashboard-layout-v2-inactive-tab-color: ${style.inactive_tab_color}` : "",
@@ -672,7 +679,7 @@ export class BaseLayout extends LitElement {
       style.card_border_color ? `--ha-card-border-color: ${dashboardLayoutV2ColorWithOpacity(style.card_border_color, style.card_border_opacity)}` : "",
       style.card_border_color ? "--ha-card-border-width: 1px" : "",
       "--dashboard-layout-v2-icon-column-width: max(64px, calc(var(--dashboard-layout-v2-icon-size, 20px) + 36px))",
-      style.icon_size ? `--dashboard-layout-v2-icon-size: ${style.icon_size}` : "",
+      style.icon_size ? `--dashboard-layout-v2-icon-size: ${dashboardLayoutV2IconSize(style.icon_size)}` : "",
       style.shadow_frame_color ? `--dashboard-layout-v2-shadow-frame-color: ${style.shadow_frame_color}` : "",
       style.shadow_frame_offset ? `--dashboard-layout-v2-shadow-frame-offset: ${style.shadow_frame_offset}` : "",
       style.shadow_frame_color
@@ -918,6 +925,7 @@ export class BaseLayout extends LitElement {
 
       .dashboard-layout-v2-menu-icon-field {
         --mdc-icon-size: var(--dashboard-layout-v2-icon-size, 20px);
+        --ha-icon-size: var(--dashboard-layout-v2-icon-size, 20px);
         --iron-icon-width: var(--dashboard-layout-v2-icon-size, 20px);
         --iron-icon-height: var(--dashboard-layout-v2-icon-size, 20px);
         display: inline-grid;
@@ -936,6 +944,7 @@ export class BaseLayout extends LitElement {
 
       .dashboard-layout-v2-menu-icon {
         --mdc-icon-size: var(--dashboard-layout-v2-icon-size, 20px);
+        --ha-icon-size: var(--dashboard-layout-v2-icon-size, 20px);
         --iron-icon-width: var(--dashboard-layout-v2-icon-size, 20px);
         --iron-icon-height: var(--dashboard-layout-v2-icon-size, 20px);
         width: var(--dashboard-layout-v2-icon-size, 20px) !important;
