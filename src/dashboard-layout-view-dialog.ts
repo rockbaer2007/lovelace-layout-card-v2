@@ -49,6 +49,7 @@ const defaultConfig = {
       icon_color: "",
       icon_active_color: "",
       icon_background_color: "",
+      icon_background_active_color: "",
       icon_shape: "rounded-square",
       icon_size: "20px",
       active_tab_color: "",
@@ -76,6 +77,7 @@ const defaultConfig = {
       analog_second_hand_color: "",
       background_mode: "none",
       background_color: "",
+      background_opacity: 100,
       background_image: "",
       submenu_background_color: "",
     },
@@ -483,6 +485,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _iconColor = "";
   @state() private _iconActiveColor = "";
   @state() private _iconBackgroundColor = "";
+  @state() private _iconBackgroundActiveColor = "";
   @state() private _iconShape = "rounded-square";
   @state() private _iconSize = "20";
   @state() private _activeTabColor = "";
@@ -510,6 +513,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   @state() private _analogSecondHandColor = "";
   @state() private _backgroundMode = "none";
   @state() private _backgroundColor = "";
+  @state() private _backgroundOpacity = 100;
   @state() private _backgroundImage = "";
   @state() private _submenuBackgroundColor = "";
   @state() private _hideHaChrome = false;
@@ -584,6 +588,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._iconColor = config.menu.style?.icon_color ?? "";
     this._iconActiveColor = config.menu.style?.icon_active_color ?? "";
     this._iconBackgroundColor = config.menu.style?.icon_background_color ?? config.menu.style?.icon_circle_color ?? "";
+    this._iconBackgroundActiveColor = config.menu.style?.icon_background_active_color ?? "";
     this._iconShape = config.menu.style?.icon_shape ?? "rounded-square";
     this._iconSize = clockSizeInputValue(config.menu.style?.icon_size ?? "20px");
     this._activeTabColor = config.menu.style?.active_tab_color ?? "";
@@ -611,6 +616,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._analogSecondHandColor = config.menu.style?.analog_second_hand_color ?? "";
     this._backgroundMode = config.menu.style?.background_mode ?? "none";
     this._backgroundColor = config.menu.style?.background_color ?? "";
+    this._backgroundOpacity = normalizedOpacity(config.menu.style?.background_opacity);
     this._backgroundImage = config.menu.style?.background_image ?? "";
     this._submenuBackgroundColor = config.menu.style?.submenu_background_color ?? "";
     this._hideHaChrome = config.chrome?.hide_ha_chrome === true;
@@ -720,6 +726,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "iconColor") this._iconColor = value;
     if (key === "iconActiveColor") this._iconActiveColor = value;
     if (key === "iconBackgroundColor") this._iconBackgroundColor = value;
+    if (key === "iconBackgroundActiveColor") this._iconBackgroundActiveColor = value;
     if (key === "iconShape") this._iconShape = value;
     if (key === "iconSize") this._iconSize = value;
     if (key === "activeTabColor") this._activeTabColor = value;
@@ -747,6 +754,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     if (key === "analogSecondHandColor") this._analogSecondHandColor = value;
     if (key === "backgroundMode") this._backgroundMode = value;
     if (key === "backgroundColor") this._backgroundColor = value;
+    if (key === "backgroundOpacity") this._backgroundOpacity = normalizedOpacity(value);
     if (key === "backgroundImage") this._backgroundImage = value;
     if (key === "submenuBackgroundColor") this._submenuBackgroundColor = value;
     if (key === "hideHaChrome") this._hideHaChrome = value;
@@ -1687,6 +1695,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           icon_color: this._iconColor,
           icon_active_color: this._iconActiveColor,
           icon_background_color: this._iconBackgroundColor,
+          icon_background_active_color: this._iconBackgroundActiveColor,
           icon_shape: this._iconShape,
           icon_size: normalizedIconSize(this._iconSize),
           active_tab_color: this._activeTabColor,
@@ -1714,6 +1723,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           analog_second_hand_color: this._analogSecondHandColor,
           background_mode: this._backgroundMode,
           background_color: this._backgroundColor,
+          background_opacity: this._backgroundOpacity,
           background_image: this._backgroundImage,
           submenu_background_color: this._submenuBackgroundColor,
         },
@@ -1946,7 +1956,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           ${this._renderTabButton("pages", "Seiten")}
           ${selectedSubpages.length ? this._renderTabButton("submenu", "Submenü") : nothing}
           ${this._renderTabButton("messages", "Meldungen")}
-          ${this._renderTabButton("style", "Style")}
+          ${this._renderTabButton("style", "Styles Global")}
           ${this._renderTabButton("backup", "Backup")}
           ${this._renderTabButton("advanced", "Erweitert")}
         </nav>
@@ -2747,7 +2757,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           </details>
 
           <details class="wide collapsible-group settings-panel" data-tab="style" open>
-            <summary>Style</summary>
+            <summary>Styles Global</summary>
             <div class="style-grid">
               <label>
                 Größe Uhr
@@ -2882,6 +2892,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                 <div class="icon-style-column">
                   ${this._renderColorField("Icon aktiv Farbe", "iconActiveColor", this._iconActiveColor, "Icon Farbe")}
                   ${this._renderColorField("Icon-Feld Farbe", "iconBackgroundColor", this._iconBackgroundColor, "transparent")}
+                  ${this._renderColorField(
+                    "Icon-Feld aktiv Farbe",
+                    "iconBackgroundActiveColor",
+                    this._iconBackgroundActiveColor,
+                    "Icon-Feld Farbe"
+                  )}
                 </div>
               </div>
               <label>
@@ -2903,6 +2919,21 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       this._backgroundColor,
                       "rgba(0,0,0,0.18)"
                     )}
+                    <label class="wide-style">
+                      Hintergrundfarbe Opacity
+                      <div class="range-row">
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          step="1"
+                          .value=${String(this._backgroundOpacity)}
+                          @input=${(ev: Event) =>
+                            this._setValue("backgroundOpacity", (ev.target as HTMLInputElement).value)}
+                        />
+                        <span>${this._backgroundOpacity}%</span>
+                      </div>
+                    </label>
                   `
                 : nothing}
               ${this._backgroundMode === "image"

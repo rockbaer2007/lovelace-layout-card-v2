@@ -148,6 +148,7 @@ export interface DashboardLayoutMenuConfig {
     icon_color?: string;
     icon_active_color?: string;
     icon_background_color?: string;
+    icon_background_active_color?: string;
     icon_circle_color?: string;
     icon_shape?: "circle" | "rounded-square";
     icon_size?: string;
@@ -176,6 +177,7 @@ export interface DashboardLayoutMenuConfig {
     analog_second_hand_color?: string;
     background_mode?: "none" | "color" | "image";
     background_color?: string;
+    background_opacity?: number;
     background_image?: string;
     submenu_background_color?: string;
   };

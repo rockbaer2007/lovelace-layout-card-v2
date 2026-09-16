@@ -43,10 +43,11 @@ layout-card without overwriting it.
 - Lets linked subviews inherit menu style through `inherits_from`.
 - Can apply the home view theme to linked subviews while saving.
 - Supports configurable tab colors, text colors, hover colors, icon color, icon
-  background color, icon shape, tab border, view card border, border opacity,
-  separate tab and view 3D frames, menu/submenu background, digital or analog
-  clock, optional analog hour marks, minute marks and seconds hand, date
-  display, weekday display, clock size and date text size.
+  background color, active icon background color, icon shape, tab border, view
+  card border, border opacity, separate tab and view 3D frames, menu/submenu
+  background, background color opacity, digital or analog clock, optional analog
+  hour marks, minute marks and seconds hand, date display, weekday display,
+  clock size and date text size.
 - Can optionally hide the Home Assistant sidebar/header for selected dashboard
   users while keeping it visible for admins.
 
@@ -172,6 +173,7 @@ views:
             icon_color: "#fbff00"
             icon_active_color: "#ffffff"
             icon_background_color: "#ffffff"
+            icon_background_active_color: ""
             icon_shape: circle
             active_tab_color: "#333aff"
             inactive_tab_color: "#bfbfbf"
@@ -191,6 +193,7 @@ views:
             weekday_wrap_size: 21px
             background_mode: none
             background_color: ""
+            background_opacity: 100
             background_image: ""
             submenu_background_color: ""
         chrome:
@@ -270,7 +273,8 @@ dashboard settings are available from the view editor and allow editing:
   background and button background colors, including the home entry
 - per-entry reset action for returning one button to the global colors
 - YAML backup export from the Backup tab
-- tab, text, hover, icon and background colors
+- tab, text, hover, icon, active icon field and background colors
+- menu background color opacity
 - tab/view borders with separate opacity controls and separate 3D frame colors
 - optional submenu for a selected main menu entry, rendered as compact icon
   buttons next to the main menu

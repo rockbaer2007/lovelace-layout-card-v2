@@ -564,7 +564,7 @@ export class BaseLayout extends LitElement {
     const background = submenu && style.submenu_background_color
       ? style.submenu_background_color
       : style.background_mode === "color" && style.background_color
-        ? style.background_color
+        ? dashboardLayoutV2ColorWithOpacity(style.background_color, style.background_opacity)
         : style.background_mode === "image" && style.background_image
           ? `center / cover no-repeat url("${style.background_image}")`
           : "";
@@ -575,6 +575,7 @@ export class BaseLayout extends LitElement {
       style.icon_background_color || style.icon_circle_color
         ? `--dashboard-layout-v2-icon-background-color: ${style.icon_background_color ?? style.icon_circle_color}`
         : "",
+      style.icon_background_active_color ? `--dashboard-layout-v2-icon-background-active-color: ${style.icon_background_active_color}` : "",
       style.icon_shape === "circle" ? "--dashboard-layout-v2-icon-radius: 50%" : "--dashboard-layout-v2-icon-radius: 8px",
       style.icon_size ? `--dashboard-layout-v2-icon-size: ${style.icon_size}` : "",
       "--dashboard-layout-v2-icon-column-width: max(64px, calc(var(--dashboard-layout-v2-icon-size, 20px) + 36px))",
