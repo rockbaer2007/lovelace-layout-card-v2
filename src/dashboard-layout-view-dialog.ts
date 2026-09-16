@@ -885,7 +885,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     return html`
       <select
         class="color-preset"
-        title=${`${label}: Farbfavorit wählen`}
+        title=${`${label}: choose color favorite`}
         .value=${""}
         @change=${(ev: Event) => {
           const select = ev.target as HTMLSelectElement;
@@ -895,11 +895,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           }
         }}
       >
-        <option value="">Favorit wählen</option>
+        <option value="">Choose favorite</option>
         ${presets.map(
           (preset, index) => html`
             <option value=${preset.value ?? ""}>
-              ${preset.name?.trim() || `Farbe ${index + 1}`} · ${preset.value}
+              ${preset.name?.trim() || `Color ${index + 1}`} · ${preset.value}
             </option>
           `
         )}
@@ -917,7 +917,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const labels = this._tooLongStatusLabels();
     if (!labels.length) return "";
     const rows = labels.map((item) => item.index + 1).join(", ");
-    return `Status-Label in Zeile ${rows} ist zu lang. Bitte auf maximal ${STATUS_LABEL_MAX_LENGTH} Zeichen kürzen.`;
+    return `Status label in row ${rows} is too long. Please shorten it to at most ${STATUS_LABEL_MAX_LENGTH} characters.`;
   }
 
   private _statusEntityOptions() {
@@ -1054,7 +1054,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         </button>
                       `;
                     })
-                  : html`<p>Keine Entität gefunden</p>`}
+                  : html`<p>No entity found</p>`}
               </div>
             `
           : nothing}
@@ -1116,7 +1116,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         </button>
                       `;
                     })
-                  : html`<p>Keine Entität gefunden</p>`}
+                  : html`<p>No entity found</p>`}
               </div>
             `
           : nothing}
@@ -1171,7 +1171,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         </button>
                       `;
                     })
-                  : html`<p>Keine Entität gefunden</p>`}
+                  : html`<p>No entity found</p>`}
               </div>
             `
           : nothing}
@@ -1223,7 +1223,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             class="color"
             type="color"
             .value=${colorPickerValue(value)}
-            title=${`${label} auswählen`}
+            title=${`Choose ${label}`}
             @input=${(ev: Event) => apply((ev.target as HTMLInputElement).value)}
           />
           ${this._renderColorPresetSelect(label, apply)}
@@ -1248,7 +1248,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             class="color"
             type="color"
             .value=${colorPickerValue(value)}
-            title=${`${label} auswählen`}
+            title=${`Choose ${label}`}
             @input=${(ev: Event) => update((ev.target as HTMLInputElement).value)}
           />
           ${this._renderColorPresetSelect(label, update)}
@@ -1426,7 +1426,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   }
 
   private _resetHomeColors() {
-    if (!window.confirm("Farben des Home-Buttons auf globale Werte zurücksetzen?")) return;
+    if (!window.confirm("Reset the home button colors to global values?")) return;
     this._homeIconColor = "";
     this._homeIconActiveColor = "";
     this._homeIconBackgroundColor = "";
@@ -1436,7 +1436,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   }
 
   private _resetPageColors(index: number) {
-    if (!window.confirm("Farben dieses Buttons auf globale Werte zurücksetzen?")) return;
+    if (!window.confirm("Reset this button colors to global values?")) return;
     this._pages = this._pages.map((page, pageIndex) => {
       if (pageIndex !== index) return page;
       const next = { ...page };
@@ -1643,7 +1643,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
   }
 
   private _resetSubPageColors(index: number) {
-    if (!window.confirm("Farben dieses Subbuttons auf globale Werte zurücksetzen?")) return;
+    if (!window.confirm("Reset this subbutton colors to global values?")) return;
     this._pages = this._pages.map((page, pageIndex) => {
       if (pageIndex !== this._selectedPageIndex || !Array.isArray(page?.subpages)) return page;
       return {
@@ -1734,7 +1734,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       this._syncJsonFromPages();
       this._error = "";
     } catch (err: any) {
-      this._error = err?.message || "Pages konnten nicht gelesen werden.";
+      this._error = err?.message || "Pages could not be read.";
     }
   }
 
@@ -1747,7 +1747,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
         pagesForSave = parsed;
       }
     } catch (err: any) {
-      throw new Error(err?.message || "Pages konnten nicht gelesen werden.");
+      throw new Error(err?.message || "Pages could not be read.");
     }
     return pagesForSave;
   }
@@ -1756,7 +1756,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const rawConfig = this.lovelace?.rawConfig ?? this.lovelace?.config;
     const views = rawConfig?.views;
     if (!Array.isArray(views) || !views[this.viewIndex]) {
-      throw new Error("Aktuelle View konnte nicht gefunden werden.");
+      throw new Error("Current view could not be found.");
     }
 
     const normalizedPages = pagesForSave.map((page, index) => this._normalizePage(page, index));
@@ -1996,7 +1996,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     try {
       nextConfig = this._buildExportConfig(this._pagesForCurrentEditorState());
     } catch (err: any) {
-      this._error = err?.message || "Dashboard konnte nicht vorbereitet werden.";
+      this._error = err?.message || "Dashboard could not be prepared.";
       return;
     }
 
@@ -2008,7 +2008,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const rawConfig = this.lovelace?.rawConfig ?? this.lovelace?.config;
     const views = rawConfig?.views;
     if (!Array.isArray(views) || !views[this.viewIndex]) {
-      this._error = "Farben konnten nicht gespeichert werden: aktuelle View nicht gefunden.";
+      this._error = "Colors could not be saved: current view not found.";
       return;
     }
 
@@ -2042,7 +2042,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       ...rawConfig,
       views: nextViews,
     });
-    this._error = "Farben gespeichert.";
+    this._error = "Colors saved.";
   }
 
   private _exportDashboardYaml() {
@@ -2061,7 +2061,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
       downloadTextFile(filename, yamlDump(exportConfig), "application/x-yaml;charset=utf-8");
       this._error = "";
     } catch (err: any) {
-      this._error = err?.message || "Dashboard YAML konnte nicht exportiert werden.";
+      this._error = err?.message || "Dashboard YAML could not be exported.";
     }
   }
 
@@ -2101,29 +2101,29 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     return html`
       <div class="scrim" @click=${this._close}></div>
       <section class=${`dialog${this._wideDialog ? " wide-dialog" : ""}`} role="dialog" aria-modal="true">
-        <header @dblclick=${this._toggleDialogWidth} title="Doppelklick: Fensterbreite umschalten">
+        <header @dblclick=${this._toggleDialogWidth} title="Double-click: toggle dialog width">
           <h2>Dashboard Layout V2</h2>
-          <button class="icon" @click=${this._close} title="Schließen">×</button>
+          <button class="icon" @click=${this._close} title="Close">×</button>
         </header>
 
-        <nav class="settings-tabs" role="tablist" aria-label="Dashboard Layout V2 Einstellungen">
-          ${this._renderTabButton("menu", "Menü")}
-          ${this._renderTabButton("display", "Anzeige")}
-          ${this._renderTabButton("pages", "Seiten")}
-          ${selectedSubpages.length ? this._renderTabButton("submenu", "Submenü") : nothing}
-          ${this._renderTabButton("messages", "Meldungen")}
+        <nav class="settings-tabs" role="tablist" aria-label="Dashboard Layout V2 settings">
+          ${this._renderTabButton("menu", "Menu")}
+          ${this._renderTabButton("display", "Display")}
+          ${this._renderTabButton("pages", "Pages")}
+          ${selectedSubpages.length ? this._renderTabButton("submenu", "Submenu") : nothing}
+          ${this._renderTabButton("messages", "Messages")}
           ${this._renderTabButton("style", "Styles Global")}
-          ${this._renderTabButton("colors", "Farben")}
+          ${this._renderTabButton("colors", "Colors")}
           ${this._renderTabButton("backup", "Backup")}
-          ${this._renderTabButton("advanced", "Erweitert")}
+          ${this._renderTabButton("advanced", "Advanced")}
         </nav>
 
         <div class="content" data-active-tab=${this._activeTab}>
           <details class="wide collapsible-group settings-panel" data-tab="menu" open>
-            <summary>Menü</summary>
+            <summary>Menu</summary>
             <div class="section-grid">
               <label>
-                Menüposition
+                Menuposition
                 <select
                   .value=${this._menuPosition}
                   @change=${(ev: Event) => this._setValue("menuPosition", (ev.target as HTMLSelectElement).value)}
@@ -2135,7 +2135,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               </label>
 
               <label>
-                Menütitel
+                Menutitel
                 <input
                   .value=${this._menuTitle}
                   @input=${(ev: Event) => this._setValue("menuTitle", (ev.target as HTMLInputElement).value)}
@@ -2148,13 +2148,13 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   .checked=${this._iconOnly}
                   @change=${(ev: Event) => this._setValue("iconOnly", (ev.target as HTMLInputElement).checked)}
                 />
-                Nur Icons im Menü anzeigen
+                Nur Icons im Menu anzeigen
               </label>
             </div>
           </details>
 
           <details class="wide collapsible-group settings-panel" data-tab="menu" open>
-            <summary>Hauptseite</summary>
+            <summary>Home page</summary>
             <div class="section-grid">
               <label class="check">
                 <input
@@ -2162,20 +2162,20 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   .checked=${this._showHome}
                   @change=${(ev: Event) => this._setValue("showHome", (ev.target as HTMLInputElement).checked)}
                 />
-                Hauptseite als ersten Menüpunkt anzeigen
+                Home page als ersten Menupunkt anzeigen
               </label>
 
               <fieldset class="home-entry group wide">
-                <legend>Hauptseitefeld</legend>
+                <legend>Home pagefeld</legend>
                 <label>
-                  Titel
+                  Title
                   <input
                     .value=${this._homeTitle}
                     @input=${(ev: Event) => this._setValue("homeTitle", (ev.target as HTMLInputElement).value)}
                   />
                 </label>
                 <label>
-                  Pfad
+                  Path
                   <input
                     .value=${this._homePath}
                     @input=${(ev: Event) => this._setValue("homePath", (ev.target as HTMLInputElement).value)}
@@ -2188,26 +2188,26 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                     @input=${(ev: Event) => this._setValue("homeIcon", (ev.target as HTMLInputElement).value)}
                   />
                 </label>
-                ${this._renderColorField("Icon Farbe", "homeIconColor", this._homeIconColor, "Global")}
-                ${this._renderColorField("Icon aktiv Farbe", "homeIconActiveColor", this._homeIconActiveColor, "Global")}
-                ${this._renderColorField("Icon Hintergrund", "homeIconBackgroundColor", this._homeIconBackgroundColor, "Global")}
+                ${this._renderColorField("Icon color", "homeIconColor", this._homeIconColor, "Global")}
+                ${this._renderColorField("Active icon color", "homeIconActiveColor", this._homeIconActiveColor, "Global")}
+                ${this._renderColorField("Icon background", "homeIconBackgroundColor", this._homeIconBackgroundColor, "Global")}
                 ${this._renderColorField(
-                  "Icon Hintergrund aktiv",
+                  "Icon background aktiv",
                   "homeIconBackgroundActiveColor",
                   this._homeIconBackgroundActiveColor,
                   "Global"
                 )}
-                ${this._renderColorField("Button Farbe", "homeTabColor", this._homeTabColor, "Global")}
-                ${this._renderColorField("Button aktiv Farbe", "homeActiveTabColor", this._homeActiveTabColor, "Global")}
+                ${this._renderColorField("Button color", "homeTabColor", this._homeTabColor, "Global")}
+                ${this._renderColorField("Active button color", "homeActiveTabColor", this._homeActiveTabColor, "Global")}
                 <div class="wide-style color-reset-row">
-                  <button type="button" @click=${this._resetHomeColors}>Globale Farben verwenden</button>
+                  <button type="button" @click=${this._resetHomeColors}>Use global colors</button>
                 </div>
               </fieldset>
 
               <fieldset class="home-entry group wide">
-                <legend>Abschnittsansicht</legend>
+                <legend>Sections view</legend>
                 <label>
-                  Maximalzahl von Abschnitten in der Breite
+                  Maximum number of sections in width
                   <input
                     type="number"
                     min="1"
@@ -2224,7 +2224,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                     @change=${(ev: Event) =>
                       this._setValue("homeDenseSectionPlacement", (ev.target as HTMLInputElement).checked)}
                   />
-                  Dichte Abschnittsplatzierung
+                  Dense section placement
                 </label>
                 <label class="check">
                   <input
@@ -2232,7 +2232,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                     .checked=${this._homeTopMargin}
                     @change=${(ev: Event) => this._setValue("homeTopMargin", (ev.target as HTMLInputElement).checked)}
                   />
-                  Zusätzlichen Platz oben hinzufügen
+                  Add extra top spacing
                 </label>
               </fieldset>
 
@@ -2242,16 +2242,16 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   .checked=${this._inheritTheme}
                   @change=${(ev: Event) => this._setValue("inheritTheme", (ev.target as HTMLInputElement).checked)}
                 />
-                Theme von Hauptansicht übernehmen
+                Inherit theme from home view
               </label>
             </div>
           </details>
 
           <details class="wide collapsible-group settings-panel" data-tab="display" open>
-            <summary>Uhr</summary>
+            <summary>Clock</summary>
             <div class="section-grid">
               <label>
-                Uhr
+                Clock
                 <select
                   .value=${this._clock}
                   @change=${(ev: Event) => this._setValue("clock", (ev.target as HTMLSelectElement).value)}
@@ -2263,7 +2263,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               </label>
 
               <fieldset class="display-options group">
-                <legend>Anzeigeauswahl</legend>
+                <legend>Displayauswahl</legend>
                 ${this._clock === "analog"
                   ? html`
                     <label class="check compact-check">
@@ -2302,12 +2302,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                     .checked=${this._date}
                     @change=${(ev: Event) => this._setValue("date", (ev.target as HTMLInputElement).checked)}
                   />
-                  Datum
+                  Date
                 </label>
               </fieldset>
 
               <fieldset class="weekday-options group wide">
-                <legend>Wochentag</legend>
+                <legend>Weekday</legend>
                 <label class="check">
                   <input
                     type="radio"
@@ -2326,7 +2326,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                     .checked=${this._weekday === "short"}
                     @change=${() => this._setValue("weekday", "short")}
                   />
-                  Kürzel
+                  Short label
                 </label>
                 <label class="check">
                   <input
@@ -2338,14 +2338,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   />
                   Ausgeschrieben
                 </label>
-                ${this._renderColorField("Sa / So Farbe", "weekendColor", this._weekendColor, "Standard")}
+                ${this._renderColorField("Sat / Sun color", "weekendColor", this._weekendColor, "Standard")}
               </fieldset>
-              ${this._renderColorField("Uhr-/Ringfarbe", "clockColor", this._clockColor, "Standard")}
-              ${this._renderColorField("Minutenteilung Farbe", "analogMinuteMarkColor", this._analogMinuteMarkColor, "Standard")}
-              ${this._renderColorField("Stundenteilung Farbe", "analogHourMarkColor", this._analogHourMarkColor, "Standard")}
-              ${this._renderColorField("Stundenzeiger Farbe", "analogHourHandColor", this._analogHourHandColor, "Standard")}
-              ${this._renderColorField("Minutenzeiger Farbe", "analogMinuteHandColor", this._analogMinuteHandColor, "Standard")}
-              ${this._renderColorField("Sekundenzeiger Farbe", "analogSecondHandColor", this._analogSecondHandColor, "Standard")}
+              ${this._renderColorField("Clock-/Ringfarbe", "clockColor", this._clockColor, "Standard")}
+              ${this._renderColorField("Minute mark color", "analogMinuteMarkColor", this._analogMinuteMarkColor, "Standard")}
+              ${this._renderColorField("Hour mark color", "analogHourMarkColor", this._analogHourMarkColor, "Standard")}
+              ${this._renderColorField("Hour hand color", "analogHourHandColor", this._analogHourHandColor, "Standard")}
+              ${this._renderColorField("Minute hand color", "analogMinuteHandColor", this._analogMinuteHandColor, "Standard")}
+              ${this._renderColorField("Second hand color", "analogSecondHandColor", this._analogSecondHandColor, "Standard")}
               <fieldset class="day-symbol-options group wide">
                 <legend>Tages-Symbol</legend>
                 <label>
@@ -2361,7 +2361,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   ${this._renderDaySymbolEntityPicker("christmas")}
                 </label>
                 <label class="wide-style">
-                  Symbolgröße
+                  Symbol size
                   <div class="range-row">
                     <input
                       type="range"
@@ -2375,7 +2375,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   </div>
                 </label>
                 <p class="hint">
-                  Priorität: Geburtstag vor Weihnachten/Advent vor Feiertag. Leere oder inaktive Helper zeigen kein Symbol.
+                  Priority: birthday before Christmas/Advent before holiday. Empty or inactive helpers show no symbol.
                 </p>
               </fieldset>
             </div>
@@ -2390,7 +2390,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   .checked=${this._hideHaChrome}
                   @change=${(ev: Event) => this._setValue("hideHaChrome", (ev.target as HTMLInputElement).checked)}
                 />
-                HA-Sidebar und HA-Header für nicht erlaubte Benutzer ausblenden
+                Hide HA sidebar and HA header for users that are not allowed
               </label>
               <label class="check">
                 <input
@@ -2401,7 +2401,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                 Admin immer sichtbar lassen
               </label>
               <label class="wide">
-                Sichtbare Benutzer
+                Visible users
                 <input
                   placeholder="Name oder User-ID, getrennt mit Komma"
                   .value=${this._visibleUsers}
@@ -2409,7 +2409,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                 />
               </label>
               <p class="hint">
-                Leere Liste blendet die HA-Oberfläche für alle Nicht-Admins aus, sobald die Option aktiv ist.
+                An empty list hides the HA interface for all non-admins once the option is active.
               </p>
             </div>
           </details>
@@ -2428,7 +2428,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         ${page.type === "spacer"
                           ? "Abstand"
                           : page.type === "divider"
-                            ? "Trenner"
+                            ? "Divider"
                             : pageTitle(page, index)}
                       </span>
                       ${page.type === "divider"
@@ -2451,13 +2451,13 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         >
                           <option value="page" ?selected=${selectedPageItemType === "page"}>Seite</option>
                           <option value="spacer" ?selected=${selectedPageItemType === "spacer"}>Abstand</option>
-                          <option value="divider" ?selected=${selectedPageItemType === "divider"}>Trenner</option>
+                          <option value="divider" ?selected=${selectedPageItemType === "divider"}>Divider</option>
                         </select>
                       </label>
                       ${selectedPageItemType === "divider"
                         ? html`
                             <label class="divider-color-field">
-                              Trennerfarbe
+                              Dividerfarbe
                               <div class=${`color-row${this._activeColorPresets().length ? " has-presets" : ""}`}>
                                 <input
                                   class="text"
@@ -2470,17 +2470,17 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                                   class="color"
                                   type="color"
                                   .value=${colorPickerValue(selectedPage.color ?? "#ffffff")}
-                                  title="Trennerfarbe auswählen"
+                                  title="Dividerfarbe choose"
                                   @input=${(ev: Event) =>
                                     this._updatePage(this._selectedPageIndex, "color", (ev.target as HTMLInputElement).value)}
                                 />
-                                ${this._renderColorPresetSelect("Trennerfarbe", (value) =>
+                                ${this._renderColorPresetSelect("Dividerfarbe", (value) =>
                                   this._updatePage(this._selectedPageIndex, "color", value)
                                 )}
                               </div>
                             </label>
                             <label class="divider-color-field">
-                              3D-Effekt Trenner
+                              3D-Effekt Divider
                               <div class=${`color-row${this._activeColorPresets().length ? " has-presets" : ""}`}>
                                 <input
                                   class="text"
@@ -2497,7 +2497,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                                   class="color"
                                   type="color"
                                   .value=${colorPickerValue(selectedPage.shadow_frame_color ?? "transparent")}
-                                  title="3D-Effekt Trenner auswählen"
+                                  title="3D-Effekt Divider choose"
                                   @input=${(ev: Event) =>
                                     this._updatePage(
                                       this._selectedPageIndex,
@@ -2505,13 +2505,13 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                                       (ev.target as HTMLInputElement).value
                                     )}
                                 />
-                                ${this._renderColorPresetSelect("3D-Effekt Trenner", (value) =>
+                                ${this._renderColorPresetSelect("3D-Effekt Divider", (value) =>
                                   this._updatePage(this._selectedPageIndex, "shadow_frame_color", value)
                                 )}
                               </div>
                             </label>
                             <label class="wide-style">
-                              Trenner Opacity
+                              Divider Opacity
                               <div class="range-row">
                                 <input
                                   type="range"
@@ -2530,7 +2530,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                               </div>
                             </label>
                             <label class="wide-style">
-                              Trennerhöhe
+                              Divider height
                               <div class="range-row">
                                 <input
                                   type="range"
@@ -2553,7 +2553,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       ${selectedPageItemType === "page"
                         ? html`
                       <label>
-                        Titel
+                        Title
                         <input
                           .value=${selectedPage.title ?? ""}
                           @input=${(ev: Event) =>
@@ -2561,7 +2561,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                         />
                       </label>
                       <label>
-                        Pfad
+                        Path
                         <input
                           .value=${selectedPage.path ?? ""}
                           @input=${(ev: Event) =>
@@ -2576,27 +2576,27 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                             this._updatePage(this._selectedPageIndex, "icon", (ev.target as HTMLInputElement).value)}
                         />
                       </label>
-                      ${this._renderPageColorField("Icon Farbe", selectedPage, "icon_color", (value) =>
+                      ${this._renderPageColorField("Icon color", selectedPage, "icon_color", (value) =>
                         this._updatePage(this._selectedPageIndex, "icon_color", value)
                       )}
-                      ${this._renderPageColorField("Icon aktiv Farbe", selectedPage, "icon_active_color", (value) =>
+                      ${this._renderPageColorField("Active icon color", selectedPage, "icon_active_color", (value) =>
                         this._updatePage(this._selectedPageIndex, "icon_active_color", value)
                       )}
-                      ${this._renderPageColorField("Icon Hintergrund", selectedPage, "icon_background_color", (value) =>
+                      ${this._renderPageColorField("Icon background", selectedPage, "icon_background_color", (value) =>
                         this._updatePage(this._selectedPageIndex, "icon_background_color", value)
                       )}
-                      ${this._renderPageColorField("Icon Hintergrund aktiv", selectedPage, "icon_background_active_color", (value) =>
+                      ${this._renderPageColorField("Icon background aktiv", selectedPage, "icon_background_active_color", (value) =>
                         this._updatePage(this._selectedPageIndex, "icon_background_active_color", value)
                       )}
-                      ${this._renderPageColorField("Button Farbe", selectedPage, "tab_color", (value) =>
+                      ${this._renderPageColorField("Button color", selectedPage, "tab_color", (value) =>
                         this._updatePage(this._selectedPageIndex, "tab_color", value)
                       )}
-                      ${this._renderPageColorField("Button aktiv Farbe", selectedPage, "active_tab_color", (value) =>
+                      ${this._renderPageColorField("Active button color", selectedPage, "active_tab_color", (value) =>
                         this._updatePage(this._selectedPageIndex, "active_tab_color", value)
                       )}
                       <div class="wide-style color-reset-row">
                         <button type="button" @click=${() => this._resetPageColors(this._selectedPageIndex)}>
-                          Globale Farben verwenden
+                          Use global colors
                         </button>
                       </div>
                       <label>
@@ -2607,7 +2607,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                             this._updatePageLayout(this._selectedPageIndex, (ev.target as HTMLSelectElement).value)}
                         >
                           <option value=${SECTIONS_LAYOUT_V2} ?selected=${selectedPageLayout === SECTIONS_LAYOUT_V2}>
-                            Abschnitte V2
+                            Sections V2
                           </option>
                           <option value="custom:masonry-layout-v2" ?selected=${selectedPageLayout === "custom:masonry-layout-v2"}>
                             Masonry V2
@@ -2648,7 +2648,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                           .checked=${selectedSubpages.length > 0}
                           @change=${(ev: Event) => this._setPageSubmenuEnabled((ev.target as HTMLInputElement).checked)}
                         />
-                        Hat Submenü
+                        Hat Submenu
                       </label>
                       ${selectedSubpages.length
                         ? html`
@@ -2663,12 +2663,12 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                                     (ev.target as HTMLInputElement).checked
                                   )}
                               />
-                              Hauptseite nicht als ersten Subbutton anzeigen
+                              Do not show home page as first subbutton
                             </label>
                           `
                         : nothing}
                       ${selectedSubpages.length
-                        ? html`<button type="button" @click=${() => this._selectTab("submenu")}>Submenü bearbeiten</button>`
+                        ? html`<button type="button" @click=${() => this._selectTab("submenu")}>Submenu bearbeiten</button>`
                         : nothing}
                         `
                         : nothing}
@@ -2678,21 +2678,21 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             </div>
 
             <div class="actions">
-              <button @click=${this._addPage}>Hinzufügen</button>
+              <button @click=${this._addPage}>Add</button>
               <button @click=${this._addSpacer}>Abstand</button>
-              <button @click=${this._addDivider}>Trenner</button>
+              <button @click=${this._addDivider}>Divider</button>
               <button @click=${this._duplicatePage} ?disabled=${!selectedPage}>Duplizieren</button>
               <button @click=${() => this._movePage(-1)} ?disabled=${this._selectedPageIndex <= 0}>Hoch</button>
               <button @click=${() => this._movePage(1)} ?disabled=${this._selectedPageIndex >= this._pages.length - 1}>Runter</button>
-              <button class="danger" @click=${this._deletePage} ?disabled=${!selectedPage}>Löschen</button>
+              <button class="danger" @click=${this._deletePage} ?disabled=${!selectedPage}>Delete</button>
             </div>
           </details>
 
           <details class="wide collapsible-group settings-panel" data-tab="submenu" open>
-            <summary>Submenü</summary>
+            <summary>Submenu</summary>
             ${selectedPage && selectedSubpages.length
               ? html`
-                  <p class="hint">Subbuttons erben Farben und Stil vom ausgewählten Hauptbutton.</p>
+                  <p class="hint">Subbuttons inherit colors and style from the selected main button.</p>
                   <div class="page-editor">
                     <div class="page-list">
                       ${selectedSubpages.map(
@@ -2712,7 +2712,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       ${selectedSubPage
                         ? html`
                             <label>
-                              Titel
+                              Title
                               <input
                                 .value=${selectedSubPage.title ?? ""}
                                 @input=${(ev: Event) =>
@@ -2720,7 +2720,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                               />
                             </label>
                             <label>
-                              Pfad
+                              Path
                               <input
                                 .value=${selectedSubPage.path ?? ""}
                                 @input=${(ev: Event) =>
@@ -2735,27 +2735,27 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                                   this._updateSubPage(this._selectedSubPageIndex, "icon", (ev.target as HTMLInputElement).value)}
                               />
                             </label>
-                            ${this._renderPageColorField("Icon Farbe", selectedSubPage, "icon_color", (value) =>
+                            ${this._renderPageColorField("Icon color", selectedSubPage, "icon_color", (value) =>
                               this._updateSubPage(this._selectedSubPageIndex, "icon_color", value)
                             )}
-                            ${this._renderPageColorField("Icon aktiv Farbe", selectedSubPage, "icon_active_color", (value) =>
+                            ${this._renderPageColorField("Active icon color", selectedSubPage, "icon_active_color", (value) =>
                               this._updateSubPage(this._selectedSubPageIndex, "icon_active_color", value)
                             )}
-                            ${this._renderPageColorField("Icon Hintergrund", selectedSubPage, "icon_background_color", (value) =>
+                            ${this._renderPageColorField("Icon background", selectedSubPage, "icon_background_color", (value) =>
                               this._updateSubPage(this._selectedSubPageIndex, "icon_background_color", value)
                             )}
-                            ${this._renderPageColorField("Icon Hintergrund aktiv", selectedSubPage, "icon_background_active_color", (value) =>
+                            ${this._renderPageColorField("Icon background aktiv", selectedSubPage, "icon_background_active_color", (value) =>
                               this._updateSubPage(this._selectedSubPageIndex, "icon_background_active_color", value)
                             )}
-                            ${this._renderPageColorField("Button Farbe", selectedSubPage, "tab_color", (value) =>
+                            ${this._renderPageColorField("Button color", selectedSubPage, "tab_color", (value) =>
                               this._updateSubPage(this._selectedSubPageIndex, "tab_color", value)
                             )}
-                            ${this._renderPageColorField("Button aktiv Farbe", selectedSubPage, "active_tab_color", (value) =>
+                            ${this._renderPageColorField("Active button color", selectedSubPage, "active_tab_color", (value) =>
                               this._updateSubPage(this._selectedSubPageIndex, "active_tab_color", value)
                             )}
                             <div class="wide-style color-reset-row">
                               <button type="button" @click=${() => this._resetSubPageColors(this._selectedSubPageIndex)}>
-                                Globale Farben verwenden
+                                Use global colors
                               </button>
                             </div>
                             <label>
@@ -2766,7 +2766,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                                   this._updateSubPageLayout(this._selectedSubPageIndex, (ev.target as HTMLSelectElement).value)}
                               >
                                 <option value=${SECTIONS_LAYOUT_V2} ?selected=${selectedSubPageLayout === SECTIONS_LAYOUT_V2}>
-                                  Abschnitte V2
+                                  Sections V2
                                 </option>
                                 <option value="custom:masonry-layout-v2" ?selected=${selectedSubPageLayout === "custom:masonry-layout-v2"}>
                                   Masonry V2
@@ -2807,7 +2807,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   </div>
 
                   <div class="actions">
-                    <button @click=${this._addSubPage}>Hinzufügen</button>
+                    <button @click=${this._addSubPage}>Add</button>
                     <button @click=${this._duplicateSubPage} ?disabled=${!selectedSubPage}>Duplizieren</button>
                     <button @click=${() => this._moveSubPage(-1)} ?disabled=${this._selectedSubPageIndex <= 0}>Hoch</button>
                     <button
@@ -2816,14 +2816,14 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                     >
                       Runter
                     </button>
-                    <button class="danger" @click=${this._deleteSubPage} ?disabled=${!selectedSubPage}>Löschen</button>
+                    <button class="danger" @click=${this._deleteSubPage} ?disabled=${!selectedSubPage}>Delete</button>
                   </div>
                 `
-              : html`<p class="empty">Aktiviere bei einer Seite „Hat Submenü“, um Subbuttons anzulegen.</p>`}
+              : html`<p class="empty">Aktiviere bei einer Seite „Hat Submenu“, um Subbuttons anzulegen.</p>`}
           </details>
 
           <details class="wide collapsible-group settings-panel" data-tab="messages" open>
-            <summary>Benachrichtigung</summary>
+            <summary>Notification</summary>
             <div class="notify-editor">
               <label class="check">
                 <input
@@ -2831,7 +2831,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   .checked=${this._notifyEnabled}
                   @change=${(ev: Event) => this._setValue("notifyEnabled", (ev.target as HTMLInputElement).checked)}
                 />
-                Benachrichtigung anzeigen
+                Notification anzeigen
               </label>
               ${this._notifyEnabled
                 ? html`
@@ -2840,13 +2840,13 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                       ${this._renderNotifyEntityPicker()}
                     </label>
                     ${this._renderColorField(
-                      "Rahmenfarbe",
+                      "Border color",
                       "notifyBorderColor",
                       this._notifyBorderColor,
                       "leer = rot"
                     )}
                     <label class="wide-style">
-                      Rahmen Opacity
+                      Border opacity
                       <div class="range-row">
                         <input
                           type="range"
@@ -2863,20 +2863,20 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                     ${this._notifyEntityMissing()
                       ? html`
                           <div class="helper-hint">
-                            <strong>Helper nicht gefunden</strong>
+                            <strong>Helper not found</strong>
                             <p>
-                              Erstelle in Home Assistant einen Text-Helfer mit der Entity
+                              Create a text helper in Home Assistant with the entity
                               <code>${this._notifyEntity || DEFAULT_NOTIFY_ENTITY}</code>.
                             </p>
                             <p>
-                              Pfad: Einstellungen &gt; Geräte &amp; Dienste &gt; Helfer &gt; Helfer erstellen &gt; Text.
-                              Bleibt der Text leer, wird die Benachrichtigung ausgeblendet.
+                              Path: Settings &gt; Devices &amp; services &gt; Helpers &gt; Create helper &gt; Text.
+                              Bleibt der Text leer, wird die Notification ausgeblendet.
                             </p>
                           </div>
                         `
                       : html`
                           <p class="hint">
-                            Die Box erscheint nur, wenn die Entity einen Text enthält. Leer, unknown und unavailable
+                            The box only appears when the entity contains text. Empty, unknown and unavailable
                             werden ausgeblendet.
                           </p>
                         `}
@@ -2886,7 +2886,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           </details>
 
           <details class="wide collapsible-group settings-panel" data-tab="messages" open>
-            <summary>Statuswerte</summary>
+            <summary>Status values</summary>
             <div class="status-editor">
               <label class="check">
                 <input
@@ -2894,18 +2894,18 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   .checked=${this._statusEnabled}
                   @change=${(ev: Event) => this._setValue("statusEnabled", (ev.target as HTMLInputElement).checked)}
                 />
-                Statuswerte anzeigen
+                Status values anzeigen
               </label>
               ${this._statusEnabled
                 ? html`
                     ${this._renderColorField(
-                      "Rahmenfarbe",
+                      "Border color",
                       "statusBorderColor",
                       this._statusBorderColor,
                       "leer = Tabumrandung, sonst #ffffff"
                     )}
                     <label class="wide-style">
-                      Rahmen Opacity
+                      Border opacity
                       <div class="range-row">
                         <input
                           type="range"
@@ -2953,7 +2953,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
             <summary>Styles Global</summary>
             <div class="style-grid">
               <label>
-                Größe Uhr
+                Clock size
                 <input
                   type="number"
                   min="24"
@@ -2964,7 +2964,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                 />
               </label>
               <label>
-                Größe Datum
+                Date size
                 <input
                   type="number"
                   min="8"
@@ -2977,7 +2977,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               ${this._weekday === "long"
                 ? html`
                     <label>
-                      Zeilenumbruch ab
+                      Line break from
                       <input
                         type="number"
                         min="12"
@@ -2995,11 +2995,11 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               ${this._renderColorField("Text aktiv", "activeTabTextColor", this._activeTabTextColor, "var(--text-primary-color)")}
               ${this._renderColorField("Tab inaktiv", "inactiveTabColor", this._inactiveTabColor, "transparent")}
               ${this._renderColorField("Text inaktiv", "inactiveTabTextColor", this._inactiveTabTextColor, "var(--primary-text-color)")}
-              ${this._renderColorField("Hover Farbe", "hoverTabColor", this._hoverTabColor, "var(--secondary-background-color)")}
+              ${this._renderColorField("Hover color", "hoverTabColor", this._hoverTabColor, "var(--secondary-background-color)")}
               ${this._renderColorField("Hover Text", "hoverTabTextColor", this._hoverTabTextColor, "var(--primary-text-color)")}
               ${this._renderColorField("Tabumrandung", "tabBorderColor", this._tabBorderColor, "transparent")}
               <label class="wide-style">
-                Menü-Rahmen Opacity
+                Menu-Border opacity
                 <div class="range-row">
                   <input
                     type="range"
@@ -3045,7 +3045,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               </label>
               <div class="icon-style-grid wide">
                 <div class="icon-style-column">
-                  ${this._renderColorField("Icon Farbe", "iconColor", this._iconColor, "var(--primary-color)")}
+                  ${this._renderColorField("Icon color", "iconColor", this._iconColor, "var(--primary-color)")}
                   <label>
                     Icon-Form
                     <div class="shape-options">
@@ -3068,7 +3068,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                     </div>
                   </label>
                   <label class="wide-style">
-                    Icon-Größe
+                    Icon size
                     <div class="range-row icon-size-row" @input=${(ev: Event) => ev.stopPropagation()} @change=${(ev: Event) => ev.stopPropagation()}>
                       <input
                         type="range"
@@ -3096,37 +3096,37 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   </label>
                 </div>
                 <div class="icon-style-column">
-                  ${this._renderColorField("Icon aktiv Farbe", "iconActiveColor", this._iconActiveColor, "Icon Farbe")}
-                  ${this._renderColorField("Icon-Feld Farbe", "iconBackgroundColor", this._iconBackgroundColor, "transparent")}
+                  ${this._renderColorField("Active icon color", "iconActiveColor", this._iconActiveColor, "Icon color")}
+                  ${this._renderColorField("Icon field color", "iconBackgroundColor", this._iconBackgroundColor, "transparent")}
                   ${this._renderColorField(
-                    "Icon-Feld aktiv Farbe",
+                    "Active icon field color",
                     "iconBackgroundActiveColor",
                     this._iconBackgroundActiveColor,
-                    "Icon-Feld Farbe"
+                    "Icon field color"
                   )}
                 </div>
               </div>
               <label>
-                Hintergrund
+                Background
                 <select
                   .value=${this._backgroundMode}
                   @change=${(ev: Event) => this._setValue("backgroundMode", (ev.target as HTMLSelectElement).value)}
                 >
                   <option value="none">Keine</option>
-                  <option value="color">Farbe</option>
+                  <option value="color">Color</option>
                   <option value="image">Bild</option>
                 </select>
               </label>
               ${this._backgroundMode === "color"
                 ? html`
                     ${this._renderColorField(
-                      "Hintergrundfarbe",
+                      "Backgroundfarbe",
                       "backgroundColor",
                       this._backgroundColor,
                       "rgba(0,0,0,0.18)"
                     )}
                     <label class="wide-style">
-                      Hintergrundfarbe Opacity
+                      Backgroundfarbe Opacity
                       <div class="range-row">
                         <input
                           type="range"
@@ -3155,13 +3155,13 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                   `
                 : nothing}
               ${this._renderColorField(
-                "Submenü Hintergrund",
+                "Submenu Background",
                 "submenuBackgroundColor",
                 this._submenuBackgroundColor,
-                "wie Menü"
+                "wie Menu"
               )}
               <label class="wide-style">
-                Submenü Hintergrund Opacity
+                Submenu Background Opacity
                 <div class="range-row">
                   <input
                     type="range"
@@ -3179,23 +3179,23 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           </details>
 
           <details class="wide collapsible-group settings-panel" data-tab="colors" open>
-            <summary>Farben</summary>
+            <summary>Colors</summary>
             <p class="hint">
-              Bis zu 20 Farbfavoriten für alle Farbfelder. Leere Plätze werden nicht gespeichert.
+              Up to 20 color favorites for all color fields. Empty slots are not saved.
             </p>
             <div class="colors-actions">
-              <button type="button" class="primary" @click=${this._saveColorPresets}>Farben speichern</button>
+              <button type="button" class="primary" @click=${this._saveColorPresets}>Colors speichern</button>
             </div>
             <div class="color-presets-grid">
               <span>Nr.</span>
               <span>Name</span>
-              <span>Farbe</span>
+              <span>Color</span>
               <span>Auswahl</span>
               ${normalizeColorPresets(this._colorPresets).map(
                 (preset, index) => html`
                   <span class="preset-index">${index + 1}</span>
                   <input
-                    placeholder=${`Farbe ${index + 1}`}
+                    placeholder=${`Color ${index + 1}`}
                     .value=${preset.name ?? ""}
                     @input=${(ev: Event) =>
                       this._updateColorPreset(index, "name", (ev.target as HTMLInputElement).value)}
@@ -3211,7 +3211,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
                     class="color"
                     type="color"
                     .value=${colorPickerValue(preset.value ?? "")}
-                    title=${`Farbe ${index + 1} auswählen`}
+                    title=${`Color ${index + 1} choose`}
                     @input=${(ev: Event) =>
                       this._updateColorPreset(index, "value", (ev.target as HTMLInputElement).value)}
                   />
@@ -3223,10 +3223,10 @@ class DashboardLayoutV2ViewDialog extends LitElement {
           <details class="wide json-box settings-panel" data-tab="backup" open>
             <summary>Backup</summary>
             <p class="hint">
-              Exportiert den aktuellen Editorstand als YAML-Datei auf deinen PC. Home Assistant wird dabei nicht verändert.
+              Exports the current editor state as a YAML file to your PC. Home Assistant is not changed.
             </p>
             <button type="button" @click=${this._exportDashboardYaml}>Dashboard YAML exportieren</button>
-            <p class="hint">Ein YAML-Import kann später hier ergänzt werden.</p>
+            <p class="hint">A YAML import can be added here later.</p>
           </details>
 
           <details class="wide json-box settings-panel" data-tab="advanced" ?open=${this._jsonExpanded} @toggle=${(ev: Event) => (this._jsonExpanded = (ev.target as HTMLDetailsElement).open)}>
@@ -3235,15 +3235,15 @@ class DashboardLayoutV2ViewDialog extends LitElement {
               .value=${this._pagesText}
               @input=${(ev: Event) => this._setValue("pagesText", (ev.target as HTMLTextAreaElement).value)}
             ></textarea>
-            <button @click=${this._applyJson}>JSON übernehmen</button>
+            <button @click=${this._applyJson}>Apply JSON</button>
           </details>
 
           ${this._error ? html`<p class="error">${this._error}</p>` : nothing}
         </div>
 
         <footer>
-          <button @click=${this._close}>Abbrechen</button>
-          <button class="primary" @click=${this._save} ?disabled=${Boolean(statusLabelError)}>Speichern</button>
+          <button @click=${this._close}>Cancel</button>
+          <button class="primary" @click=${this._save} ?disabled=${Boolean(statusLabelError)}>Save</button>
         </footer>
       </section>
     `;

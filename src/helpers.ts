@@ -27,7 +27,7 @@ export const loadHaForm = async () => {
 export const LAYOUT_CARD_SELECTOR_OPTIONS = [
   {
     value: "custom:sections-layout-v2",
-    label: "Abschnitte (Dashboard Layout Card V2)",
+    label: "Sections (Dashboard Layout Card V2)",
   },
   {
     value: "custom:masonry-layout-v2",

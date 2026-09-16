@@ -29,7 +29,7 @@ layout-card without overwriting it.
   entry.
 - The editor can export the current dashboard configuration as a YAML backup
   file without writing anything back to Home Assistant.
-- A separate Farben tab can store up to 20 reusable color favorites for all
+- A separate Colors tab can store up to 20 reusable color favorites for all
   color fields without mixing them into Styles Global.
 - Supports non-clickable menu spacers and rounded divider bars.
 - Divider bars support their own color, opacity and optional 3D frame color.
@@ -184,7 +184,7 @@ views:
             border_opacity: 100
             items:
               - entity: sensor.outdoor_temperature
-                label: Außen
+                label: Outside
                 unit: °C
               - entity: sensor.pv_power
                 label: PV
@@ -300,7 +300,7 @@ dashboard settings are available from the view editor and allow editing:
 - per-entry reset action for returning one button to the global colors
 - YAML backup export from the Backup tab
 - wider 80vw editor window with 95vw double-click expansion
-- separate Farben tab with up to 20 reusable color favorites for all color fields
+- separate Colors tab with up to 20 reusable color favorites for all color fields
 - tab, text, hover, icon, active icon field and background colors
 - notification and status border opacity
 - menu and submenu background color opacity
@@ -326,24 +326,24 @@ The Dashboard Layout V2 view dialog is organized into tabs:
 
 | Tab | Options |
 | --- | --- |
-| Menü | Menu position (`left`, `none`, `right`), menu title and global icon-only mode for kiosk/tablet layouts. |
-| Hauptseite | Show or hide the home entry, home title, path, icon, per-home icon/button colors, maximum Sections V2 columns, dense section placement, extra top spacing and theme inheritance from the home view. |
-| Anzeige | Clock mode (`none`, `digital`, `analog`), analog hour marks, minute marks and seconds hand, date visibility, weekday mode (`none`, `short`, `long`), weekend color, clock/ring color, analog mark and hand colors, holiday/birthday/christmas helper entities and day-symbol size. |
-| Seiten | Main menu pages, spacers and dividers; title, path, icon, layout type, maximum columns, per-entry colors, reset to global colors, first submenu button behavior, divider color, divider 3D frame color, divider opacity and divider height. |
-| Submenü | Subpages for the selected main page with title, path, icon, layout type, maximum columns, per-entry colors and reset to global colors. The submenu tab appears when the selected main entry has subpages. |
-| Meldungen | Optional notification popup based on a text helper, notification border color and opacity, optional status values with up to four entity rows, labels, units, status border color and status border opacity. |
+| Menu | Menu position (`left`, `none`, `right`), menu title and global icon-only mode for kiosk/tablet layouts. |
+| Home page | Show or hide the home entry, home title, path, icon, per-home icon/button colors, maximum Sections V2 columns, dense section placement, extra top spacing and theme inheritance from the home view. |
+| Display | Clock mode (`none`, `digital`, `analog`), analog hour marks, minute marks and seconds hand, date visibility, weekday mode (`none`, `short`, `long`), weekend color, clock/ring color, analog mark and hand colors, holiday/birthday/christmas helper entities and day-symbol size. |
+| Pages | Main menu pages, spacers and dividers; title, path, icon, layout type, maximum columns, per-entry colors, reset to global colors, first submenu button behavior, divider color, divider 3D frame color, divider opacity and divider height. |
+| Submenu | Subpages for the selected main page with title, path, icon, layout type, maximum columns, per-entry colors and reset to global colors. The submenu tab appears when the selected main entry has subpages. |
+| Messages | Optional notification popup based on a text helper, notification border color and opacity, optional status values with up to four entity rows, labels, units, status border color and status border opacity. |
 | Styles Global | Clock size, date size, weekday wrap size, tab/text/hover colors, menu border color and opacity, tab 3D frame color, card/content border color and opacity, card 3D frame color, shared 3D offset, icon color, active icon color, icon field color, active icon field color, icon shape, icon size, menu background mode (`none`, `color`, `image`), menu background color and opacity, menu background image, submenu background color and submenu background opacity. |
-| Farben | Up to 20 reusable color favorites. The dedicated **Farben speichern** button saves only the favorites. |
+| Colors | Up to 20 reusable color favorites. The dedicated **Save colors** button saves only the favorites. |
 | Backup | Export the current dashboard editor state as YAML to the local computer. |
-| Erweitert | Home Assistant chrome settings, optional always-visible admin controls, visible user list and advanced JSON editing for page data. |
+| Advanced | Home Assistant chrome settings, optional always-visible admin controls, visible user list and advanced JSON editing for page data. |
 
 ## Color favorites
 
-The **Farben** tab stores up to 20 reusable color favorites separately from
+The **Colors** tab stores up to 20 reusable color favorites separately from
 **Styles Global**. Each favorite can have a name and a color value. Every color
 field, including divider colors, keeps direct text input and the normal color picker, and additionally shows
 a favorite dropdown as soon as at least one favorite color is defined. The
-**Farben speichern** button writes only the color favorites, without saving other
+**Save colors** button writes only the color favorites, without saving other
 open editor changes.
 
 Example:
@@ -372,11 +372,11 @@ tab_color: ""
 active_tab_color: "#333aff"
 ```
 
-In the editor, the **Globale Farben verwenden** action clears only these six
+In the editor, the **Use global colors** action clears only these six
 color fields for the selected Home, main menu or submenu button. It does not
 change the page, subpage, layout, icon, path or global colors.
 
-The **Dashboard YAML exportieren** action in the Backup tab downloads the
+The **Export dashboard YAML** action in the Backup tab downloads the
 current editor state as a `.yaml` backup file to the local computer. It does not
 write anything back to Home Assistant and is intended as a quick safety backup
 before testing larger menu, color or layout changes.

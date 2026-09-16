@@ -381,8 +381,8 @@ class DashboardLayoutCardV2 extends LitElement {
         <button
           class=${`notify-popup-button${this._notifyOpen ? " active" : ""}`}
           type="button"
-          aria-label="Meldungen anzeigen"
-          title="Meldungen"
+          aria-label="Show messages"
+          title="Messages"
           @click=${(ev: Event) => {
             ev.stopPropagation();
             this._notifyOpen = !this._notifyOpen;
@@ -392,8 +392,8 @@ class DashboardLayoutCardV2 extends LitElement {
         </button>
         ${this._notifyOpen
           ? html`
-              <div class="notify-popup" role="dialog" aria-label="Meldungen">
-                <strong>Meldung</strong>
+              <div class="notify-popup" role="dialog" aria-label="Messages">
+                <strong>Message</strong>
                 <p>${message}</p>
                 <button
                   type="button"
@@ -402,7 +402,7 @@ class DashboardLayoutCardV2 extends LitElement {
                     this._notifyOpen = false;
                   }}
                 >
-                  Schließen
+                  Close
                 </button>
               </div>
             `
@@ -531,7 +531,7 @@ class DashboardLayoutCardV2 extends LitElement {
     return html`
       <nav
         class="submenu"
-        aria-label=${`${pageTitle(mainPage)} Untermenü`}
+        aria-label=${`${pageTitle(mainPage)} submenu`}
         style=${[
           `--dashboard-layout-v2-submenu-offset: ${this._subMenuOffset()}px`,
           submenuBackground ? `--dashboard-layout-v2-menu-background: ${submenuBackground}` : "",

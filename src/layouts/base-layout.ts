@@ -420,7 +420,7 @@ export class BaseLayout extends LitElement {
       const minutes = now.getMinutes() + seconds / 60;
       const hours = (now.getHours() % 12) + minutes / 60;
       return html`
-        <div class="dashboard-layout-v2-analog-clock" aria-label="Analoge Uhr">
+        <div class="dashboard-layout-v2-analog-clock" aria-label="Analog clock">
           ${menu.analog_minute_marks
             ? Array.from({ length: 60 }, (_, index) =>
                 index % 5 === 0
@@ -549,8 +549,8 @@ export class BaseLayout extends LitElement {
         <button
           class=${`dashboard-layout-v2-notify-popup-button${this._dashboardLayoutV2NotifyOpen ? " active" : ""}`}
           type="button"
-          aria-label="Meldungen anzeigen"
-          title="Meldungen"
+          aria-label="Show messages"
+          title="Messages"
           @click=${(ev: Event) => {
             ev.stopPropagation();
             this._dashboardLayoutV2NotifyOpen = !this._dashboardLayoutV2NotifyOpen;
@@ -560,8 +560,8 @@ export class BaseLayout extends LitElement {
         </button>
         ${this._dashboardLayoutV2NotifyOpen
           ? html`
-              <div class="dashboard-layout-v2-notify-popup" role="dialog" aria-label="Meldungen">
-                <strong>Meldung</strong>
+              <div class="dashboard-layout-v2-notify-popup" role="dialog" aria-label="Messages">
+                <strong>Message</strong>
                 <p>${message}</p>
                 <button
                   type="button"
@@ -570,7 +570,7 @@ export class BaseLayout extends LitElement {
                     this._dashboardLayoutV2NotifyOpen = false;
                   }}
                 >
-                  Schließen
+                  Close
                 </button>
               </div>
             `
@@ -696,7 +696,7 @@ export class BaseLayout extends LitElement {
       >
         ${subpages.length
           ? html`
-              <nav aria-label=${`${dashboardLayoutV2PageTitle(activePage)} Untermenü`}>
+              <nav aria-label=${`${dashboardLayoutV2PageTitle(activePage)} submenu`}>
                 ${subpages.map((page) => this._renderDashboardLayoutV2SubMenuItem(page))}
               </nav>
             `

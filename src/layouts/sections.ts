@@ -335,7 +335,7 @@ class SectionsLayout extends BaseLayout {
         card: {
           type: "markdown",
           text_only: true,
-          content: `# ${viewConfig.title ?? "Titel"}`,
+          content: `# ${viewConfig.title ?? "Title"}`,
         },
       },
     });
@@ -350,7 +350,7 @@ class SectionsLayout extends BaseLayout {
         card: {
           type: "markdown",
           text_only: true,
-          content: "Fußzeile",
+          content: "Footer",
         },
       },
     });
@@ -403,7 +403,7 @@ class SectionsLayout extends BaseLayout {
           <div class=${this.lovelace?.editMode ? "chrome-card-fallback header edit-mode" : "chrome-card-fallback header"}>
             ${this.lovelace?.editMode
               ? html`
-                  <button class="chrome-configure" @click=${this._configureHeader} title="Kopfzeilen-Einstellungen">
+                  <button class="chrome-configure" @click=${this._configureHeader} title="Header settings">
                     <ha-icon .icon=${"mdi:pencil"}></ha-icon>
                   </button>
                 `
@@ -420,7 +420,7 @@ class SectionsLayout extends BaseLayout {
           <div class=${this.lovelace?.editMode ? "chrome-card-fallback footer edit-mode" : "chrome-card-fallback footer"}>
             ${this.lovelace?.editMode
               ? html`
-                  <button class="chrome-configure" @click=${this._configureFooter} title="Fußzeilen-Einstellungen">
+                  <button class="chrome-configure" @click=${this._configureFooter} title="Footer settings">
                     <ha-icon .icon=${"mdi:pencil"}></ha-icon>
                   </button>
                 `
@@ -437,7 +437,7 @@ class SectionsLayout extends BaseLayout {
       <div class=${editMode ? "direct-chrome header edit-mode" : "direct-chrome header"}>
         ${editMode
           ? html`
-              <button class="chrome-configure" @click=${this._configureHeader} title="Kopfzeilen-Einstellungen">
+              <button class="chrome-configure" @click=${this._configureHeader} title="Header settings">
                 <ha-icon .icon=${"mdi:pencil"}></ha-icon>
               </button>
             `
@@ -449,7 +449,7 @@ class SectionsLayout extends BaseLayout {
               ? html`
                   <button class="direct-add" @click=${this._addHeaderCard}>
                     <ha-icon .icon=${"mdi:plus"}></ha-icon>
-                    Titel hinzufügen
+                    Add title
                   </button>
                 `
               : ""}
@@ -458,7 +458,7 @@ class SectionsLayout extends BaseLayout {
           ? html`
               <button class="direct-add badge-placeholder" type="button">
                 <ha-icon .icon=${"mdi:plus"}></ha-icon>
-                Badge hinzufügen
+                Add badge
               </button>
             `
           : ""}
@@ -474,7 +474,7 @@ class SectionsLayout extends BaseLayout {
       <div class=${editMode ? "direct-chrome footer edit-mode" : "direct-chrome footer"}>
         ${editMode
           ? html`
-              <button class="chrome-configure" @click=${this._configureFooter} title="Fußzeilen-Einstellungen">
+              <button class="chrome-configure" @click=${this._configureFooter} title="Footer settings">
                 <ha-icon .icon=${"mdi:pencil"}></ha-icon>
               </button>
             `
@@ -484,7 +484,7 @@ class SectionsLayout extends BaseLayout {
           : html`
               <button class="direct-add" @click=${this._addFooterCard}>
                 <ha-icon .icon=${"mdi:plus"}></ha-icon>
-                Fußzeile hinzufügen
+                Add footer
               </button>
             `}
       </div>
@@ -674,7 +674,7 @@ class SectionsLayout extends BaseLayout {
         `)}
         ${editMode
           ? html`
-              <button class="create-section" @click=${this._addSection} title="Abschnitt hinzufügen">
+              <button class="create-section" @click=${this._addSection} title="Add section">
                 <ha-icon .icon=${"mdi:view-grid-plus"}></ha-icon>
               </button>
             `

@@ -94,9 +94,9 @@ class DashboardLayoutCardV2Editor extends LitElement {
   }
 
   _computeLabel(schema) {
-    if (schema.name === "menu") return "Menü-Konfiguration";
-    if (schema.name === "chrome") return "HA-Oberfläche";
-    if (schema.name === "pages") return "Seiten";
+    if (schema.name === "menu") return "Menu configuration";
+    if (schema.name === "chrome") return "HA interface";
+    if (schema.name === "pages") return "Pages";
     return schema.name;
   }
 
@@ -121,9 +121,9 @@ class DashboardLayoutCardV2Editor extends LitElement {
         <div class="quick-options">
           <label class="check-row">
             <input type="checkbox" .checked=${menu.icon_only === true} @change=${(ev: Event) => this._toggleIconOnly(ev)}>
-            <span>Nur Icons im Menü anzeigen</span>
+            <span>Show only icons in the menu</span>
           </label>
-          <p class="hint">Erzwingt den kompakten Menümodus auch auf Desktop. Ohne Haken greift weiterhin automatisch der mobile Icon-Modus.</p>
+          <p class="hint">Forces compact menu mode on desktop. Without this option, automatic mobile icon mode still applies.</p>
         </div>
         <ha-form
           .hass=${this.hass}
@@ -139,7 +139,7 @@ class DashboardLayoutCardV2Editor extends LitElement {
   _renderPagesTab() {
     return html`
       <section class="tab-panel" role="tabpanel">
-        <p class="hint">Hier bleiben Hauptseiten, Trenner, Abstandshalter und später Untermenüs zusammen.</p>
+        <p class="hint">Main pages, dividers, spacers and later submenus stay together here.</p>
         <ha-form
           .hass=${this.hass}
           .data=${{ pages: this._config.pages ?? [] }}
@@ -169,10 +169,10 @@ class DashboardLayoutCardV2Editor extends LitElement {
     return html`
       <section class="tab-panel" role="tabpanel">
         <div class="placeholder">
-          <strong>Erweitertes Menü / Submenü</strong>
+          <strong>Advanced menu / submenu</strong>
           <p>
-            Dieser Bereich ist für die nächste Ausbaustufe vorbereitet: Submenüs pro Hauptmenü-Button,
-            feste oder ausgewählte Position und eigene Seiten je Submenü-Eintrag.
+            This area is prepared for the next expansion step: submenus per main menu button,
+            fixed or selected position and dedicated pages per submenu entry.
           </p>
         </div>
       </section>
@@ -185,14 +185,14 @@ class DashboardLayoutCardV2Editor extends LitElement {
     return html`
       <div class="editor">
         <p>
-          Dashboard Layout Card V2 konfigurieren. Die Einstellungen sind in Reiter aufgeteilt,
-          damit neue Menü- und Submenü-Funktionen übersichtlich bleiben.
+          Configure Dashboard Layout Card V2. The settings are split into tabs,
+          so new menu and submenu features stay manageable.
         </p>
-        <nav class="tabs" role="tablist" aria-label="Dashboard Layout Card V2 Einstellungen">
-          ${this._renderTabButton("menu", "Menü")}
-          ${this._renderTabButton("pages", "Seiten")}
-          ${this._renderTabButton("chrome", "HA-Oberfläche")}
-          ${this._renderTabButton("advanced", "Erweitert")}
+        <nav class="tabs" role="tablist" aria-label="Dashboard Layout Card V2 settings">
+          ${this._renderTabButton("menu", "Menu")}
+          ${this._renderTabButton("pages", "Pages")}
+          ${this._renderTabButton("chrome", "HA interface")}
+          ${this._renderTabButton("advanced", "Advanced")}
         </nav>
         ${this._activeTab === "menu" ? this._renderMenuTab(menu) : ""}
         ${this._activeTab === "pages" ? this._renderPagesTab() : ""}
