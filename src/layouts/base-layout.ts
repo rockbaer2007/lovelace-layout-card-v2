@@ -705,7 +705,7 @@ export class BaseLayout extends LitElement {
 
   _renderDashboardLayoutV2SubMenu() {
     const menu = this._dashboardLayoutV2Menu();
-    if (menu.position === "none") return html``;
+    if (menu.position === "none" || !this._dashboardLayoutV2HasSubmenu()) return html``;
     const activePage = this._dashboardLayoutV2ActivePage();
     const subpages = this._dashboardLayoutV2ActiveSubpages();
 
@@ -744,13 +744,20 @@ export class BaseLayout extends LitElement {
     ].filter(Boolean).join(";");
   }
 
+  _dashboardLayoutV2HasSubmenu() {
+    return this._dashboardLayoutV2Pages().some(
+      (page: any) => Array.isArray(page?.subpages) && page.subpages.length > 0
+    );
+  }
+
   _renderDashboardLayoutV2Shell(content) {
     const menu = this._dashboardLayoutV2Menu();
     if (menu.position === "none") return content;
+    const hasSubmenu = this._dashboardLayoutV2HasSubmenu();
 
     return html`
       <section
-        class=${`dashboard-layout-v2-shell menu-${menu.position}${menu.icon_only === true ? " menu-icon-only" : ""}`}
+        class=${`dashboard-layout-v2-shell menu-${menu.position}${hasSubmenu ? " has-submenu" : ""}${menu.icon_only === true ? " menu-icon-only" : ""}`}
         style=${this._dashboardLayoutV2ContentStyle(menu)}
       >
         ${menu.position === "left" ? this._renderDashboardLayoutV2Menu() : ""}
@@ -773,20 +780,36 @@ export class BaseLayout extends LitElement {
 
       .dashboard-layout-v2-shell {
         display: grid;
-        grid-template-columns: minmax(160px, 220px) var(--dashboard-layout-v2-icon-column-width, 64px) minmax(0, 1fr);
+        grid-template-columns: minmax(160px, 220px) minmax(0, 1fr);
         gap: 12px;
         height: 100%;
       }
 
       .dashboard-layout-v2-shell.menu-right {
+        grid-template-columns: minmax(0, 1fr) minmax(160px, 220px);
+      }
+
+      .dashboard-layout-v2-shell.has-submenu {
+        grid-template-columns: minmax(160px, 220px) var(--dashboard-layout-v2-icon-column-width, 64px) minmax(0, 1fr);
+      }
+
+      .dashboard-layout-v2-shell.menu-right.has-submenu {
         grid-template-columns: minmax(0, 1fr) var(--dashboard-layout-v2-icon-column-width, 64px) minmax(160px, 220px);
       }
 
       .dashboard-layout-v2-shell.menu-icon-only {
-        grid-template-columns: var(--dashboard-layout-v2-icon-column-width, 64px) var(--dashboard-layout-v2-icon-column-width, 64px) minmax(0, 1fr);
+        grid-template-columns: var(--dashboard-layout-v2-icon-column-width, 64px) minmax(0, 1fr);
       }
 
       .dashboard-layout-v2-shell.menu-right.menu-icon-only {
+        grid-template-columns: minmax(0, 1fr) var(--dashboard-layout-v2-icon-column-width, 64px);
+      }
+
+      .dashboard-layout-v2-shell.has-submenu.menu-icon-only {
+        grid-template-columns: var(--dashboard-layout-v2-icon-column-width, 64px) var(--dashboard-layout-v2-icon-column-width, 64px) minmax(0, 1fr);
+      }
+
+      .dashboard-layout-v2-shell.menu-right.has-submenu.menu-icon-only {
         grid-template-columns: minmax(0, 1fr) var(--dashboard-layout-v2-icon-column-width, 64px) var(--dashboard-layout-v2-icon-column-width, 64px);
       }
 
