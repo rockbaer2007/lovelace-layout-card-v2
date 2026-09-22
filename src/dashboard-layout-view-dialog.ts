@@ -687,9 +687,15 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     this._homeIconBackgroundActiveColor = homeEntry.icon_background_active_color;
     this._homeTabColor = homeEntry.tab_color;
     this._homeActiveTabColor = homeEntry.active_tab_color;
-    this._homeMaxColumns = Number(currentViewConfig?.max_columns ?? 4);
-    this._homeDenseSectionPlacement = currentViewConfig?.dense_section_placement === true;
-    this._homeTopMargin = currentViewConfig?.top_margin === true;
+    // The editor may be opened from a subpage. Read section options from the
+    // configured home view in that case, otherwise saving the subpage would
+    // replace the home view's values with the subpage defaults.
+    const configuredHomeView =
+      rawViews.find((view: any, index: number) => String(view?.path ?? index) === String(homeEntry.path)) ??
+      currentViewConfig;
+    this._homeMaxColumns = Number(configuredHomeView?.max_columns ?? 4);
+    this._homeDenseSectionPlacement = configuredHomeView?.dense_section_placement === true;
+    this._homeTopMargin = configuredHomeView?.top_margin === true;
     this._inheritTheme = config.inherit_theme !== false;
     this._clock = config.menu.clock ?? "digital";
     this._analogHourMarks = config.menu.analog_hour_marks === true;
@@ -1943,7 +1949,9 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     const existingViewsByPath = new Map(
       views.map((view, index) => [String(view.path ?? index), { view, index }])
     );
-    const homeTheme = existingViewsByPath.get(homePath)?.view.theme ?? views[this.viewIndex].theme;
+    const hasConfiguredHomeView = existingViewsByPath.has(homePath);
+    const homeViewPath = hasConfiguredHomeView ? homePath : currentPath;
+    const homeTheme = existingViewsByPath.get(homeViewPath)?.view.theme ?? views[this.viewIndex].theme;
     const applyInheritedTheme = (view: any, viewPath: string) => {
       if (!this._inheritTheme || viewPath === homePath) return view;
       if (homeTheme) return { ...view, theme: homeTheme };
@@ -1977,7 +1985,7 @@ class DashboardLayoutV2ViewDialog extends LitElement {
     });
     const nextViews = views.map((view, index) => {
       const viewPath = String(view.path ?? index);
-      const isHomeView = viewPath === currentPath || viewPath === homePath || (index === this.viewIndex && !view.subview);
+      const isHomeView = viewPath === homeViewPath;
       const isRelatedDashboardLayoutV2View =
         relatedPaths.has(viewPath) && isDashboardLayoutV2View(view);
       if (!isRelatedDashboardLayoutV2View) return view;
