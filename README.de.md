@@ -6,7 +6,7 @@
 
 Sections V2 übergibt die von HA 2026.11 benötigten vollständigen Konfigurationspfade an die nativen Abschnitts-, Kopf- und Fußzeilen-Editoren. Neue Cards landen im jeweiligen Abschnitt; der schwebende Hinzufügen-Button verwendet den ersten Abschnitt. Auch die anderen V2-Layouts übergeben vollständige Card-Pfade, wenn HA diese bereitstellt. Vorhandene Cards und Menüeinstellungen bleiben erhalten; eine YAML-Umstellung ist nicht erforderlich. Die bisherigen Index-Eigenschaften bleiben für ältere HA-Versionen erhalten.
 
-Build, TypeScript-Prüfung und isolierte Browser-Regressionstests sind erfolgreich. Grundlage ist Frontend `20261028.4` aus Core `2026.11.0`. Ein Live-Test unter HA 2026.11 ist noch nicht bestätigt: Das geprüfte Testsystem .177 läuft weiterhin mit Core 2026.10.4. Siehe [Kompatibilitätsbericht](docs/ha-2026.11-compatibility.md).
+Build, TypeScript-Prüfung und isolierte Browser-Regressionstests sind erfolgreich. Der Live-Test auf .177 mit Core `2026.11.0` / Frontend `20261028.4` war am 05.11.2026 ebenfalls erfolgreich: Card im zweiten Abschnitt hinzufügen und bearbeiten, über den schwebenden Button im ersten Abschnitt hinzufügen, Kopf-/Fußzeilen-Cards bearbeiten und neu laden. Vorhandene Abschnitts-Cards und die andere Testansicht blieben erhalten. Testdashboard und temporäre Ressource wurden danach entfernt. Siehe [Kompatibilitätsbericht](docs/ha-2026.11-compatibility.md).
 
 Parallel installierbarer V2-Fork von [thomasloven/lovelace-layout-card](https://github.com/thomasloven/lovelace-layout-card) mit zusätzlichen Dashboard-Ansichts-Funktionen für Home Assistant.
 

@@ -6,7 +6,7 @@
 
 Sections V2 transmet désormais les chemins de configuration complets requis par HA 2026.11 aux éditeurs natifs des sections, de l’en-tête et du pied de page. Les nouvelles cartes sont ajoutées à la section concernée ; le bouton flottant utilise la première section. Les autres dispositions V2 transmettent également les chemins complets des cartes lorsque HA les fournit. Les cartes et réglages de menu existants sont conservés ; aucune migration YAML n’est nécessaire. Les anciennes propriétés d’index restent disponibles pour les versions antérieures de HA.
 
-La compilation, la vérification TypeScript et les tests de régression isolés dans le navigateur ont réussi. La comparaison utilise le frontend `20261028.4` livré avec Core `2026.11.0`. Un test réel sous HA 2026.11 reste à confirmer : le système de test .177 utilise encore Core 2026.10.4. Voir le [rapport de compatibilité](docs/ha-2026.11-compatibility.md).
+La compilation, la vérification TypeScript et les tests de régression isolés ont réussi. Le test réel sur .177 avec Core `2026.11.0` / frontend `20261028.4` a également réussi le 05/11/2026 : ajout et modification d’une carte dans la deuxième section, ajout dans la première section via le bouton flottant, modification des cartes d’en-tête et de pied de page, puis rechargement. Les cartes existantes des sections et l’autre vue de test ont été conservées. Le tableau de bord de test et la ressource temporaire ont ensuite été supprimés. Voir le [rapport de compatibilité](docs/ha-2026.11-compatibility.md).
 
 Fork V2 installable en parallèle de [thomasloven/lovelace-layout-card](https://github.com/thomasloven/lovelace-layout-card), avec des fonctions supplémentaires pour créer des tableaux de bord Home Assistant.
 
