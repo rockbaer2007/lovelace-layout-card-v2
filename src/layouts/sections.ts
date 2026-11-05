@@ -173,6 +173,9 @@ class SectionsLayout extends BaseLayout {
   }
 
   private _resolvedViewIndex() {
+    if (this.path?.[0] === "views" && Number.isInteger(this.path[1]) && Number(this.path[1]) >= 0) {
+      return Number(this.path[1]);
+    }
     if (Number.isInteger(Number(this.index))) return Number(this.index);
 
     const views = this.lovelace?.rawConfig?.views ?? this.lovelace?.config?.views ?? [];
@@ -191,6 +194,33 @@ class SectionsLayout extends BaseLayout {
     }
 
     return undefined;
+  }
+
+  private _viewPath(): Array<string | number> | undefined {
+    const index = this._resolvedViewIndex();
+    return index === undefined ? undefined : ["views", index];
+  }
+
+  private _sectionPath(index: number) {
+    const viewPath = this._viewPath();
+    return viewPath ? [...viewPath, "sections", index] : undefined;
+  }
+
+  _addCard() {
+    // HA's generic view button targets view.cards. Sections need a section list.
+    // Before the path API, use the native grid's own button instead.
+    if (!this.path) {
+      const section = this.shadowRoot?.querySelector("hui-section") as any;
+      section?._layoutElement?._addCard?.();
+      return;
+    }
+    const sectionPath = this._sectionPath(0);
+    if (!sectionPath) return;
+    this.dispatchEvent(new CustomEvent("ll-create-card", {
+      bubbles: true,
+      composed: true,
+      detail: { path: [...sectionPath, "cards"], suggested: ["tile", "heading"] },
+    }));
   }
 
   private _currentViewConfig(): SectionsViewConfig {
@@ -379,7 +409,8 @@ class SectionsLayout extends BaseLayout {
   private _renderFallbackCardEditor(
     card: LovelaceCard | HuiCard,
     editCard: (ev: Event) => void,
-    deleteCard: (ev: Event) => void
+    deleteCard: (ev: Event) => void,
+    slot: "header" | "footer"
   ) {
     if (!this.lovelace?.editMode) return card;
 
@@ -388,7 +419,7 @@ class SectionsLayout extends BaseLayout {
         @ll-edit-card=${editCard}
         @ll-delete-card=${deleteCard}
         .lovelace=${this.lovelace}
-        .path=${[0]}
+        .path=${this.path ? [...(this._viewPath() ?? []), slot, "card"] : [0]}
         no-duplicate
         no-move
       >
@@ -408,7 +439,7 @@ class SectionsLayout extends BaseLayout {
                   </button>
                 `
               : ""}
-            ${this._renderFallbackCardEditor(card, this._editHeaderCard, this._deleteHeaderCard)}
+            ${this._renderFallbackCardEditor(card, this._editHeaderCard, this._deleteHeaderCard, "header")}
           </div>
         `
       : "";
@@ -425,7 +456,7 @@ class SectionsLayout extends BaseLayout {
                   </button>
                 `
               : ""}
-            ${this._renderFallbackCardEditor(card, this._editFooterCard, this._deleteFooterCard)}
+            ${this._renderFallbackCardEditor(card, this._editFooterCard, this._deleteFooterCard, "footer")}
           </div>
         `
       : "";
@@ -444,7 +475,7 @@ class SectionsLayout extends BaseLayout {
           : ""}
         <div class="direct-heading">
           ${card
-            ? this._renderFallbackCardEditor(card, this._editHeaderCard, this._deleteHeaderCard)
+            ? this._renderFallbackCardEditor(card, this._editHeaderCard, this._deleteHeaderCard, "header")
             : editMode
               ? html`
                   <button class="direct-add" @click=${this._addHeaderCard}>
@@ -480,7 +511,7 @@ class SectionsLayout extends BaseLayout {
             `
           : ""}
         ${card
-          ? this._renderFallbackCardEditor(card, this._editFooterCard, this._deleteFooterCard)
+          ? this._renderFallbackCardEditor(card, this._editFooterCard, this._deleteFooterCard, "footer")
           : html`
               <button class="direct-add" @click=${this._addFooterCard}>
                 <ha-icon .icon=${"mdi:plus"}></ha-icon>
@@ -593,6 +624,7 @@ class SectionsLayout extends BaseLayout {
                 .badges=${badges}
                 .lovelace=${this.lovelace}
                 .viewIndex=${this._resolvedViewIndex()}
+                .path=${this._viewPath()}
                 .config=${viewConfig?.header ?? {}}
               ></hui-view-header>
               ${this._showHeaderCardFallback ? this._renderHeaderCardFallback(this._headerCard) : ""}
@@ -618,6 +650,7 @@ class SectionsLayout extends BaseLayout {
                 .hass=${this.hass}
                 .lovelace=${this.lovelace}
                 .viewIndex=${this._resolvedViewIndex()}
+                .path=${this._viewPath()}
                 .config=${viewConfig?.footer ?? {}}
               ></hui-view-footer>
               ${this._showFooterCardFallback ? this._renderFooterCardFallback(this._footerCard) : ""}
@@ -650,6 +683,7 @@ class SectionsLayout extends BaseLayout {
                     .lovelace=${this.lovelace}
                     .index=${index}
                     .viewIndex=${this._resolvedViewIndex()}
+                    .path=${this._sectionPath(index)}
                   >
                     <hui-section
                       .hass=${this.hass}
@@ -657,6 +691,7 @@ class SectionsLayout extends BaseLayout {
                       .config=${sectionConfig}
                       .viewIndex=${this._resolvedViewIndex()}
                       .index=${index}
+                      .path=${this._sectionPath(index)}
                       ?preview=${editMode}
                     ></hui-section>
                   </hui-section-edit-mode>
@@ -668,6 +703,7 @@ class SectionsLayout extends BaseLayout {
                     .config=${sectionConfig}
                     .viewIndex=${this._resolvedViewIndex()}
                     .index=${index}
+                    .path=${this._sectionPath(index)}
                   ></hui-section>
                 `}
           </div>

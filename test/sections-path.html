@@ -1,0 +1,101 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>HA 2026.11 Sections path regression</title>
+<script type="importmap">
+{"imports":{"lit":"../node_modules/lit/index.js","lit/":"../node_modules/lit/","lit-html":"../node_modules/lit-html/lit-html.js","lit-html/":"../node_modules/lit-html/","lit-element/":"../node_modules/lit-element/","@lit/reactive-element":"../node_modules/@lit/reactive-element/reactive-element.js","@lit/reactive-element/":"../node_modules/@lit/reactive-element/"}}
+</script>
+<div id="fixture"></div>
+<pre id="result">Running...</pre>
+<script type="module">
+import {html, render, LitElement} from 'lit';
+import '../dashboard-layout-card-v2.js';
+
+// HA frontend 20261028.4 (Core 2026.11.0) uses paths in hui-section,
+// hui-grid-section, hui-section-edit-mode and the header/footer elements.
+// Model the native grid's [...this.path, 'cards'] add-card contract and
+// the view handler's immutable save, without any Home Assistant connection.
+class NativeSection extends LitElement {
+  static properties = {path: {attribute: false}, config: {attribute: false}};
+  render() {
+    return html`<button @click=${() => this.dispatchEvent(new CustomEvent('ll-create-card', {
+      bubbles: true, composed: true, detail: {path: [...this.path, 'cards']},
+    }))}>Add card</button>`;
+  }
+}
+customElements.define('hui-section', NativeSection);
+for (const name of ['hui-section-edit-mode', 'hui-view-header', 'hui-view-footer', 'hui-card-edit-mode']) {
+  customElements.define(name, class extends HTMLElement {});
+}
+const fixture = document.querySelector('#fixture');
+const layout = document.createElement('sections-layout-v2');
+const same = (a,b) => {
+  if (JSON.stringify(a) !== JSON.stringify(b)) throw new Error(`${JSON.stringify(a)} != ${JSON.stringify(b)}`);
+};
+let config = {views: [
+  {title: 'Untouched', cards: [{type: 'markdown', content: 'Original'}]},
+  {title: 'Sections', type: 'custom:sections-layout-v2', sections: [
+    {type: 'grid', cards: [{type: 'button', name: 'Keep A'}]},
+    {type: 'grid', cards: [{type: 'button', name: 'Keep B'}]},
+  ], header: {card: {type: 'markdown', content: 'Header'}}, footer: {card: {type: 'markdown', content: 'Footer'}}},
+]};
+let savedPath;
+fixture.addEventListener('ll-create-card', event => {
+  savedPath = event.detail.path;
+  const next = structuredClone(config);
+  const target = savedPath.reduce((value, key) => value[key], next);
+  target.push({type: 'markdown', content: 'Added'});
+  config = next;
+});
+const lovelace = {editMode: true, config, rawConfig: config};
+layout.lovelace = lovelace;
+layout.index = 0; // A current HA path must take precedence over a stale index.
+layout.path = ['views', 1];
+async function draw() {
+  render(layout._renderSectionsView(config.views[1].sections, 4, true), fixture);
+  await Promise.all([...fixture.querySelectorAll('hui-section')].map(el => el.updateComplete));
+}
+try {
+  const original = structuredClone(config);
+  await draw();
+  const sections = [...fixture.querySelectorAll('hui-section')];
+  same(sections[1].path, ['views', 1, 'sections', 1]);
+  same(fixture.querySelectorAll('hui-section-edit-mode')[1].path, sections[1].path);
+  sections[1].shadowRoot.querySelector('button').click();
+  same(savedPath, ['views', 1, 'sections', 1, 'cards']);
+  same(config.views[0], original.views[0]);
+  same(config.views[1].sections[0], original.views[1].sections[0]);
+  same(config.views[1].sections[1].cards[0], original.views[1].sections[1].cards[0]);
+  same(config.views[1].sections[1].cards.length, 2);
+  lovelace.config = lovelace.rawConfig = config;
+  layout._nativeChromeReady = true;
+  render(layout.render(), fixture);
+  same(fixture.querySelector('hui-view-header').path, ['views', 1]);
+  same(fixture.querySelector('hui-view-footer').path, ['views', 1]);
+  layout.addEventListener('ll-create-card', event => { savedPath = event.detail.path; });
+  layout._addCard();
+  same(savedPath, ['views', 1, 'sections', 0, 'cards']);
+  render(layout._renderFallbackCardEditor(document.createElement('div'), layout._editHeaderCard,
+    layout._deleteHeaderCard, 'header'), fixture);
+  same(fixture.querySelector('hui-card-edit-mode').path, ['views', 1, 'header', 'card']);
+  render(layout._renderFallbackCardEditor(document.createElement('div'), layout._editFooterCard,
+    layout._deleteFooterCard, 'footer'), fixture);
+  same(fixture.querySelector('hui-card-edit-mode').path, ['views', 1, 'footer', 'card']);
+  layout.path = undefined;
+  layout.index = 1;
+  await draw();
+  same(fixture.querySelector('hui-section').viewIndex, 1);
+  same(fixture.querySelector('hui-section').index, 0);
+  const masonry = document.createElement('masonry-layout-v2');
+  masonry.lovelace = lovelace;
+  masonry.path = ['views', 0];
+  const card = document.createElement('div');
+  same(masonry.getCardElement({card, index: 2}).path, ['views', 0, 'cards', 2]);
+  masonry.path = undefined;
+  masonry.index = 0;
+  same(masonry.getCardElement({card, index: 2}).path, [0, 2]);
+  document.querySelector('#result').textContent = 'PASS: HA 2026.11 path contract, add to second section, existing cards preserved, header/footer, global add, legacy indices';
+} catch (error) {
+  document.querySelector('#result').textContent = `FAIL: ${error.stack}`;
+  throw error;
+}
+</script>

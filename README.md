@@ -2,6 +2,12 @@
 
 English | [Deutsch](README.de.md) | [Français](README.fr.md)
 
+## 0.1.181: Home Assistant 2026.11 editor compatibility
+
+Sections V2 now passes the complete configuration paths required by HA 2026.11 to native section, header and footer editors. Adding a card targets its section; the floating add button targets the first section. Other V2 layouts also pass complete card paths when supplied by HA. Existing cards and menu settings are retained; no YAML migration is required. Legacy index properties remain available for older HA versions.
+
+Build, TypeScript checks and isolated browser regressions passed. The comparison uses frontend `20261028.4`, shipped with Core `2026.11.0`. A live HA 2026.11 test is not yet confirmed: the checked test host .177 still runs Core 2026.10.4. See [the compatibility report](docs/ha-2026.11-compatibility.md).
+
 Parallel installable V2 fork of
 [thomasloven/lovelace-layout-card](https://github.com/thomasloven/lovelace-layout-card)
 with additional dashboard-view features for Home Assistant.

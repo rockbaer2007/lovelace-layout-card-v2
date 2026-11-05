@@ -92,6 +92,7 @@ function dashboardLayoutV2MenuIconSize(menu?: any) {
 export class BaseLayout extends LitElement {
   @property() cards: Array<LovelaceCard | HuiCard> = [];
   @property() index: number;
+  @property({ attribute: false }) path?: Array<string | number>;
   @property() narrow: boolean;
   @property() hass;
   @property() lovelace: any;
@@ -163,7 +164,9 @@ export class BaseLayout extends LitElement {
     const wrapper = document.createElement("hui-card-options") as any;
     wrapper.hass = this.hass;
     wrapper.lovelace = this.lovelace;
-    wrapper.path = [this.index, card.index];
+    wrapper.path = this.path
+      ? [...this.path, "cards", card.index]
+      : [this.index, card.index];
     card.card.editMode = true;
     wrapper.appendChild(card.card);
     if (card.show === false) wrapper.style.border = "1px solid red";
@@ -171,7 +174,11 @@ export class BaseLayout extends LitElement {
   }
 
   _addCard() {
-    this.dispatchEvent(new CustomEvent("ll-create-card"));
+    this.dispatchEvent(new CustomEvent("ll-create-card", {
+      bubbles: true,
+      composed: true,
+      detail: this.path ? { path: [...this.path, "cards"] } : undefined,
+    }));
   }
 
   _render_fab() {
